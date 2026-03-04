@@ -1,7 +1,8 @@
-import React from 'react'
 
-export default function NgosPage() {
+const NGOsPage = () => {
   return (
-    <div>NgosPage</div>
+    <div>NGOsPage</div>
   )
 }
+
+export default NGOsPage
