@@ -1,3 +1,4 @@
+import { ApiRequestOptions } from '@/types/axios.interface';
 import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -18,10 +19,6 @@ const axiosInstance = () => {
     return instance;
 }
 
-export interface ApiRequestOptions {
-    params?: Record<string, unknown>;
-    headers?: Record<string, string>;
-}
 
 const httpGet = async (endpoint: string, options?: ApiRequestOptions) => {
     try {        
