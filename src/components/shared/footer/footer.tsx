@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -19,6 +19,20 @@ import {
 } from "lucide-react";
 
 export default function Footer() {
+  const [showTopBtn, setShowTopBtn] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowTopBtn(true);
+      } else {
+        setShowTopBtn(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -162,32 +176,35 @@ export default function Footer() {
       </div>
 
     
-      <motion.button
-        onClick={scrollToTop}
+      {/* Scroll to Top Button */}
+      {showTopBtn && (
+        <motion.button
+          onClick={scrollToTop}
      
-        whileHover={{ 
-          scale: 1.1,
-          backgroundColor: "#22c55e",
-          color: "#fff",
-          boxShadow: "0 0 50px rgba(34, 197, 94, 0.7)",
-        }}
-       
-        whileTap={{ scale: 0.9 }}
-    
-        animate={{
-          y: [0, -15, 0],
-        }}
-        transition={{
-          y: {
-            duration: 2.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }
-        }}
-        className="absolute bottom-10 right-10 size-14 bg-white dark:bg-[#111] text-green-500 dark:text-green-400 rounded-full flex items-center justify-center border border-zinc-200 dark:border-white/10 shadow-lg z-30 transition-colors"
-      >
-        <ArrowUp size={24} />
-      </motion.button>
+          whileHover={{ 
+            scale: 1.1,
+            backgroundColor: "#22c55e",
+            color: "#fff",
+            boxShadow: "0 0 50px rgba(34, 197, 94, 0.7)",
+          }}
+         
+          whileTap={{ scale: 0.9 }}
+      
+          animate={{
+            y: [0, -15, 0],
+          }}
+          transition={{
+            y: {
+              duration: 2.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }
+          }}
+          className="fixed bottom-10 right-10 size-14 bg-white dark:bg-[#111] text-green-500 dark:text-green-400 rounded-full flex items-center justify-center border border-zinc-200 dark:border-white/10 shadow-lg z-50 transition-colors"
+        >
+          <ArrowUp size={24} />
+        </motion.button>
+      )}
 
       {/* Background Subtle Gradient */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[300px] bg-green-500/5 blur-[120px] pointer-events-none -z-10"></div>
