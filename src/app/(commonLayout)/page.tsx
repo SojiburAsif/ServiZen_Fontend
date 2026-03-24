@@ -12,7 +12,10 @@ import OurTeam from "@/components/shared/static/OurTeam";
 
 export default function Home() {
   return (
-    <div className="">
+    <div className="relative">
+      {/* Global abstract background letters */}
+     
+
       <HeroSection></HeroSection>
       <Features></Features>
       <OurServices></OurServices>

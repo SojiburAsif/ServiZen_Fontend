@@ -18,7 +18,7 @@ export default function MarqueePage() {
   return (
     <div className="w-full overflow-hidden py-12 bg-white dark:bg-black">
       <section 
-        className="w-full py-8 bg-gradient-to-br from-[#FAFAFA] via-[#E2F7D8] to-[#80F279] text-gray-900 font-sans selection:bg-green-300 overflow-hidden relative shadow-lg transform -rotate-3 scale-105 my-4 border-y-4 border-green-500/20"
+        className="w-full py-4 md:py-8 bg-gradient-to-br from-[#FAFAFA] via-[#E2F7D8] to-[#80F279] text-gray-900 font-sans selection:bg-green-300 overflow-hidden relative shadow-lg transform -rotate-2 md:-rotate-3 scale-[1.02] md:scale-105 my-4 border-y-2 md:border-y-4 border-green-500/20"
       >
         
         {/* Subtle background shadows for the marquee */}
@@ -34,28 +34,28 @@ export default function MarqueePage() {
             {marqueeItems.map((item, idx) => (
               <motion.div 
                 key={idx} 
-                className="flex items-center gap-4 mx-8 md:mx-16 group cursor-pointer"
+                className="flex items-center gap-2 md:gap-4 mx-4 md:mx-8 group cursor-pointer"
                 whileHover={{
-                  rotate: [0, -4, 4, -4, 4, 0],
-                  scale: 1.05,
+                  y: -5,
+                  scale: 1.02,
+                  textShadow: "0px 5px 15px rgba(34, 197, 94, 0.3)",
                   transition: { 
-                    duration: 0.6, 
-                    repeat: Infinity,
-                    ease: "easeInOut"
+                    duration: 0.3, 
+                    ease: "easeOut"
                   }
                 }}
               >
                 <motion.div 
-                  className="p-3 rounded-full bg-white border border-green-200 text-green-600 group-hover:bg-gray-900 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-md"
+                  className="p-1.5 md:p-3 rounded-full bg-white border border-green-200 text-green-600 group-hover:bg-green-500 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-green-500/50"
                 >
-                  <item.icon size={28} className="group-hover:animate-pulse" />
+                  <item.icon className="w-4 h-4 md:w-6 md:h-6" />
                 </motion.div>
-                <span className="text-2xl md:text-3xl font-black text-gray-900 uppercase tracking-wide group-hover:text-gray-700 transition-colors duration-300">
+                <span className="text-sm sm:text-base md:text-2xl font-black text-gray-900 uppercase tracking-wide group-hover:text-green-700 transition-colors duration-300 whitespace-nowrap">
                   {item.text}
                 </span>
                 
                 {/* Added a subtle divider between items */}
-                <span className="mx-4 md:mx-8 text-green-700/50">
+                <span className="mx-2 md:mx-6 text-green-700/50 text-xs md:text-base">
                   ✦
                 </span>
               </motion.div>

@@ -5,6 +5,7 @@
     "": {
       "name": "fontend",
       "dependencies": {
+        "@radix-ui/react-dialog": "^1.1.15",
         "@tanstack/react-devtools": "^0.9.9",
         "@tanstack/react-form-devtools": "^0.2.17",
         "@tanstack/react-form-nextjs": "^1.28.4",

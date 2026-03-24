@@ -3,6 +3,8 @@
 import Them from "@/components/features/Theme/them";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader, DialogDescription } from "@/components/ui/dialog";
+import { NotificationContent } from "@/app/(commonLayout)/notification/page";
 import { 
   Menu, 
   Search, 
@@ -36,12 +38,13 @@ const Navbar = () => {
         <Link 
           key={link.href} 
           href={link.href} 
-          className={`text-sm font-medium transition-colors duration-300 ${
+          className={`group flex items-center gap-1.5 text-sm font-medium transition-colors duration-300 ${
             isActive 
-              ? "text-green-500" 
-              : "text-black hover:text-green-500 dark:text-white dark:hover:text-green-400"
+              ? "text-green-600 dark:text-green-500" 
+              : "text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400"
           }`}
         >
+          <link.icon className={`size-4 transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-green-600 dark:text-green-500" : "text-gray-500 group-hover:text-green-600 dark:text-gray-400 dark:group-hover:text-green-400"}`} />
           {link.label}
         </Link>
       )
@@ -49,7 +52,7 @@ const Navbar = () => {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200/40 bg-[#FAFAFA]/80 backdrop-blur-md dark:bg-black/80 dark:border-gray-800/60 font-sans">
+    <header className="sticky top-0 z-50 w-full border-b border-green-900/10 bg-gradient-to-r from-[#F0F0F0] via-[#D5F0C8] to-[#70E06A] dark:from-[#030303] dark:via-[#081808] dark:to-[#032003] text-gray-900 dark:text-white font-sans shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-[88px] w-full max-w-7xl items-center justify-between px-6 lg:px-12">
         
         {/* --- Logo Section --- */}
@@ -70,10 +73,35 @@ const Navbar = () => {
         {/* --- Right Section --- */}
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-2 mr-2">
-             <Button size="icon" variant="ghost" className="relative text-gray-500 hover:text-gray-900 rounded-full dark:text-gray-400 dark:hover:text-white transition-colors">
-              <Bell className="size-4" />
-              <span className="absolute right-2.5 top-2.5 flex size-1.5 rounded-full bg-orange-500"></span>
-            </Button>
+            
+            {/* Notification Modal */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="icon" variant="ghost" className="relative text-gray-500 hover:text-gray-900 rounded-full dark:text-gray-400 dark:hover:text-white transition-colors">
+                  <Bell className="size-4" />
+                  <span className="absolute right-2.5 top-2.5 flex size-1.5 rounded-full bg-orange-500"></span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px] md:max-w-2xl bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-gray-800 p-0 overflow-hidden">
+                <DialogHeader className="p-6 pb-2">
+                  <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Bell className="size-5 text-green-500" /> Notifications
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-500 dark:text-gray-400">
+                    Stay updated with your latest alerts and offers.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="max-h-[60vh] overflow-y-auto p-6 pt-2 custom-scrollbar">
+                   <NotificationContent />
+                </div>
+                <div className="p-4 border-t border-gray-100 dark:border-gray-800/50 bg-gray-50 dark:bg-black/50 text-center">
+                  <Link href="/notification" className="text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
+                    View all notifications
+                  </Link>
+                </div>
+              </DialogContent>
+            </Dialog>
+
             <Them />
           </div>
 
@@ -107,19 +135,22 @@ const Navbar = () => {
               </SheetTrigger>
               <SheetContent side="right" className="bg-white dark:bg-black">
                 <SheetTitle className="sr-only">Menu</SheetTitle>
-                <nav className="flex flex-col gap-4 mt-10">
+                <nav className="flex flex-col gap-4 mt-8 px-2">
                   {navLinks.map((link) => {
                     const isActive = pathname === link.href;
                     return (
                       <Link 
                         key={link.href} 
                         href={link.href} 
-                        className={`text-lg font-medium border-b border-gray-100 dark:border-gray-800 pb-2 transition-colors ${
+                        className={`group flex items-center gap-3 text-lg font-medium border-b border-gray-100 dark:border-gray-800/50 pb-3 transition-colors ${
                           isActive 
-                            ? "text-green-500" 
-                            : "text-black dark:text-white hover:text-green-500 dark:hover:text-green-400"
+                            ? "text-green-600 dark:text-green-500" 
+                            : "text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400"
                         }`}
                       >
+                        <div className={`p-2 rounded-lg transition-colors ${isActive ? "bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500" : "bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 group-hover:bg-green-50 dark:group-hover:bg-green-500/10 group-hover:text-green-600 dark:group-hover:text-green-400"}`}>
+                          <link.icon className="size-5" />
+                        </div>
                         {link.label}
                       </Link>
                     )

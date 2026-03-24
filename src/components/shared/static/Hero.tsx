@@ -33,7 +33,7 @@ const TypewriterText = ({ words }: { words: string[] }) => {
 
 export default function HeroSection() {
   return (
-    <div className="relative min-h-[calc(100vh-88px)] w-full overflow-hidden bg-gradient-to-br from-[#FAFAFA] via-[#E2F7D8] to-[#80F279] text-gray-900 font-sans selection:bg-green-300">
+    <div className="relative min-h-[calc(100vh-88px)] w-full overflow-hidden bg-gradient-to-br from-[#FAFAFA] via-[#E2F7D8] to-[#80F279] dark:from-[#050505] dark:via-[#0a1f0a] dark:to-[#052e05] text-gray-900 dark:text-white font-sans selection:bg-green-300">
       
       {/* Noise Overlay */}
       <div 
@@ -42,7 +42,7 @@ export default function HeroSection() {
       ></div>
 
       {/* Abstract background letters */}
-      <div className="absolute -bottom-20 -left-10 text-[300px] md:text-[400px] font-bold text-green-800/5 leading-none select-none pointer-events-none transform -rotate-6">
+      <div className="absolute -bottom-20 -left-10 text-[300px] md:text-[400px] font-bold text-green-800/5 dark:text-green-500/5 leading-none select-none pointer-events-none transform -rotate-6">
         S Z
       </div>
 
@@ -57,7 +57,7 @@ export default function HeroSection() {
             viewport={{ once: false, amount: 0.2 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <h1 className="text-[3rem] leading-[1.1] md:text-[5rem] lg:text-[6.5rem] font-medium tracking-tight text-gray-900">
+            <h1 className="text-[3rem] leading-[1.1] md:text-[5rem] lg:text-[6.5rem] font-medium tracking-tight text-gray-900 dark:text-white">
               Your all-in-one <br />
               solution for modern <br />
               <TypewriterText words={["PestControl", "Plumbing", "Cleaning", "Electrical"]} />
@@ -74,19 +74,19 @@ export default function HeroSection() {
             viewport={{ once: false, amount: 0.2 }}
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
           >
-            <p className="text-lg md:text-xl text-gray-700/80 leading-relaxed max-w-sm">
+            <p className="text-lg md:text-xl text-gray-700/80 dark:text-gray-300/80 leading-relaxed max-w-sm">
               The perfect modern platform for all your professional home service needs.
             </p>
             
             <div className="flex items-center gap-4">
-              <button className="px-8 py-3 rounded-full bg-gray-900 text-white font-medium hover:bg-gray-800 transition-all duration-300 shadow-xl shadow-green-900/10">
+              <button className="px-8 py-3 rounded-full bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-300 shadow-xl shadow-green-900/10">
                 Get Started
               </button>
               <div className="flex items-center gap-2 group cursor-pointer">
-                <div className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-900/10 bg-white/50 backdrop-blur text-gray-900 font-semibold group-hover:bg-gray-900 group-hover:text-white transition-all">
+                <div className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-900/10 dark:border-white/10 bg-white/50 dark:bg-black/50 backdrop-blur text-gray-900 dark:text-white font-semibold group-hover:bg-gray-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-gray-900 transition-all">
                    →
                 </div>
-                <span className="text-sm font-semibold uppercase tracking-widest">Explore</span>
+                <span className="text-sm font-semibold uppercase tracking-widest text-gray-900 dark:text-white">Explore</span>
               </div>
             </div>
           </motion.div>
@@ -94,17 +94,17 @@ export default function HeroSection() {
 
         {/* Bottom Badge */}
         <motion.div 
-          className="absolute bottom-10 left-6 lg:left-12 flex items-center gap-3 opacity-50"
+          className="absolute bottom-6 md:bottom-10 left-6 lg:left-12 flex items-center gap-3 md:gap-4 opacity-70 dark:opacity-90"
           initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 0.5, x: 0 }}
+          whileInView={{ opacity: 0.8, x: 0 }}
           viewport={{ once: false, amount: 0.2 }}
           transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
         >
-          <div className="w-10 h-10 rounded bg-gray-900 flex items-center justify-center text-white font-bold text-xs">
-            SZ
+          <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center p-2 shadow-lg">
+            <img src="/favicon.ico" alt="ServZEN" className="w-full h-full object-contain" />
           </div>
-          <p className="text-[10px] font-bold uppercase tracking-tighter text-gray-800 leading-tight">
-            Trusted by <br /> 5000+ Users <br /> Worldwide.
+          <p className="text-xs md:text-sm lg:text-base font-bold uppercase tracking-wide text-gray-800 dark:text-gray-100 leading-tight">
+            Trusted by <br /> <span className="text-green-600 dark:text-green-500 text-sm md:text-lg">5000+ Users</span> <br /> Worldwide.
           </p>
         </motion.div>
       </div>
