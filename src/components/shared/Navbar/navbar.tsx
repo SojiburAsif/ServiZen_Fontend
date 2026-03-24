@@ -136,7 +136,7 @@ const Navbar = () => {
             </div>
           ) : (
              <div className="flex items-center gap-3">
-               <button className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800">
+               <button className="flex items-center justify-center w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800">
                  <UserCircle className="size-5 text-gray-600 dark:text-gray-300" />
                </button>
                <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
@@ -154,29 +154,68 @@ const Navbar = () => {
                   <Menu className="size-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="bg-white dark:bg-black">
-                <SheetTitle className="sr-only">Menu</SheetTitle>
-                <nav className="flex flex-col gap-4 mt-8 px-2">
-                  {navLinks.map((link) => {
-                    const isActive = pathname === link.href;
-                    return (
-                      <Link 
-                        key={link.href} 
-                        href={link.href} 
-                        className={`group flex items-center gap-3 text-lg font-medium border-b border-gray-100 dark:border-gray-800/50 pb-3 transition-colors ${
-                          isActive 
-                            ? "text-green-600 dark:text-green-500" 
-                            : "text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400"
-                        }`}
-                      >
-                        <div className={`p-2 rounded-lg transition-colors ${isActive ? "bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500" : "bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 group-hover:bg-green-50 dark:group-hover:bg-green-500/10 group-hover:text-green-600 dark:group-hover:text-green-400"}`}>
+              <SheetContent side="right" className="bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-xl border-l border-green-900/10 w-[300px] flex flex-col p-4">
+                <SheetTitle className="text-left text-lg font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-4 mb-4">
+                  Navigation Menu
+                </SheetTitle>
+                
+                <div className="flex flex-col justify-between h-[calc(100vh-100px)] overflow-y-auto custom-scrollbar pr-2">
+                  <nav className="flex flex-col gap-2">
+                    {navLinks.map((link) => {
+                      const isActive = pathname === link.href;
+                      return (
+                        <Link 
+                          key={link.href} 
+                          href={link.href} 
+                          className={`group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors ${
+                            isActive 
+                              ? "bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500" 
+                              : "text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-500/10 hover:text-green-600 dark:hover:text-green-400"
+                          }`}
+                        >
                           <link.icon className="size-5" />
-                        </div>
-                        {link.label}
-                      </Link>
-                    )
-                  })}
-                </nav>
+                          {link.label}
+                        </Link>
+                      )
+                    })}
+
+                    {isLoggedIn && (
+                      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-2">
+                        <Link href="/dashboard" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                           <LayoutDashboard className="size-5" /> Dashboard
+                        </Link>
+                        <Link href="/notification" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                           <Bell className="size-5" /> Notifications
+                        </Link>
+                      </div>
+                    )}
+                  </nav>
+
+                  <div className="mt-auto border-t border-gray-100 dark:border-gray-800 pt-4 pb-4">
+                     {isLoggedIn ? (
+                       <div className="flex items-center justify-between px-2">
+                         <div className="flex items-center gap-3">
+                           <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                              <UserCircle className="size-6" />
+                           </div>
+                           <span className="text-sm font-medium text-gray-700 dark:text-gray-200">My Profile</span>
+                         </div>
+                         <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30">
+                           <LogOut className="size-5" />
+                         </Button>
+                       </div>
+                     ) : (
+                       <div className="flex flex-col gap-3">
+                          <Link href="/login" className="w-full flex items-center justify-center py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            Login
+                          </Link>
+                          <Link href="/register" className="w-full flex items-center justify-center py-2.5 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 transition-colors">
+                            Get Started
+                          </Link>
+                       </div>
+                     )}
+                  </div>
+                </div>
               </SheetContent>
             </Sheet>
           </div>

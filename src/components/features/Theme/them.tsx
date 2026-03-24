@@ -1,46 +1,55 @@
 "use client"
 
+import * as React from "react"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+import { motion, AnimatePresence } from "framer-motion"
 
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+export default function ThemeToggle() {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
 
-export function Them() {
-  const { setTheme } = useTheme()
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return <div className="h-8 w-8 rounded-lg bg-gray-200/50 animate-pulse" />
+  }
+
+  const isDark = theme === "dark"
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="border-emerald-300/60 bg-background hover:bg-emerald-100/60 dark:border-emerald-400/30 dark:hover:bg-emerald-900/30"
-          aria-label="Toggle theme"
-        >
-          <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="border-emerald-200 dark:border-emerald-700/40">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <motion.button
+      // Click korle ektu choto hobe (Squish effect)
+      whileTap={{ scale: 0.9 }}
+      whileHover={{ scale: 1.05 }}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      className="relative flex h-9 items-center gap-2 overflow-hidden rounded-xl border border-emerald-200/50 bg-white/40 pl-2 pr-3 shadow-sm backdrop-blur-sm transition-colors hover:border-emerald-400 dark:border-emerald-800/50 dark:bg-zinc-900/40"
+    >
+      {/* Icon Section */}
+      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={isDark ? "dark" : "light"}
+            initial={{ scale: 0, rotate: -45, opacity: 0 }}
+            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            exit={{ scale: 0, rotate: 45, opacity: 0 }}
+            transition={{ duration: 0.2, type: "spring", stiffness: 300, damping: 20 }}
+          >
+            {isDark ? (
+              <Moon className="h-3.5 w-3.5 text-emerald-400" fill="currentColor" />
+            ) : (
+              <Sun className="h-4 w-4 text-amber-500" fill="currentColor" />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Label - Compact text */}
+      <span className="text-xs font-bold tracking-tight text-slate-600 dark:text-slate-300">
+        {isDark ? "Dark" : "Light"}
+      </span>
+    </motion.button>
   )
 }
-
-export default Them
