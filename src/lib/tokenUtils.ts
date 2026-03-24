@@ -8,19 +8,31 @@ const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET
 const getTokenSecondsRemaining =  (token: string): number => {
     if(!token) return 0;
 
-    try {
-        const tokenPayload= JWT_ACCESS_SECRET ? jwt.verify(token, JWT_ACCESS_SECRET as string) as JwtPayload : jwt.decode(token) as JwtPayload;
+    // Non-JWT tokens (e.g., opaque session tokens) do not contain exp.
+    const jwtParts = token.split(".");
+    if (jwtParts.length !== 3) {
+        return 0;
+    }
 
-        if (tokenPayload && !tokenPayload.exp){
+    try {
+        const decodedToken = JWT_ACCESS_SECRET
+            ? jwt.verify(token, JWT_ACCESS_SECRET as string)
+            : jwt.decode(token);
+
+        if (!decodedToken || typeof decodedToken !== "object") {
             return 0;
         }
 
-        const remainingSeconds = tokenPayload.exp as number - Math.floor(Date.now() / 1000)
+        const tokenPayload = decodedToken as JwtPayload;
+        if (typeof tokenPayload.exp !== "number") {
+            return 0;
+        }
+
+        const remainingSeconds = tokenPayload.exp - Math.floor(Date.now() / 1000)
 
         return remainingSeconds > 0 ? remainingSeconds : 0;
 
-    } catch (error) {
-        console.error("Error decoding token:", error);
+    } catch {
         return 0;
     }
 } 

@@ -48,13 +48,13 @@ const LoginForm = () => {
         }
     })
   return (
-    <Card className="w-full max-w-md mx-auto border border-emerald-200/80 shadow-xl bg-gradient-to-b from-white to-emerald-50/40">
+    <Card className="w-full max-w-lg mx-auto border border-emerald-200/80 dark:border-emerald-700/40 shadow-xl bg-gradient-to-b from-white to-emerald-50/40 dark:from-zinc-900 dark:to-emerald-950/20">
       <CardHeader className="text-center space-y-2">
-        <div className="mx-auto h-11 w-11 rounded-xl bg-emerald-900 text-emerald-100 flex items-center justify-center font-bold">
+        <div className="mx-auto h-11 w-11 rounded-xl bg-emerald-900 text-emerald-100 flex items-center justify-center font-bold shadow-sm">
           SZ
         </div>
-        <CardTitle className="text-2xl font-bold text-emerald-950">Welcome Back!</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl font-bold text-emerald-950 dark:text-emerald-200">Welcome Back!</CardTitle>
+        <CardDescription className="text-emerald-800/80 dark:text-emerald-300/70">
           Please enter your credentials to log in.
         </CardDescription>
       </CardHeader>
@@ -69,7 +69,7 @@ const LoginForm = () => {
             e.stopPropagation();
             form.handleSubmit();
           }}
-          className="space-y-4"
+          className="space-y-5"
         >
           <form.Field
             name="email"
@@ -81,6 +81,7 @@ const LoginForm = () => {
                 label="Email"
                 type="email"
                 placeholder="Enter your email"
+                inputClassName="border-emerald-200 focus-visible:ring-emerald-200 dark:border-emerald-800/50 dark:bg-zinc-900 dark:text-emerald-100"
               />
             )}
           </form.Field>
@@ -98,13 +99,14 @@ const LoginForm = () => {
                 placeholder="Enter your password"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 className="cursor-pointer"
+                inputClassName="border-emerald-200 focus-visible:ring-emerald-200 dark:border-emerald-800/50 dark:bg-zinc-900 dark:text-emerald-100"
                 append={
                   <Button
                     type="button"
                     onClick={() => setShowPassword((value) => !value)}
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full hover:bg-emerald-100"
+                    className="h-9 w-9 rounded-full hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
                   >
                     {showPassword ? (
                       <EyeOff className="size-4" aria-hidden="true" />
@@ -120,7 +122,7 @@ const LoginForm = () => {
           <div className="text-right mt-2">
             <Link
               href="/forgot-password"
-              className="text-sm text-emerald-700 hover:text-emerald-900 hover:underline underline-offset-4"
+              className="text-sm text-emerald-700 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-200 hover:underline underline-offset-4"
             >
               Forgot password?
             </Link>
@@ -140,7 +142,7 @@ const LoginForm = () => {
                 isPending={isSubmitting || isPending}
                 pendingLabel="Logging In...."
                 disabled={!canSubmit}
-                className="bg-emerald-800 text-white hover:bg-emerald-900"
+                className="bg-emerald-700 text-white hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
               >
                 Log In
               </AppSubmitButton>
@@ -150,16 +152,16 @@ const LoginForm = () => {
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+            <div className="w-full border-t border-emerald-200/80 dark:border-emerald-800/50"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">
+            <span className="px-2 bg-white dark:bg-zinc-900 text-emerald-700/80 dark:text-emerald-300/70">
               Or continue with
             </span>
           </div>
         </div>
 
-        <Button variant="outline" className="w-full border-emerald-700/30 hover:bg-emerald-50" onClick={() => {
+        <Button variant="outline" className="w-full border-emerald-700/30 dark:border-emerald-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40" onClick={() => {
             const baseUrl = env.NEXT_PUBLIC_API_BASE_URL;
             //TODO redirect path after login in frontend
             window.location.href = `${baseUrl}/auth/login/google`;
@@ -186,12 +188,12 @@ const LoginForm = () => {
         </Button>
       </CardContent>
 
-      <CardFooter className="justify-center border-t border-emerald-100 pt-4">
-        <p className="text-sm text-muted-foreground">
+      <CardFooter className="justify-center border-t border-emerald-100 dark:border-emerald-900/40 pt-4">
+        <p className="text-sm text-muted-foreground dark:text-emerald-300/70">
               Don&apos;t have an account?{" "}
             <Link
                 href="/register"
-                className="text-emerald-800 font-semibold hover:underline underline-offset-4"
+                className="text-emerald-800 dark:text-emerald-300 font-semibold hover:underline underline-offset-4"
             >
                 Sign Up for an account
             </Link>

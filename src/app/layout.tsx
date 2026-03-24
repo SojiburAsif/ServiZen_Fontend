@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Onest } from "next/font/google";
 import "./globals.css";
 import QueryProviders from "@/lib/providers/QueryProvider";
+import { ThemeProvider } from "@/lib/providers/theme-provider";
 
 const onestSans = Onest({
   variable: "--font-geist-sans",
@@ -24,12 +25,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${onestSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProviders>
-          {children}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
         </QueryProviders>
       </body>
     </html>

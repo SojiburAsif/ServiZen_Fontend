@@ -21,9 +21,11 @@ type AppFieldProps = {
     label : string;
     type ?: "text" | "email" | "password" | "number";
     placeholder ?: string;
+    icon ?: React.ReactNode;
     append ?: React.ReactNode;
     prepend ?: React.ReactNode;
     className ?: string;
+    inputClassName ?: string;
     disabled ?: boolean;
 }
 
@@ -32,11 +34,14 @@ const AppField = ({
     label,
     type = "text",
     placeholder,
+    icon,
     append,
     prepend,
     className,
+    inputClassName,
     disabled = false,
 } : AppFieldProps) => {
+    const leadingAdornment = prepend ?? icon;
 
     const firstError = field.state.meta.isTouched && field.state.meta.errors.length > 0 ? getErrorMessage(field.state.meta.errors[0]) : null;
 
@@ -53,8 +58,8 @@ const AppField = ({
 
         <div className="relative">
             {
-                prepend && (<div className="absolute inset-y-0 left-0 items-center pl-3 pointer-events-none z-10">
-                    {prepend}
+                leadingAdornment && (<div className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2">
+                    {leadingAdornment}
                 </div>)
             }
 
@@ -70,30 +75,28 @@ const AppField = ({
                 aria-invalid={hasError}
                 aria-describedby={hasError ? `${field.name}-error` : undefined}
                 className={cn(
-                    prepend && "pl-10",
-                    append && "pr-10",
+                    "h-12 text-base",
+                    leadingAdornment && "pl-12",
+                    append && "pr-12",
                     hasError && "border-destructive focus-visible:ring-destructive/20",
+                    inputClassName,
                 )}
             />
 
             {
-                append && (<div className="absolute inset-y-0 right-0 flex items-center pr-2 z-10">
+                append && (<div className="absolute right-2 top-1/2 z-10 -translate-y-1/2 flex items-center">
                     {append}
                 </div>)
             }
-
-            {
-                hasError && (
-                    <p
-                     id={`${field.name}-error`}
-                     role="alert"
-                     className="text-sm text-destructive" 
-                    >
-                        {firstError}
-                    </p>
-                )
-            }
         </div>
+
+        <p
+            id={`${field.name}-error`}
+            role="alert"
+            className={cn("min-h-5 text-sm", hasError ? "text-destructive" : "text-transparent")}
+        >
+            {hasError ? firstError : "_"}
+        </p>
     </div>
   )
 }
