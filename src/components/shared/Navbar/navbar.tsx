@@ -39,7 +39,7 @@ const Navbar = () => {
           className={`text-sm font-medium transition-colors duration-300 ${
             isActive 
               ? "text-green-500" 
-              : "text-gray-500 hover:text-green-500 dark:text-gray-400 dark:hover:text-green-400"
+              : "text-black hover:text-green-500 dark:text-white dark:hover:text-green-400"
           }`}
         >
           {link.label}
@@ -117,7 +117,7 @@ const Navbar = () => {
                         className={`text-lg font-medium border-b border-gray-100 dark:border-gray-800 pb-2 transition-colors ${
                           isActive 
                             ? "text-green-500" 
-                            : "text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400"
+                            : "text-black dark:text-white hover:text-green-500 dark:hover:text-green-400"
                         }`}
                       >
                         {link.label}

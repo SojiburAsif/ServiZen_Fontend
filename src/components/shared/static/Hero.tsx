@@ -50,7 +50,13 @@ export default function HeroSection() {
         
         <main className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end pb-20">
           {/* Left Huge Typography */}
-          <div className="lg:col-span-8">
+          <motion.div 
+            className="lg:col-span-8"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.2 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
             <h1 className="text-[3rem] leading-[1.1] md:text-[5rem] lg:text-[6.5rem] font-medium tracking-tight text-gray-900">
               Your all-in-one <br />
               solution for modern <br />
@@ -58,10 +64,16 @@ export default function HeroSection() {
               <br />
               Services.
             </h1>
-          </div>
+          </motion.div>
 
           {/* Right Subtext & CTA */}
-          <div className="lg:col-span-4 flex flex-col gap-8 pb-4">
+          <motion.div 
+            className="lg:col-span-4 flex flex-col gap-8 pb-4"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          >
             <p className="text-lg md:text-xl text-gray-700/80 leading-relaxed max-w-sm">
               The perfect modern platform for all your professional home service needs.
             </p>
@@ -77,18 +89,24 @@ export default function HeroSection() {
                 <span className="text-sm font-semibold uppercase tracking-widest">Explore</span>
               </div>
             </div>
-          </div>
+          </motion.div>
         </main>
 
         {/* Bottom Badge */}
-        <div className="absolute bottom-10 left-6 lg:left-12 flex items-center gap-3 opacity-50">
+        <motion.div 
+          className="absolute bottom-10 left-6 lg:left-12 flex items-center gap-3 opacity-50"
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 0.5, x: 0 }}
+          viewport={{ once: false, amount: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+        >
           <div className="w-10 h-10 rounded bg-gray-900 flex items-center justify-center text-white font-bold text-xs">
             SZ
           </div>
           <p className="text-[10px] font-bold uppercase tracking-tighter text-gray-800 leading-tight">
             Trusted by <br /> 5000+ Users <br /> Worldwide.
           </p>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

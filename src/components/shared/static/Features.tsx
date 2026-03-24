@@ -28,7 +28,7 @@ const bgIcons = [
 
 export default function Features() {
   return (
-    <section className="relative min-h-screen w-full bg-zinc-50 dark:bg-[#050505] text-zinc-900 dark:text-white overflow-hidden py-24 px-6 lg:px-12 flex flex-col justify-between selection:bg-emerald-500/30">
+    <section className="relative min-h-screen w-full bg-zinc-50 dark:bg-black text-zinc-900 dark:text-white overflow-hidden py-24 px-6 lg:px-12 flex flex-col justify-between selection:bg-emerald-500/30">
       
       {/* --- Ambient Background Icons --- */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -58,7 +58,8 @@ export default function Features() {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.2 }}
+          transition={{ duration: 0.5 }}
           className="flex justify-start"
         >
           <span className="px-5 py-2 rounded-full border border-emerald-500/30 text-[10px] font-black tracking-[0.3em] uppercase bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 backdrop-blur-xl">
@@ -70,7 +71,8 @@ export default function Features() {
           <motion.h2 
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
             className="text-5xl md:text-8xl font-bold tracking-tighter leading-none"
           >
             Why <span className="text-emerald-500">Choose</span> Us?
@@ -79,7 +81,8 @@ export default function Features() {
           <motion.p 
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
             className="text-zinc-600 dark:text-gray-400 text-sm md:text-lg max-w-[400px] leading-snug font-light md:text-right"
           >
             Providing expert home solutions with <span className="text-zinc-900 dark:text-white font-medium">certified professionals</span> and eco-friendly care.
@@ -93,18 +96,21 @@ export default function Features() {
           {featureData.map((feature, index) => (
             <motion.div
               key={feature.id}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0, scale: 0.5, y: 50 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.2 }}
               animate={{ 
                 y: [0, -20, 0],
               }}
               transition={{
+                duration: 0.5,
+                ease: "easeOut",
+                delay: index * 0.05,
                 y: {
                   duration: 4 + (index % 2),
                   repeat: Infinity,
                   ease: "easeInOut",
-                  delay: index * 0.1
+                  delay: index * 0.1 + 0.5
                 }
               }}
               whileHover={{ 
