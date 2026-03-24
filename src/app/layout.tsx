@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Onest } from "next/font/google";
 import "./globals.css";
+import QueryProviders from "@/lib/providers/QueryProvider";
 
 const onestSans = Onest({
   variable: "--font-geist-sans",
@@ -27,7 +28,9 @@ export default function RootLayout({
       <body
         className={`${onestSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <QueryProviders>
+          {children}
+        </QueryProviders>
       </body>
     </html>
   );
