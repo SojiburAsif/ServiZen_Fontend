@@ -1,0 +1,1 @@
+export default function ServicePage() { return <div>Service Details</div>; }

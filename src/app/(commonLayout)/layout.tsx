@@ -1,4 +1,4 @@
-import Navbar from "@/components/modules/Navbar/navbar";
+import Navbar from "@/components/shared/Navbar/navbar";
 
 export default function CommonLayout({
   children,

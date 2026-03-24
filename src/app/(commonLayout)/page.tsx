@@ -1,10 +1,13 @@
+import Features from "@/components/shared/static/Features";
+import HeroSection from "@/components/shared/static/Hero";
 
 
 
 export default function Home() {
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center px-4 py-16 sm:px-6">
-     home 
-    </section>
+    <div className="">
+      <HeroSection></HeroSection>
+      <Features></Features>
+    </div>
   );
 }
