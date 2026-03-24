@@ -1,3 +1,1 @@
-export default function DashboardProviderSlotDefault() {
-  return null;
-}
+export default function ProviderDefault() { return null; }

@@ -19,6 +19,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { Role } from "@/app/constants/role";
 
 const navLinks = [
   { href: "/", label: "Home", icon: Home },
@@ -29,7 +30,10 @@ const navLinks = [
 
 const Navbar = () => {
   const pathname = usePathname();
-  const [isLoggedIn] = useState(false);
+  
+  // Hardcoded for demonstration, replace with actual auth logic
+  const userRole = Role.ADMIN;
+  const isLoggedIn = !!userRole;
 
   const renderDesktopLinks = () => (
     navLinks.map((link) => {
@@ -74,33 +78,44 @@ const Navbar = () => {
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-2 mr-2">
             
-            {/* Notification Modal */}
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="icon" variant="ghost" className="relative text-gray-500 hover:text-gray-900 rounded-full dark:text-gray-400 dark:hover:text-white transition-colors">
-                  <Bell className="size-4" />
-                  <span className="absolute right-2.5 top-2.5 flex size-1.5 rounded-full bg-orange-500"></span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px] md:max-w-2xl bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-gray-800 p-0 overflow-hidden">
-                <DialogHeader className="p-6 pb-2">
-                  <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <Bell className="size-5 text-green-500" /> Notifications
-                  </DialogTitle>
-                  <DialogDescription className="text-gray-500 dark:text-gray-400">
-                    Stay updated with your latest alerts and offers.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="max-h-[60vh] overflow-y-auto p-6 pt-2 custom-scrollbar">
-                   <NotificationContent />
-                </div>
-                <div className="p-4 border-t border-gray-100 dark:border-gray-800/50 bg-gray-50 dark:bg-black/50 text-center">
-                  <Link href="/notification" className="text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
-                    View all notifications
-                  </Link>
-                </div>
-              </DialogContent>
-            </Dialog>
+            {isLoggedIn && (
+              <>
+                <Link href="/dashboard">
+                  <Button variant="ghost" className="text-sm font-medium text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400">
+                    <LayoutDashboard className="size-4 mr-1.5" />
+                    Dashboard
+                  </Button>
+                </Link>
+
+                {/* Notification Modal */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button size="icon" variant="ghost" className="relative text-gray-500 hover:text-gray-900 rounded-full dark:text-gray-400 dark:hover:text-white transition-colors">
+                      <Bell className="size-4" />
+                      <span className="absolute right-2.5 top-2.5 flex size-1.5 rounded-full bg-orange-500"></span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px] md:max-w-2xl bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-gray-800 p-0 overflow-hidden">
+                    <DialogHeader className="p-6 pb-2">
+                      <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Bell className="size-5 text-green-500" /> Notifications
+                      </DialogTitle>
+                      <DialogDescription className="text-gray-500 dark:text-gray-400">
+                        Stay updated with your latest alerts and offers.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="max-h-[60vh] overflow-y-auto p-6 pt-2 custom-scrollbar">
+                       <NotificationContent />
+                    </div>
+                    <div className="p-4 border-t border-gray-100 dark:border-gray-800/50 bg-gray-50 dark:bg-black/50 text-center">
+                      <Link href="/notification" className="text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
+                        View all notifications
+                      </Link>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </>
+            )}
 
             <Them />
           </div>
@@ -112,16 +127,22 @@ const Navbar = () => {
               <Link href="/login" className="hidden md:block text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
                 Login
               </Link>
-              <Link href="/register">
-                <button className="px-5 py-2.5 rounded-full bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 transition-all duration-300 shadow-lg shadow-gray-900/10">
-                  Get Started
-                </button>
+              <Link 
+                href="/register" 
+                className="px-5 py-2.5 rounded-full bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 transition-all duration-300 shadow-lg shadow-gray-900/10"
+              >
+                Get Started
               </Link>
             </div>
           ) : (
-             <button className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800">
-               <UserCircle className="size-5 text-gray-600 dark:text-gray-300" />
-             </button>
+             <div className="flex items-center gap-3">
+               <button className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800">
+                 <UserCircle className="size-5 text-gray-600 dark:text-gray-300" />
+               </button>
+               <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
+                 <LogOut className="size-4" />
+               </Button>
+             </div>
           )}
 
           {/* Mobile Menu Trigger */}

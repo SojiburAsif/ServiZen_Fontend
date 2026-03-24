@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
-import { Facebook, Twitter, Linkedin, Instagram, Users, ArrowRight, BadgeCheck, Briefcase, Star, Quote } from 'lucide-react';
+import { Users, ArrowRight, BadgeCheck, Briefcase, Star, Quote } from 'lucide-react';
+import { FaFacebook as Facebook, FaTwitter as Twitter, FaLinkedin as Linkedin, FaInstagram as Instagram } from 'react-icons/fa';
 
 const teamMembers = [
   {

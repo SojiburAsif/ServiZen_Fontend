@@ -4,9 +4,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  Instagram,
-  Linkedin,
-  Twitter,
   ArrowUpRight,
   ArrowUp,
   Home,
@@ -17,6 +14,7 @@ import {
   FileText,
   HelpCircle
 } from "lucide-react";
+import { FaInstagram as Instagram, FaLinkedin as Linkedin, FaTwitter as Twitter } from "react-icons/fa";
 
 export default function Footer() {
   const [showTopBtn, setShowTopBtn] = useState(false);
@@ -56,7 +54,7 @@ export default function Footer() {
                 fill="none" 
                 preserveAspectRatio="none"
               >
-                {/* মেইন বোল্ড লাইন */}
+          
                 <motion.path 
                   d="M5 25 Q 150 -5 295 18 Q 180 35 30 28" 
                   stroke="currentColor" 
@@ -67,7 +65,7 @@ export default function Footer() {
                   whileInView={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.5, ease: "easeInOut" }}
                 />
-                {/* একটু ডিলে করে চিকন একটা লাইন */}
+         
                 <motion.path 
                   d="M20 32 Q 150 10 285 26" 
                   stroke="currentColor" 

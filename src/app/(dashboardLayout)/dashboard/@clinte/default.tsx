@@ -1,3 +1,1 @@
-export default function DashboardClinteSlotDefault() {
-  return null;
-}
+export default function ClinteDefault() { return null; }
