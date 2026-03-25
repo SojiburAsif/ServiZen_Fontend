@@ -4,9 +4,8 @@ export default function CommonProtectedLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
-      Common Protected Layout
+    <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
       {children}
-    </>
+    </div>
   );
 }

@@ -1,59 +1,31 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Loader2, CheckCircle2, RefreshCcw } from "lucide-react";
 import { clearPendingAuth, getPendingAuth } from "@/lib/pendingAuth";
 import { loginAction, verifyEmailAction } from "@/services/auth.service";
-
-type AuthMeta = {
-  email?: string;
-  needPasswordChange?: boolean;
-  needPasswordchange?: boolean;
-};
-
-const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return Boolean(value) && typeof value === "object";
-};
-
-const resolveAuthMeta = (payload: unknown): AuthMeta => {
-  if (!isRecord(payload)) return {};
-
-  const user = isRecord(payload.user) ? payload.user : payload;
-
-  return {
-    email: typeof user.email === "string" ? user.email : undefined,
-    needPasswordChange:
-      typeof user.needPasswordChange === "boolean"
-        ? user.needPasswordChange
-        : typeof user.needPasswordchange === "boolean"
-          ? user.needPasswordchange
-          : undefined,
-  };
-};
 
 export const VerifyEmailForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const dashboardPath = "/dashboard";
   const showOtpNotice = searchParams.get("notice") === "otp-sent";
+  
   const [email, setEmail] = useState("");
-  const [isEmailPrefilled, setIsEmailPrefilled] = useState(false);
-  const [otp, setOtp] = useState("");
+  const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     const emailParam = searchParams.get("email");
-    if (emailParam) {
-      setEmail(emailParam);
-      setIsEmailPrefilled(true);
-      return;
-    }
-
-    setIsEmailPrefilled(false);
+    if (emailParam) setEmail(emailParam);
   }, [searchParams]);
 
   useEffect(() => {
@@ -63,165 +35,146 @@ export const VerifyEmailForm = () => {
     }
   }, [resendCooldown]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
+  // Handle OTP Input Change
+  const handleChange = (value: string, index: number) => {
+    if (isNaN(Number(value))) return;
+    const newOtp = [...otp];
+    newOtp[index] = value.substring(value.length - 1);
+    setOtp(newOtp);
 
-    if (!email.trim()) {
-      setError("Email is missing. Please register again.");
-      return;
+    // Move to next input
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
     }
+  };
 
+  // Handle Backspace
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const finalOtp = otp.join("");
+    if (finalOtp.length < 6) return;
+
+    setError("");
     setLoading(true);
 
     try {
-      const result = await verifyEmailAction(email, otp);
-
+      const result = await verifyEmailAction(email, finalOtp);
       if (result.success) {
-        const authMeta = resolveAuthMeta((result as { data?: unknown }).data);
-        const needPasswordChange = Boolean(authMeta.needPasswordChange);
-        const resolvedEmail = authMeta.email || email;
-        const pendingAuth = getPendingAuth(resolvedEmail);
-
-        if (pendingAuth) {
-          const loginResult = await loginAction({
-            email: pendingAuth.email,
-            password: pendingAuth.password,
-          });
-
-          if (loginResult.success) {
-            clearPendingAuth();
-          }
-        }
-
         setSuccess(true);
-        setOtp("");
+        const pendingAuth = getPendingAuth(email);
+        if (pendingAuth) {
+          const loginResult = await loginAction({ email: pendingAuth.email, password: pendingAuth.password });
+          if (loginResult.success) clearPendingAuth();
+        }
         setTimeout(() => {
-          if (needPasswordChange) {
-            router.push(`/reset-password?email=${encodeURIComponent(resolvedEmail)}`);
-            router.refresh();
-            return;
-          }
-
-          router.push(dashboardPath);
+          router.push("/dashboard");
           router.refresh();
         }, 2000);
       } else {
-        setError(result.message || "Verification failed");
+        setError(result.message || "Invalid OTP code.");
       }
-    } catch (err: Error | unknown) {
-      const errorMsg = err instanceof Error ? err.message : "An error occurred";
-      setError(errorMsg);
+    } catch (err: any) {
+      setError("Verification failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResendOtp = async () => {
-    setError("");
-    setResendLoading(true);
-
-    try {
-      // TODO: Implement resend OTP endpoint
-      // const result = await resendOtpAction(email);
-      setResendCooldown(60);
-      setSuccess(false);
-      setOtp("");
-    } catch (err: Error | unknown) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to resend OTP";
-      setError(errorMsg);
-    } finally {
-      setResendLoading(false);
-    }
-  };
-
   return (
-    <div className="mx-auto w-full max-w-md rounded-2xl border border-emerald-200/80 bg-gradient-to-b from-white to-emerald-50/50 p-6 shadow-xl dark:border-emerald-700/40 dark:from-zinc-900 dark:to-emerald-950/20">
-      <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-900 text-emerald-100 shadow-sm">
-        SZ
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="overflow-hidden rounded-[2.5rem] border border-white/40 bg-white/70 p-8 shadow-2xl backdrop-blur-2xl dark:border-green-900/30 dark:bg-black/60"
+    >
+      <div className="mb-8 flex flex-col items-center justify-center gap-4 text-center">
+        <Link href="/" className="group flex items-center gap-2 transition-transform active:scale-95">
+          <img src="/favicon.ico" alt="Logo" className="h-10 w-10 object-contain" />
+          <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            Serv<span className="font-serif italic text-gray-500 dark:text-gray-400">ZEN</span>
+          </span>
+        </Link>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Verify Your Email</h1>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Check your inbox for the 6-digit code</p>
+        </div>
       </div>
 
-      <h1 className="text-2xl font-bold text-emerald-950 dark:text-emerald-200">Verify Email</h1>
-      <p className="mt-1 text-sm text-emerald-800/80 dark:text-emerald-300/70">
-        Enter the OTP sent to your email to verify your account
-      </p>
+      <AnimatePresence mode="wait">
+        {success ? (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-6 text-center">
+            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
+            </div>
+            <p className="font-bold text-gray-900 dark:text-white text-lg">Verification Successful!</p>
+          </motion.div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="rounded-xl bg-red-500/10 p-3 text-center text-[11px] font-medium text-red-600 dark:text-red-400">
+                {error}
+              </div>
+            )}
 
-      {showOtpNotice && (
-        <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-200">
-          We sent a verification OTP to your email. Verify now to continue.
-        </div>
-      )}
+            <div className="space-y-6">
+              {/* Email Display */}
+              <div className="flex items-center justify-center gap-2 rounded-xl bg-gray-100/50 py-2 px-4 dark:bg-gray-800/50">
+                <Mail className="h-3 w-3 text-gray-400" />
+                <span className="text-[11px] font-medium text-gray-500">{email}</span>
+              </div>
 
-      {success && (
-        <div className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
-          Email verified successfully! Redirecting...
-        </div>
-      )}
+              {/* Modern Multi-Slot OTP Input */}
+              <div className="flex justify-between gap-2">
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => {
+                      inputRefs.current[index] = el;
+                    }}
+                    type="text"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleChange(e.target.value, index)}
+                    onKeyDown={(e) => handleKeyDown(e, index)}
+                    className="h-12 w-full max-w-[3.5rem] rounded-xl border border-gray-200 bg-white text-center text-xl font-bold text-gray-900 outline-none transition-all focus:border-green-500 focus:ring-4 focus:ring-green-500/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+                  />
+                ))}
+              </div>
+            </div>
 
-      {error && (
-        <div className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
-          {error}
-        </div>
-      )}
+            <button
+              type="submit"
+              disabled={loading || otp.join("").length !== 6}
+              className="group relative flex h-12 w-full items-center justify-center rounded-xl bg-green-600 font-bold text-white shadow-lg shadow-green-600/20 transition-all hover:bg-green-700 active:scale-[0.98] disabled:opacity-50 dark:bg-green-500"
+            >
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Confirm Verification"}
+            </button>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-emerald-900 dark:text-emerald-200">
-            Email Address
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            readOnly={isEmailPrefilled}
-            className="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-4 py-2 text-emerald-950 placeholder-emerald-700/40 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-emerald-800/60 dark:bg-zinc-900 dark:text-emerald-100 dark:placeholder-emerald-300/40"
-          />
-        </div>
+            <div className="text-center">
+              <button
+                type="button"
+                disabled={resendCooldown > 0}
+                onClick={() => setResendCooldown(60)}
+                className="inline-flex items-center gap-2 text-xs font-bold text-green-700 transition-colors hover:text-green-600 disabled:text-gray-400 dark:text-green-400"
+              >
+                <RefreshCcw size={14} className={resendCooldown > 0 ? "animate-spin" : ""} />
+                {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : "Resend Code"}
+              </button>
+            </div>
+          </form>
+        )}
+      </AnimatePresence>
 
-        <div>
-          <label htmlFor="otp" className="block text-sm font-medium text-emerald-900 dark:text-emerald-200">
-            OTP (6 digits)
-          </label>
-          <input
-            id="otp"
-            name="otp"
-            type="text"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-            placeholder="000000"
-            maxLength={6}
-            pattern="\d{6}"
-            disabled={loading}
-            className="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-4 py-2 text-center text-emerald-950 placeholder-emerald-700/40 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:bg-emerald-50 dark:border-emerald-800/60 dark:bg-zinc-900 dark:text-emerald-100 dark:placeholder-emerald-300/40 dark:disabled:bg-zinc-800"
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-3">
-          <button
-            type="submit"
-            disabled={!email || !otp || otp.length !== 6 || loading}
-            className="flex-1 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:bg-slate-400 disabled:cursor-not-allowed"
-          >
-            {loading ? "Verifying..." : "Verify Email"}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleResendOtp}
-            disabled={resendCooldown > 0 || resendLoading}
-            className="rounded px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 disabled:text-slate-400 dark:text-emerald-300 dark:hover:bg-emerald-900/30"
-          >
-            {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend OTP"}
-          </button>
-        </div>
-      </form>
-
-      <p className="mt-4 text-center text-sm text-emerald-800/80 dark:text-emerald-300/70">
-        OTP expires in 10 minutes
-      </p>
-    </div>
+      <div className="mt-8 border-t border-gray-100 pt-6 text-center dark:border-gray-800">
+        <p className="text-[10px] uppercase tracking-widest text-gray-400">
+          Powered by <span className="text-green-600 font-bold">ServZEN Security</span>
+        </p>
+      </div>
+    </motion.div>
   );
 };
