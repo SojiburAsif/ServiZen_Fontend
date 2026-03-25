@@ -1,4 +1,5 @@
-"use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,6 +8,7 @@ import { motion } from "framer-motion";
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff, Lock, Mail, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import AppField from "@/components/shared/form/AppFilds";
 import AppSubmitButton from "@/components/shared/form/AppSubmiteButon";
@@ -21,10 +23,12 @@ import { loginAction } from "@/services/auth.service";
 import { ILoginPayload } from "@/types/auth.typs";
 import { AuthValidation } from "@/zod/auth.validation";
 
-// Helper functions for error handling
-const isVerificationRequired = (msg: string) => /verify|verification|unverified/i.test(msg);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const extractError = (err: unknown) => (err as any)?.response?.data?.message || (err as any)?.message || "Login failed";
+// --- Helper functions for error handling ---
+const isVerificationRequired = (msg: string) => 
+  /verify|verification|unverified|not verified/i.test(msg);
+
+const extractError = (err: unknown) => 
+  (err as any)?.response?.data?.message || (err as any)?.message || "Login failed";
 
 const LoginForm = () => {
   const router = useRouter();
@@ -37,7 +41,9 @@ const LoginForm = () => {
     ? "Session mismatch. Please try again."
     : null;
 
-  useEffect(() => { clearGoogleOAuthLock(); }, []);
+  useEffect(() => { 
+    clearGoogleOAuthLock(); 
+  }, []);
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (payload: ILoginPayload) => loginAction(payload),
@@ -48,33 +54,55 @@ const LoginForm = () => {
     onSubmit: async ({ value }) => {
       setServerError(null);
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = await mutateAsync(value) as any;
 
-        // Always check for email verification first, regardless of success
-        const userData = result?.data?.user || result?.data || {};
-        if (!userData?.emailVerified || isVerificationRequired(result.message || "")) {
+        // 1. Logic for Success response (200 OK)
+        if (result?.success) {
+          const userData = result?.data?.user || result?.data || {};
+
+          // Check if email is unverified in the success data
+          if (userData?.emailVerified === false) {
+            setPendingAuth(value.email, value.password);
+            window.location.href = `/verify-email?email=${encodeURIComponent(value.email)}&notice=otp-sent`;
+            return;
+          }
+
+          if (userData?.needPasswordChange) {
+            router.push(`/reset-password?email=${encodeURIComponent(value.email)}`);
+            return;
+          }
+
+          clearPendingAuth();
+          toast.success("Welcome back! Login successful.");
+          router.push("/dashboard");
+          router.refresh();
+          return;
+        }
+
+        // 2. Logic if API returns success: false but doesn't throw (rare)
+        if (isVerificationRequired(result?.message || "")) {
           setPendingAuth(value.email, value.password);
-          router.push(`/verify-email?email=${encodeURIComponent(value.email)}&notice=otp-sent`);
+          window.location.href = `/verify-email?email=${encodeURIComponent(value.email)}&notice=otp-sent`;
           return;
         }
 
-        if (!result.success) {
-          setServerError(result.message || "Login failed");
-          return;
-        }
+        setServerError(result?.message || "Invalid credentials");
 
-        if (userData?.needPasswordChange) {
-          router.push(`/reset-password?email=${encodeURIComponent(value.email)}`);
-          return;
-        }
-
-        clearPendingAuth();
-        router.push("/dashboard");
-        router.refresh();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
-        setServerError(extractError(error));
+        // 3. Backend throws 4xx or 500 error (Most likely case)
+        const errMsg = extractError(error);
+
+        // Force redirect if message indicates verification is needed
+        if (isVerificationRequired(errMsg)) {
+          setPendingAuth(value.email, value.password);
+          // Using window.location to bypass any router-level state locks during 500 errors
+          window.location.href = `/verify-email?email=${encodeURIComponent(value.email)}&notice=otp-sent`;
+          return; 
+        }
+
+        // Otherwise, show standard error UI
+        setServerError(errMsg);
+        toast.error(errMsg);
       }
     }
   });
@@ -99,7 +127,7 @@ const LoginForm = () => {
         <CardHeader className="space-y-3 pb-6 pt-4 text-center">
           <div className="flex justify-center">
             <Link href="/" className="group flex items-center text-center gap-2 transition-transform active:scale-95">
-              <img src="/favicon.ico" alt="" className="h-10 w-10" />
+              <img src="/favicon.ico" alt="ServZEN" className="h-10 w-10" />
               <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Serv<span className="font-serif italic text-gray-500 dark:text-gray-400">ZEN</span>
               </span>
@@ -117,7 +145,11 @@ const LoginForm = () => {
 
         <CardContent className="px-4 sm:px-6 md:px-8">
           <form
-            onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit(); }}
+            onSubmit={(e) => { 
+              e.preventDefault(); 
+              e.stopPropagation(); 
+              form.handleSubmit(); 
+            }}
             className="space-y-6"
           >
             <form.Field name="email" validators={{ onChange: AuthValidation.loginUserValidationSchema.shape.email }}>
@@ -162,7 +194,7 @@ const LoginForm = () => {
             </form.Field>
 
             <div className="flex justify-end">
-              <Link href="/forgot-password" className="text-sm font-bold text-emerald-700 hover:text-emerald-600 dark:text-emerald-400">
+              <Link href="/forgot-password"  className="text-sm font-bold text-emerald-700 hover:text-emerald-600 dark:text-emerald-400">
                 Forgot password?
               </Link>
             </div>
@@ -188,8 +220,14 @@ const LoginForm = () => {
           </form>
 
           <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-emerald-100 dark:border-emerald-900/50"></div></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-3 text-emerald-800/40 dark:bg-slate-950 dark:text-emerald-400/40">Or join with</span></div>
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-emerald-100 dark:border-emerald-900/50"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-3 text-emerald-800/40 dark:bg-slate-950 dark:text-emerald-400/40">
+                Or join with
+              </span>
+            </div>
           </div>
 
           <Button

@@ -85,7 +85,7 @@ export default async function DashboardLayout({
 
             <div className="mx-auto w-full ">
               {userRole === Role.ADMIN && (
-                <div className="">{admin}</div>
+                <div className="pt-2">{admin}</div>
               )}
 
               {userRole === Role.CLIENT && (

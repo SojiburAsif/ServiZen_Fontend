@@ -513,9 +513,8 @@ const RegisterForm = () => {
 
                 if (!result.started) {
                   setIsGooglePending(false);
-
                   if (result.reason === "already_inflight") {
-                    setServerError("Google login already চলছে, একটু অপেক্ষা করে আবার চেষ্টা করুন.");
+                    setServerError("Google login is already in progress. Please wait a moment and try again.");
                     return;
                   }
 

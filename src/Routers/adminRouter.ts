@@ -20,6 +20,7 @@ export const AdminRouters: Route[] = [
         items: [
             { title: "Home", url: "/dashboard", icon: Home },
             { title: "Stats", url: "/dashboard/stats", icon: BarChart3 },
+            { title: "Create Provider", url: "/dashboard/CreateProvider", icon: Settings },
             { title: "Admin Profile", url: "/dashboard/profile", icon: UserCog },
             { title: "All Users", url: "/dashboard/users", icon: Users },
             { title: "All Providers", url: "/dashboard/providers", icon: UserSquare2 },
@@ -29,7 +30,6 @@ export const AdminRouters: Route[] = [
             { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
             { title: "Reviews & Ratings", url: "/dashboard/reviews", icon: ClipboardList },
             { title: "Financial Reports", url: "/dashboard/reports", icon: ShieldCheck },
-            { title: "Settings", url: "/dashboard/settings", icon: Settings }
         ],
     }
 ]
