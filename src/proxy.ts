@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import { RoleType } from "./app/constants/role";
 import { getServerEnv } from "./lib/env";
@@ -110,9 +111,7 @@ export async function proxy(request: NextRequest) {
         // Support legacy/role-prefixed dashboard URLs by redirecting to the unified /dashboard route.
         if (dashboardAliasOwner) {
             if (!isAuthenticated || !userRole) {
-                const loginUrl = new URL("/login", request.url);
-                loginUrl.searchParams.set("redirect", pathname);
-                return NextResponse.redirect(loginUrl);
+                return NextResponse.redirect(new URL("/login", request.url));
             }
 
             if (dashboardAliasOwner !== userRole) {
@@ -122,25 +121,23 @@ export async function proxy(request: NextRequest) {
             return NextResponse.redirect(new URL("/dashboard", request.url));
         }
 
-        // Reset-password can be opened from forgot-password by email query param.
-        if (pathname === "/reset-password") {
-            const email = request.nextUrl.searchParams.get("email");
-
-            if (isAuthenticated && email) {
-                if (authUserInfo?.needPasswordChange) {
-                    return NextResponse.next();
-                }
-
-                return NextResponse.redirect(new URL(getFallbackDashboardRoute(userRole), request.url));
+        // Only allow /change-password route if needPasswordChange is true
+        if (pathname === "/change-password") {
+            if (!isAuthenticated) {
+                return NextResponse.redirect(new URL("/login", request.url));
             }
-
-            if (email) {
+            // Only allow if needPasswordChange is true
+            const infoAny = authUserInfo as any;
+            const needPasswordChange = Boolean(
+                infoAny?.needPasswordChange ??
+                infoAny?.needPasswordchange ??
+                (typeof infoAny === "object" && Object.keys(infoAny).find(k => k.toLowerCase() === "needpasswordchange"))
+            );
+            if (needPasswordChange) {
                 return NextResponse.next();
             }
-
-            const loginUrl = new URL("/login", request.url);
-            loginUrl.searchParams.set("redirect", pathname);
-            return NextResponse.redirect(loginUrl);
+            // If not needed, redirect to dashboard
+            return NextResponse.redirect(new URL(getFallbackDashboardRoute(userRole), request.url));
         }
 
         // Public route.
@@ -150,21 +147,26 @@ export async function proxy(request: NextRequest) {
 
         // Protected route requires valid access token.
         if (!isAuthenticated) {
-            const loginUrl = new URL("/login", request.url);
-            loginUrl.searchParams.set("redirect", pathname);
-            return NextResponse.redirect(loginUrl);
+            return NextResponse.redirect(new URL("/login", request.url));
         }
 
         const userInfo = authUserInfo;
 
         if (userInfo) {
+            // Normalize needPasswordChange (support both spellings)
+            const infoAny = userInfo as any;
+            const needPasswordChange = Boolean(
+                infoAny.needPasswordChange ??
+                infoAny.needPasswordchange ??
+                (typeof infoAny === "object" && Object.keys(infoAny).find(k => k.toLowerCase() === "needpasswordchange"))
+            );
+
             if (userInfo.emailVerified === false) {
                 if (pathname !== "/verify-email") {
                     const verifyEmailUrl = new URL("/verify-email", request.url);
                     verifyEmailUrl.searchParams.set("email", userInfo.email);
                     return NextResponse.redirect(verifyEmailUrl);
                 }
-
                 return NextResponse.next();
             }
 
@@ -172,17 +174,16 @@ export async function proxy(request: NextRequest) {
                 return NextResponse.redirect(new URL(getFallbackDashboardRoute(userRole), request.url));
             }
 
-            if (userInfo.needPasswordChange) {
-                if (pathname !== "/reset-password") {
-                    const resetPasswordUrl = new URL("/reset-password", request.url);
-                    resetPasswordUrl.searchParams.set("email", userInfo.email);
-                    return NextResponse.redirect(resetPasswordUrl);
+            // If needPasswordChange is true, only allow /change-password, block all else
+            if (needPasswordChange) {
+                if (pathname !== "/change-password") {
+                    return NextResponse.redirect(new URL("/change-password", request.url));
                 }
-
                 return NextResponse.next();
             }
 
-            if (!userInfo.needPasswordChange && pathname === "/reset-password") {
+            // If not needPasswordChange, block /change-password
+            if (!needPasswordChange && pathname === "/change-password") {
                 return NextResponse.redirect(new URL(getFallbackDashboardRoute(userRole), request.url));
             }
         }

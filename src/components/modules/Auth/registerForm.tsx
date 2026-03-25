@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { publicEnv } from "@/lib/env";
 import { clearGoogleOAuthLock, startGoogleOAuth } from "@/lib/googleOAuth";
+import { clearPendingAuth, setPendingAuth } from "@/lib/pendingAuth";
 import { registerAction } from "@/services/auth.service";
 import { IRegisterPayload } from "@/types/auth.typs";
 import { AuthValidation } from "@/zod/auth.validation";
@@ -18,6 +19,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+const extractErrorMessage = (error: unknown, fallback = "Register failed") => {
+  if (typeof error === "string") {
+    return error;
+  }
+
+  if (error && typeof error === "object") {
+    const maybeError = error as { message?: string; response?: { data?: { message?: string } } };
+    return maybeError.response?.data?.message || maybeError.message || fallback;
+  }
+
+  return fallback;
+};
 
 const validateOptionalField = (schema: { safeParse: (value: string) => { success: boolean; error?: { issues: Array<{ message: string }> } } }) => {
   return ({ value }: { value: string }) => {
@@ -82,11 +96,32 @@ const RegisterForm = () => {
 
         setServerSuccess(result.message || "Account created successfully");
         form.reset();
+        const userData = (result as any)?.data?.user || (result as any)?.data || {};
+        const needPasswordChange = Boolean(userData?.needPasswordChange ?? userData?.needPasswordchange);
+
+        // Extra harden: clear all tokens/cookies after register, before verify
+        if (typeof window !== "undefined") {
+          // Remove all cookies (session, access, refresh, etc.)
+          document.cookie.split(';').forEach(function(c) {
+            document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
+          });
+          // Remove local/session storage tokens if any
+          window.localStorage.clear();
+          window.sessionStorage.clear();
+        }
+
         setTimeout(() => {
-          router.push("/login");
+          if (needPasswordChange) {
+            clearPendingAuth();
+            router.push(`/reset-password?email=${encodeURIComponent(payload.email)}`);
+            return;
+          }
+
+          setPendingAuth(payload.email, payload.password);
+          router.push(`/verify-email?email=${encodeURIComponent(payload.email)}`);
         }, 800);
-      } catch (error: any) {
-        setServerError(`Register failed: ${error.message}`);
+      } catch (error: unknown) {
+        setServerError(extractErrorMessage(error, "Register failed. Please try again."));
       }
     },
   });

@@ -5,10 +5,24 @@ import { env } from '../env';
 
 const API_BASE_URL = env.NEXT_PUBLIC_API_BASE_URL;
 
+const logHttpError = (method: string, endpoint: string, error: unknown) => {
+    if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const payload = error.response?.data as { message?: string; error?: string } | undefined;
+        const apiMessage = payload?.error || payload?.message;
+        const fallback = error.message || 'Unknown error';
+        console.error(`${method} ${endpoint} failed${status ? ` (${status})` : ''}: ${apiMessage || fallback}`);
+        return;
+    }
+
+    console.error(`${method} ${endpoint} failed:`, error);
+};
+
 const axiosInstance = () => {
     const instance = axios.create({
         baseURL : API_BASE_URL,
         timeout : 30000,
+        withCredentials: true,
         headers:{
             'Content-Type' : 'application/json',
         }
@@ -27,7 +41,7 @@ const httpGet = async <TData>(endpoint: string, options?: ApiRequestOptions) : P
         });
         return response.data;
     } catch (error) {       
-        console.error(`GET request to ${endpoint} failed:`, error);
+        logHttpError('GET', endpoint, error);
         throw error;
     }
 }
@@ -40,7 +54,7 @@ const httpPost = async <TData>(endpoint: string, data: unknown, options?: ApiReq
         });
         return response.data;
     } catch (error) {
-        console.error(`POST request to ${endpoint} failed:`, error);
+        logHttpError('POST', endpoint, error);
         throw error;
     }
 }
@@ -53,7 +67,7 @@ const httpPut = async <TData>(endpoint: string, data: unknown, options?: ApiRequ
         });
         return response.data;
     } catch (error) {
-        console.error(`PUT request to ${endpoint} failed:`, error);
+        logHttpError('PUT', endpoint, error);
         throw error;
     }
 }
@@ -67,7 +81,7 @@ const httpPatch = async <TData>(endpoint: string, data: unknown, options?: ApiRe
         return response.data;
     }
     catch (error) {
-        console.error(`PATCH request to ${endpoint} failed:`, error);
+        logHttpError('PATCH', endpoint, error);
         throw error;
     }
 }
@@ -80,7 +94,7 @@ const httpDelete =  async <TData>(endpoint: string, options?: ApiRequestOptions)
         });
         return response.data;
     } catch (error) {
-        console.error(`DELETE request to ${endpoint} failed:`, error);
+        logHttpError('DELETE', endpoint, error);
         throw error;
     }
 }

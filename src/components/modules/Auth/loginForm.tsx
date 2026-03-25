@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { publicEnv } from "@/lib/env";
 import { clearGoogleOAuthLock, startGoogleOAuth } from "@/lib/googleOAuth";
+import { clearPendingAuth, setPendingAuth } from "@/lib/pendingAuth";
 import { loginAction } from "@/services/auth.service";
 import { ILoginPayload } from "@/types/auth.typs";
 import { AuthValidation } from "@/zod/auth.validation";
@@ -17,6 +18,17 @@ import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+
+const isVerificationRequiredMessage = (message: string) => {
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("verify") ||
+    normalized.includes("verification") ||
+    normalized.includes("email verified") ||
+    normalized.includes("email not verified") ||
+    normalized.includes("unverified")
+  );
+};
 
 const extractErrorMessage = (error: unknown, fallback = "Login failed") => {
   if (typeof error === "string") {
@@ -61,14 +73,37 @@ const LoginForm = () => {
             setServerError(null);
             try {
                 const result = await mutateAsync(value) as any;
+              const dashboardPath = "/dashboard";
 
                 if(!result.success ){
+              if (isVerificationRequiredMessage(result.message || "")) {
+                      setPendingAuth(value.email, value.password);
+                      router.push(`/verify-email?email=${encodeURIComponent(value.email)}&notice=${encodeURIComponent("otp-sent")}`);
+                return;
+              }
+
                     setServerError(result.message || "Login failed");
                     return ;
                 }
 
-                const redirectPath = searchParams.get("redirect") || "/dashboard";
-                router.push(redirectPath);
+                const userData = result?.data?.user || result?.data || {};
+                const needPasswordChange = Boolean(userData?.needPasswordChange ?? userData?.needPasswordchange);
+                if (needPasswordChange) {
+                  clearPendingAuth();
+                  router.push(`/reset-password?email=${encodeURIComponent(value.email)}`);
+                  router.refresh();
+                  return;
+                }
+
+                const isEmailVerified = Boolean(userData?.emailVerified);
+            if (!isEmailVerified) {
+                  setPendingAuth(value.email, value.password);
+                  router.push(`/verify-email?email=${encodeURIComponent(value.email)}&notice=${encodeURIComponent("otp-sent")}`);
+              return;
+            }
+
+                clearPendingAuth();
+                router.push(dashboardPath);
                 router.refresh();
             } catch (error : any) {
                 setServerError(extractErrorMessage(error, "Login failed. Please try again."));
@@ -80,10 +115,9 @@ const LoginForm = () => {
     try {
       setServerError(null);
       setIsGooglePending(true);
-      const redirectPath = searchParams.get("redirect") || "/dashboard";
       const result = startGoogleOAuth({
         apiBaseUrl: publicEnv.NEXT_PUBLIC_API_BASE_URL,
-        callbackPath: redirectPath,
+        callbackPath: "/dashboard",
         appOrigin: publicEnv.NEXT_PUBLIC_APP_ORIGIN,
       });
 

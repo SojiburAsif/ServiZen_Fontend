@@ -12,6 +12,36 @@ import { AuthValidation } from "@/zod/auth.validation";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+type HttpErrorLike = {
+    message?: string;
+    response?: {
+        status?: number;
+        data?: {
+            message?: string;
+            error?: string;
+            errorSources?: Array<{ message?: string }>;
+        };
+    };
+};
+
+const getHttpErrorMessage = (error: unknown, fallback: string) => {
+    if (!error || typeof error !== "object") {
+        return fallback;
+    }
+
+    const maybeError = error as HttpErrorLike;
+    const apiMessage = maybeError.response?.data?.message?.trim();
+    const apiError = maybeError.response?.data?.error?.trim();
+    const firstSourceMessage = maybeError.response?.data?.errorSources?.[0]?.message?.trim();
+    const genericMessage = maybeError.message?.trim();
+
+    if (apiError && apiError.toLowerCase() !== "failed to fetch") {
+        return apiError;
+    }
+
+    return firstSourceMessage || apiMessage || apiError || genericMessage || fallback;
+};
+
 export type AuthUserInfo = {
     needPasswordChange: boolean;
     email: string;
@@ -206,8 +236,16 @@ const normalizeUserInfo = (rawData: any, authToken?: string): AuthUserInfo | nul
         normalizeRoleValue(decoded?.role) ||
         "USER";
 
+    // Support both needPasswordChange and needPasswordchange (case-insensitive, both spellings)
+    const needPasswordChange = Boolean(
+        data?.needPasswordChange ??
+        data?.needPasswordchange ??
+        rawData?.needPasswordChange ??
+        rawData?.needPasswordchange ??
+        (typeof data === "object" && Object.keys(data).find(k => k.toLowerCase() === "needpasswordchange" || k.toLowerCase() === "needpasswordchange"))
+    );
     return {
-        needPasswordChange: Boolean(data?.needPasswordChange ?? rawData?.needPasswordChange ?? false),
+        needPasswordChange,
         email,
         name,
         role,
@@ -373,6 +411,66 @@ const createAuthHeaders = (
     return headers;
 };
 
+type AuthTokens = {
+    accessToken?: string;
+    refreshToken?: string;
+    sessionToken?: string;
+};
+
+const toRecord = (value: unknown): Record<string, unknown> => {
+    if (value && typeof value === "object") {
+        return value as Record<string, unknown>;
+    }
+
+    return {};
+};
+
+const extractAuthTokens = (payload: unknown): AuthTokens => {
+    const root = toRecord(payload);
+    const data = toRecord(root.data);
+
+    const accessToken = pickFirstString(
+        data.accessToken,
+        root.accessToken,
+        data.token,
+        root.token
+    );
+
+    const refreshToken = pickFirstString(
+        data.refreshToken,
+        root.refreshToken
+    );
+
+    const sessionToken = pickFirstString(
+        data.sessionToken,
+        root.sessionToken,
+        data.token,
+        root.token
+    );
+
+    return {
+        accessToken: accessToken || undefined,
+        refreshToken: refreshToken || undefined,
+        sessionToken: sessionToken || undefined,
+    };
+};
+
+const persistAuthTokens = async (payload: unknown) => {
+    const { accessToken, refreshToken, sessionToken } = extractAuthTokens(payload);
+
+    if (accessToken) {
+        await setTokenInCookies("accessToken", accessToken);
+    }
+
+    if (refreshToken) {
+        await setTokenInCookies("refreshToken", refreshToken);
+    }
+
+    if (sessionToken) {
+        await setTokenInCookies("better-auth.session_token", sessionToken, 24 * 60 * 60);
+    }
+};
+
 export const loginAction = async (payload: ILoginPayload): Promise<ApiResponse<ILoginSuccessData> | ApiErrorResponse> => {
     const parsedPayload = AuthValidation.loginUserValidationSchema.safeParse(payload);
 
@@ -386,16 +484,13 @@ export const loginAction = async (payload: ILoginPayload): Promise<ApiResponse<I
     try {
         const response = await httpClient.post<ILoginSuccessData>("/auth/login", parsedPayload.data);
 
-        const { accessToken, refreshToken, token} = response.data;
-        await setTokenInCookies("accessToken", accessToken);
-        await setTokenInCookies("refreshToken", refreshToken);
-        await setTokenInCookies("better-auth.session_token", token, 24 * 60 * 60); // 1 day in seconds
+        await persistAuthTokens(response);
         return response;
         
-    } catch (error : any) {
+    } catch (error: unknown) {
         return {
             success: false,
-            message: `Login failed: ${error.message}`,
+            message: getHttpErrorMessage(error, "Login failed"),
         }
     }
 }
@@ -418,11 +513,146 @@ export const registerAction = async (
 
     try {
         const response = await httpClient.post<unknown>("/auth/register", registerPayload);
+        // Do NOT persist tokens after register; only after verify-email or login
+        return response;
+    } catch (error: unknown) {
+        return {
+            success: false,
+            message: getHttpErrorMessage(error, "Register failed"),
+        };
+    }
+};
+
+export const changePasswordAction = async (
+    payload: Record<string, any>
+): Promise<ApiResponse<unknown> | ApiErrorResponse> => {
+    const parsedPayload = AuthValidation.changePasswordValidationSchema.safeParse(payload);
+
+    if (!parsedPayload.success) {
+        const firstError = parsedPayload.error.issues[0].message || "Invalid input";
+        return {
+            success: false,
+            message: firstError,
+        };
+    }
+
+    const { confirmNewPassword, ...changePasswordPayload } = parsedPayload.data;
+    void confirmNewPassword;
+
+    try {
+        const response = await httpClient.post<unknown>("/auth/change-password", changePasswordPayload);
         return response;
     } catch (error: any) {
         return {
             success: false,
-            message: `Register failed: ${error.message}`,
+            message: `Change password failed: ${error.message}`,
+        };
+    }
+};
+
+export const verifyEmailAction = async (
+    email: string,
+    otp: string
+): Promise<ApiResponse<unknown> | ApiErrorResponse> => {
+    if (!email || !otp) {
+        return {
+            success: false,
+            message: "Email and OTP are required",
+        };
+    }
+
+    try {
+        const response = await httpClient.post<unknown>("/auth/verify-email", { email, otp });
+        await persistAuthTokens(response);
+        return response;
+    } catch (error: any) {
+        return {
+            success: false,
+            message: `Email verification failed: ${error.message}`,
+        };
+    }
+};
+
+export const forgetPasswordAction = async (
+    email: string
+): Promise<ApiResponse<unknown> | ApiErrorResponse> => {
+    if (!email) {
+        return {
+            success: false,
+            message: "Email is required",
+        };
+    }
+
+    try {
+        const response = await httpClient.post<unknown>("/auth/forget-password", { email });
+        return response;
+    } catch (error: any) {
+        return {
+            success: false,
+            message: `Forget password request failed: ${error.message}`,
+        };
+    }
+};
+
+export const resetPasswordAction = async (
+    email: string,
+    otp: string,
+    newPassword: string
+): Promise<ApiResponse<unknown> | ApiErrorResponse> => {
+    if (!email || !otp || !newPassword) {
+        return {
+            success: false,
+            message: "Email, OTP, and new password are required",
+        };
+    }
+
+    try {
+        const response = await httpClient.post<unknown>("/auth/reset-password", {
+            email,
+            otp,
+            newPassword,
+        });
+        return response;
+    } catch (error: any) {
+        return {
+            success: false,
+            message: `Password reset failed: ${error.message}`,
+        };
+    }
+};
+
+export const createProviderAction = async (
+    payload: Record<string, any>
+): Promise<ApiResponse<unknown> | ApiErrorResponse> => {
+    const parsedPayload = AuthValidation.createProviderValidationSchema.safeParse(payload);
+
+    if (!parsedPayload.success) {
+        const firstError = parsedPayload.error.issues[0].message || "Invalid input";
+        return {
+            success: false,
+            message: firstError,
+        };
+    }
+
+    try {
+        const response = await httpClient.post<unknown>("/users/create-provider", parsedPayload.data);
+        return response;
+    } catch (error: any) {
+        return {
+            success: false,
+            message: `Provider creation failed: ${error.message}`,
+        };
+    }
+};
+
+export const logoutAction = async (): Promise<ApiResponse<unknown> | ApiErrorResponse> => {
+    try {
+        const response = await httpClient.post<unknown>("/auth/logout", {});
+        return response;
+    } catch (error: any) {
+        return {
+            success: false,
+            message: `Logout failed: ${error.message}`,
         };
     }
 };
@@ -448,7 +678,7 @@ export async function getUserInfo(): Promise<AuthUserInfo | null> {
 
         const cookieHeader = rawCookieHeader || createAuthCookieHeader(accessToken, sessionToken, refreshToken);
         const authToken = accessToken || sessionToken;
-        const canCallMeEndpoint = hasAccessRoleClaim(accessToken);
+        const canCallMeEndpoint = Boolean(sessionToken) && hasAccessRoleClaim(accessToken);
         const authHeaders = createAuthHeaders(cookieHeader, accessToken, sessionToken);
 
         if (!cookieHeader) {

@@ -34,7 +34,7 @@ export default async function DashboardLayout({
   const tokenRole = String(decodedToken?.role || "").toUpperCase();
 
   if (!user && !decodedToken) {
-    redirect("/login?redirect=/dashboard");
+    redirect("/login");
   }
 
   const rawRole = String(user?.role || tokenRole || "").toUpperCase();
@@ -74,7 +74,6 @@ export default async function DashboardLayout({
                 </BreadcrumbList>
               </Breadcrumb>
             </div>
-
 
 
           </header>
