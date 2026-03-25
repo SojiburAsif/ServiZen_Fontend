@@ -10,16 +10,29 @@ import {
   Search, 
   LayoutDashboard, 
   LogOut, 
-  UserCircle,
+  Mail,
+  Shield,
   Home,
   Info,
   Phone,
   Bell
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { Role } from "@/app/constants/role";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+type NavbarUser = {
+  name?: string;
+  email?: string;
+  role?: string;
+  image?: string;
+  emailVerified?: boolean;
+  needPasswordChange?: boolean;
+};
+
+type NavbarProps = {
+  initialUser?: NavbarUser | null;
+};
 
 const navLinks = [
   { href: "/", label: "Home", icon: Home },
@@ -28,12 +41,41 @@ const navLinks = [
   { href: "/contact", label: "Contact", icon: Phone },
 ];
 
-const Navbar = () => {
+const Navbar = ({ initialUser = null }: NavbarProps) => {
   const pathname = usePathname();
-  
-  // Hardcoded for demonstration, replace with actual auth logic
-  const userRole = Role.ADMIN;
-  const isLoggedIn = !!userRole;
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  const [user, setUser] = useState<NavbarUser | null>(initialUser);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const isLoggedIn = Boolean(user);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const userInitial = user?.name?.trim()?.charAt(0)?.toUpperCase() || "U";
+  const userRole = user?.role?.trim();
+
+  const handleLogout = async () => {
+    if (isLoggingOut) {
+      return;
+    }
+
+    setIsLoggingOut(true);
+
+    try {
+      await fetch("/logout", {
+        method: "POST",
+      });
+    } catch {
+      // Ignore network errors and still clear client auth state.
+    } finally {
+      setUser(null);
+      setIsLoggingOut(false);
+      router.push("/login");
+      router.refresh();
+    }
+  };
 
   const renderDesktopLinks = () => (
     navLinks.map((link) => {
@@ -88,32 +130,39 @@ const Navbar = () => {
                 </Link>
 
                 {/* Notification Modal */}
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button size="icon" variant="ghost" className="relative text-gray-500 hover:text-gray-900 rounded-full dark:text-gray-400 dark:hover:text-white transition-colors">
-                      <Bell className="size-4" />
-                      <span className="absolute right-2.5 top-2.5 flex size-1.5 rounded-full bg-orange-500"></span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px] md:max-w-2xl bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-gray-800 p-0 overflow-hidden">
-                    <DialogHeader className="p-6 pb-2">
-                      <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        <Bell className="size-5 text-green-500" /> Notifications
-                      </DialogTitle>
-                      <DialogDescription className="text-gray-500 dark:text-gray-400">
-                        Stay updated with your latest alerts and offers.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="max-h-[60vh] overflow-y-auto p-6 pt-2 custom-scrollbar">
-                       <NotificationContent />
-                    </div>
-                    <div className="p-4 border-t border-gray-100 dark:border-gray-800/50 bg-gray-50 dark:bg-black/50 text-center">
-                      <Link href="/notification" className="text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
-                        View all notifications
-                      </Link>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                {mounted ? (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button size="icon" variant="ghost" className="relative text-gray-500 hover:text-gray-900 rounded-full dark:text-gray-400 dark:hover:text-white transition-colors">
+                        <Bell className="size-4" />
+                        <span className="absolute right-2.5 top-2.5 flex size-1.5 rounded-full bg-orange-500"></span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px] md:max-w-2xl bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-gray-800 p-0 overflow-hidden">
+                      <DialogHeader className="p-6 pb-2">
+                        <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                          <Bell className="size-5 text-green-500" /> Notifications
+                        </DialogTitle>
+                        <DialogDescription className="text-gray-500 dark:text-gray-400">
+                          Stay updated with your latest alerts and offers.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="max-h-[60vh] overflow-y-auto p-6 pt-2 custom-scrollbar">
+                         <NotificationContent />
+                      </div>
+                      <div className="p-4 border-t border-gray-100 dark:border-gray-800/50 bg-gray-50 dark:bg-black/50 text-center">
+                        <Link href="/notification" className="text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
+                          View all notifications
+                        </Link>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                ) : (
+                  <Button size="icon" variant="ghost" className="relative text-gray-500 hover:text-gray-900 rounded-full dark:text-gray-400 dark:hover:text-white transition-colors">
+                    <Bell className="size-4" />
+                    <span className="absolute right-2.5 top-2.5 flex size-1.5 rounded-full bg-orange-500"></span>
+                  </Button>
+                )}
               </>
             )}
 
@@ -136,10 +185,86 @@ const Navbar = () => {
             </div>
           ) : (
              <div className="flex items-center gap-3">
-               <button className="flex items-center justify-center w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800">
-                 <UserCircle className="size-5 text-gray-600 dark:text-gray-300" />
-               </button>
-               <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
+               {mounted ? (
+               <Dialog>
+                 <DialogTrigger asChild>
+                   <button className="flex items-center justify-center w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden ring-2 ring-transparent hover:ring-green-300 transition-all">
+                     {user?.image ? (
+                      <img src={user.image} alt={user?.name || "User"} className="h-full w-full object-cover" />
+                     ) : (
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{userInitial}</span>
+                     )}
+                   </button>
+                 </DialogTrigger>
+                 <DialogContent className="sm:max-w-md bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-gray-800">
+                   <DialogHeader>
+                     <DialogTitle>My Profile</DialogTitle>
+                     <DialogDescription>
+                       Account details and quick actions.
+                     </DialogDescription>
+                   </DialogHeader>
+
+                   <div className="space-y-4">
+                     <div className="flex items-center gap-3">
+                       <div className="h-12 w-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                         {user?.image ? (
+                           <img src={user.image} alt={user?.name || "User"} className="h-full w-full object-cover" />
+                         ) : (
+                           <span className="text-base font-semibold">{userInitial}</span>
+                         )}
+                       </div>
+                       <div>
+                         <p className="font-semibold text-gray-900 dark:text-gray-100">{user?.name || "User"}</p>
+                         <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || "No email"}</p>
+                       </div>
+                     </div>
+
+                     <div className="space-y-2 text-sm">
+                       {userRole && (
+                        <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                          <Shield className="size-4 text-green-600" />
+                          <span>Role: {userRole}</span>
+                        </div>
+                       )}
+                       <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                         <Mail className="size-4 text-green-600" />
+                         <span>{user?.email || "No email available"}</span>
+                       </div>
+                     </div>
+
+                     <div className="flex gap-2">
+                       <Link href="/dashboard" className="inline-flex items-center justify-center px-3 py-2 rounded-md bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors">
+                         Go to Dashboard
+                       </Link>
+                       <Button
+                         variant="outline"
+                         onClick={handleLogout}
+                         disabled={isLoggingOut}
+                         className="text-rose-600 border-rose-300 hover:bg-rose-50"
+                       >
+                         <LogOut className="size-4 mr-2" />
+                         Logout
+                       </Button>
+                     </div>
+                   </div>
+                 </DialogContent>
+               </Dialog>
+               ) : (
+                <button className="flex items-center justify-center w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden ring-2 ring-transparent">
+                  {user?.image ? (
+                    <img src={user.image} alt={user?.name || "User"} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{userInitial}</span>
+                  )}
+                </button>
+               )}
+               <Button
+                 variant="ghost"
+                 size="icon"
+                 onClick={handleLogout}
+                 disabled={isLoggingOut}
+                 className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+               >
                  <LogOut className="size-4" />
                </Button>
              </div>
@@ -148,6 +273,7 @@ const Navbar = () => {
           {/* Mobile Menu Trigger */}
           <div className="md:hidden flex items-center gap-2">
             <Them />
+            {mounted ? (
             <Sheet>
               <SheetTrigger asChild>
                 <Button size="icon" variant="ghost">
@@ -195,12 +321,39 @@ const Navbar = () => {
                      {isLoggedIn ? (
                        <div className="flex items-center justify-between px-2">
                          <div className="flex items-center gap-3">
-                           <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
-                              <UserCircle className="size-6" />
-                           </div>
-                           <span className="text-sm font-medium text-gray-700 dark:text-gray-200">My Profile</span>
+                           <Dialog>
+                             <DialogTrigger asChild>
+                               <button className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 overflow-hidden">
+                                  {user?.image ? (
+                                    <img src={user.image} alt={user?.name || "User"} className="h-full w-full object-cover" />
+                                  ) : (
+                                    <span className="text-sm font-semibold">{userInitial}</span>
+                                  )}
+                               </button>
+                             </DialogTrigger>
+                             <DialogContent className="sm:max-w-md bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-gray-800">
+                               <DialogHeader>
+                                 <DialogTitle>My Profile</DialogTitle>
+                                 <DialogDescription>
+                                   Account details and quick actions.
+                                 </DialogDescription>
+                               </DialogHeader>
+                               <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                                 <p><strong>Name:</strong> {user?.name || "User"}</p>
+                                 <p><strong>Email:</strong> {user?.email || "No email"}</p>
+                                 {userRole && <p><strong>Role:</strong> {userRole}</p>}
+                               </div>
+                             </DialogContent>
+                           </Dialog>
+                           <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{user?.name || "My Profile"}</span>
                          </div>
-                         <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30">
+                         <Button
+                           variant="ghost"
+                           size="icon"
+                           onClick={handleLogout}
+                           disabled={isLoggingOut}
+                           className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
+                         >
                            <LogOut className="size-5" />
                          </Button>
                        </div>
@@ -218,6 +371,11 @@ const Navbar = () => {
                 </div>
               </SheetContent>
             </Sheet>
+            ) : (
+              <Button size="icon" variant="ghost" aria-label="Open navigation">
+                <Menu className="size-6" />
+              </Button>
+            )}
           </div>
         </div>
       </div>

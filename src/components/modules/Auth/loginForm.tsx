@@ -6,7 +6,8 @@ import AppSubmitButton from "@/components/shared/form/AppSubmiteButon";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { env } from "@/lib/env";
+import { publicEnv } from "@/lib/env";
+import { clearGoogleOAuthLock, startGoogleOAuth } from "@/lib/googleOAuth";
 import { loginAction } from "@/services/auth.service";
 import { ILoginPayload } from "@/types/auth.typs";
 import { AuthValidation } from "@/zod/auth.validation";
@@ -14,17 +15,41 @@ import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
+const extractErrorMessage = (error: unknown, fallback = "Login failed") => {
+  if (typeof error === "string") {
+    return error;
+  }
+
+  if (error && typeof error === "object") {
+    const maybeError = error as { message?: string; response?: { data?: { message?: string } } };
+    return maybeError.response?.data?.message || maybeError.message || fallback;
+  }
+
+  return fallback;
+};
 
 const LoginForm = () => {
     // const queryClient = useQueryClient();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
     const [serverError, setServerError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
+    const [isGooglePending, setIsGooglePending] = useState(false);
+    const oauthError = searchParams.get("error") === "state_mismatch"
+      ? "Google login session mismatch. Please try again."
+      : null;
 
     const { mutateAsync , isPending} = useMutation({
       mutationFn : (payload : ILoginPayload) => loginAction(payload),
     })
+
+    useEffect(() => {
+      clearGoogleOAuthLock();
+    }, []);
 
     const form = useForm({
         defaultValues : {
@@ -41,12 +66,40 @@ const LoginForm = () => {
                     setServerError(result.message || "Login failed");
                     return ;
                 }
+
+                const redirectPath = searchParams.get("redirect") || "/dashboard";
+                router.push(redirectPath);
+                router.refresh();
             } catch (error : any) {
-                console.log(`Login failed: ${error.message}`);
-                setServerError(`Login failed: ${error.message}`);
+                setServerError(extractErrorMessage(error, "Login failed. Please try again."));
             }
         }
     })
+
+  const handleGoogleLogin = () => {
+    try {
+      setServerError(null);
+      setIsGooglePending(true);
+      const redirectPath = searchParams.get("redirect") || "/dashboard";
+      const result = startGoogleOAuth({
+        apiBaseUrl: publicEnv.NEXT_PUBLIC_API_BASE_URL,
+        callbackPath: redirectPath,
+        appOrigin: publicEnv.NEXT_PUBLIC_APP_ORIGIN,
+      });
+
+      if (!result.started) {
+        setIsGooglePending(false);
+        if (result.reason === "already_inflight") {
+          setServerError("Google login already চলছে, একটু অপেক্ষা করে আবার চেষ্টা করুন.");
+          return;
+        }
+        setServerError("Google login start failed. Please try again.");
+      }
+    } catch (error) {
+      setIsGooglePending(false);
+      setServerError(extractErrorMessage(error, "Google login start failed. Please try again."));
+    }
+  };
   return (
     <Card className="w-full max-w-lg mx-auto border border-emerald-200/80 dark:border-emerald-700/40 shadow-xl bg-gradient-to-b from-white to-emerald-50/40 dark:from-zinc-900 dark:to-emerald-950/20">
       <CardHeader className="text-center space-y-2">
@@ -128,9 +181,9 @@ const LoginForm = () => {
             </Link>
           </div>
 
-          {serverError && (
+          {(serverError || oauthError) && (
             <Alert variant={"destructive"}>
-              <AlertDescription>{serverError}</AlertDescription>
+              <AlertDescription>{serverError || oauthError}</AlertDescription>
             </Alert>
           )}
 
@@ -161,11 +214,12 @@ const LoginForm = () => {
           </div>
         </div>
 
-        <Button variant="outline" className="w-full border-emerald-700/30 dark:border-emerald-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40" onClick={() => {
-            const baseUrl = env.NEXT_PUBLIC_API_BASE_URL;
-            //TODO redirect path after login in frontend
-            window.location.href = `${baseUrl}/auth/login/google`;
-        }}>
+        <Button
+          variant="outline"
+          disabled={isGooglePending}
+          className="w-full border-emerald-700/30 dark:border-emerald-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+          onClick={handleGoogleLogin}
+        >
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
             <path
               fill="currentColor"
@@ -184,7 +238,7 @@ const LoginForm = () => {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          Sign in with Google
+          {isGooglePending ? "Redirecting to Google..." : "Sign in with Google"}
         </Button>
       </CardContent>
 

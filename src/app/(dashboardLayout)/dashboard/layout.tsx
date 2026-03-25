@@ -1,5 +1,9 @@
 import { Role } from "@/app/constants/role";
 import { AppSidebar } from "@/components/shared/dashboard/app-sidebar";
+import { jwtUtils } from "@/lib/jwtUtils";
+import { getUserInfo } from "@/services/auth.service";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import {
   Breadcrumb,
@@ -23,8 +27,22 @@ export default async function DashboardLayout({
   provider: React.ReactNode;
   clinte: React.ReactNode;
 }) {
-  
-  const userRole = Role.ADMIN; 
+  const user = await getUserInfo();
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  const decodedToken = accessToken ? jwtUtils.decodedToken(accessToken) : null;
+  const tokenRole = String(decodedToken?.role || "").toUpperCase();
+
+  if (!user && !decodedToken) {
+    redirect("/login?redirect=/dashboard");
+  }
+
+  const rawRole = String(user?.role || tokenRole || "").toUpperCase();
+  const userRole = rawRole === "ADMIN"
+    ? Role.ADMIN
+    : rawRole === "PROVIDER"
+      ? Role.PROVIDER
+      : Role.CLIENT;
 
   return (
     <SidebarProvider>

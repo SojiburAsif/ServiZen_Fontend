@@ -35,6 +35,7 @@ export function AppSidebar({
 } & React.ComponentProps<typeof Sidebar>) {
     const pathname = usePathname();
     const router = useRouter();
+    const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
     let routes: Route[] = [];
 
@@ -43,6 +44,7 @@ export function AppSidebar({
             routes = AdminRouters;
             break;
         case "USER":
+        case "CLIENT":
             routes = UserRouters;
             break;
         case "PROVIDER":
@@ -50,17 +52,23 @@ export function AppSidebar({
             break;
     }
 
+    const handleLogout = async () => {
+        if (isLoggingOut) {
+            return;
+        }
 
-    //   const handleLogout = async () => {
-    //     await authClient.signOut({
-    //       fetchOptions: {
-    //         onSuccess: () => {
-    //           router.push("/"); 
-    //           router.refresh(); 
-    //         },
-    //       },
-    //     });
-    //   };
+        setIsLoggingOut(true);
+
+        try {
+            await fetch("/logout", { method: "POST" });
+        } catch {
+            // Ignore network failure and continue client-side logout flow.
+        } finally {
+            setIsLoggingOut(false);
+            router.push("/login");
+            router.refresh();
+        }
+    };
 
     return (
         <Sidebar
@@ -153,7 +161,8 @@ export function AppSidebar({
                 <div className="px-4 pb-8">
                     <div className="pt-4 border-t border-slate-100 dark:border-zinc-900">
                         <button
-                            onClick={() => { }}
+                            onClick={handleLogout}
+                            disabled={isLoggingOut}
                             className="flex items-center gap-3 w-full px-4 py-4 rounded-2xl
               font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 
               border border-transparent hover:border-rose-200 dark:hover:border-rose-500/20 transition-all duration-200"

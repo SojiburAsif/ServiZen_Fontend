@@ -6,7 +6,8 @@ import AppSubmitButton from "@/components/shared/form/AppSubmiteButon";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { env } from "@/lib/env";
+import { publicEnv } from "@/lib/env";
+import { clearGoogleOAuthLock, startGoogleOAuth } from "@/lib/googleOAuth";
 import { registerAction } from "@/services/auth.service";
 import { IRegisterPayload } from "@/types/auth.typs";
 import { AuthValidation } from "@/zod/auth.validation";
@@ -16,7 +17,7 @@ import { AtSign, Lock, Mail, MapPin, Phone, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const validateOptionalField = (schema: { safeParse: (value: string) => { success: boolean; error?: { issues: Array<{ message: string }> } } }) => {
   return ({ value }: { value: string }) => {
@@ -37,6 +38,11 @@ const RegisterForm = () => {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [serverSuccess, setServerSuccess] = useState<string | null>(null);
+  const [isGooglePending, setIsGooglePending] = useState(false);
+
+  useEffect(() => {
+    clearGoogleOAuthLock();
+  }, []);
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (payload: IRegisterPayload) => registerAction(payload),
@@ -264,10 +270,26 @@ const RegisterForm = () => {
             <Button
               type="button"
               variant="outline"
+              disabled={isGooglePending}
               className="w-full border-emerald-700/30 dark:border-emerald-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
               onClick={() => {
-                const baseUrl = env.NEXT_PUBLIC_API_BASE_URL;
-                window.location.href = `${baseUrl}/auth/login/google`;
+                setServerError(null);
+                setIsGooglePending(true);
+
+                const result = startGoogleOAuth({
+                  apiBaseUrl: publicEnv.NEXT_PUBLIC_API_BASE_URL,
+                  callbackPath: "/dashboard",
+                  appOrigin: publicEnv.NEXT_PUBLIC_APP_ORIGIN,
+                });
+
+                if (!result.started) {
+                  setIsGooglePending(false);
+                  if (result.reason === "already_inflight") {
+                    setServerError("Google login already চলছে, একটু অপেক্ষা করে আবার চেষ্টা করুন.");
+                    return;
+                  }
+                  setServerError("Google login start failed. Please try again.");
+                }
               }}
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -288,7 +310,7 @@ const RegisterForm = () => {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Continue with Google
+              {isGooglePending ? "Redirecting to Google..." : "Continue with Google"}
             </Button>
           </form>
         </CardContent>
