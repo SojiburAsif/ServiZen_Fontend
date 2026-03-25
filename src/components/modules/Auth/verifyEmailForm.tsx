@@ -67,17 +67,23 @@ export const VerifyEmailForm = () => {
       const result = await verifyEmailAction(email, finalOtp);
       if (result.success) {
         setSuccess(true);
-        const pendingAuth = getPendingAuth(email);
-        if (pendingAuth) {
-          const loginResult = await loginAction({ email: pendingAuth.email, password: pendingAuth.password });
-          if (loginResult.success) clearPendingAuth();
-        }
-        setTimeout(() => {
+        // Show loading screen before redirect
+        setTimeout(async () => {
+          const pendingAuth = getPendingAuth(email);
+          if (pendingAuth) {
+            const loginResult = await loginAction({ email: pendingAuth.email, password: pendingAuth.password });
+            if (loginResult.success) clearPendingAuth();
+          }
           router.push("/dashboard");
           router.refresh();
-        }, 2000);
+        }, 1800);
       } else {
-        setError(result.message || "Invalid OTP code.");
+        // Show a more meaningful error for invalid OTP
+        if (result.message && /otp|invalid|code|verify/i.test(result.message)) {
+          setError("The code you entered is invalid or expired. Please check your email and try again.");
+        } else {
+          setError(result.message || "Verification failed. Please try again.");
+        }
       }
     } catch (err: any) {
       setError("Verification failed. Please try again.");
@@ -111,7 +117,11 @@ export const VerifyEmailForm = () => {
             <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
               <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
             </div>
-            <p className="font-bold text-gray-900 dark:text-white text-lg">Verification Successful!</p>
+            <p className="font-bold text-gray-900 dark:text-white text-lg mb-2">Verification Successful!</p>
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-xs text-gray-500 dark:text-gray-300">Redirecting to your dashboard...</span>
+              <Loader2 className="h-5 w-5 animate-spin text-green-600 dark:text-green-400" />
+            </div>
           </motion.div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">

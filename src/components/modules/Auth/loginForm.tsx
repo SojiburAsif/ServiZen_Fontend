@@ -50,25 +50,22 @@ const LoginForm = () => {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = await mutateAsync(value) as any;
+
+        // Always check for email verification first, regardless of success
+        const userData = result?.data?.user || result?.data || {};
+        if (!userData?.emailVerified || isVerificationRequired(result.message || "")) {
+          setPendingAuth(value.email, value.password);
+          router.push(`/verify-email?email=${encodeURIComponent(value.email)}&notice=otp-sent`);
+          return;
+        }
+
         if (!result.success) {
-          if (isVerificationRequired(result.message || "")) {
-            setPendingAuth(value.email, value.password);
-            router.push(`/verify-email?email=${encodeURIComponent(value.email)}&notice=otp-sent`);
-            return;
-          }
           setServerError(result.message || "Login failed");
           return;
         }
 
-        const userData = result?.data?.user || result?.data || {};
         if (userData?.needPasswordChange) {
           router.push(`/reset-password?email=${encodeURIComponent(value.email)}`);
-          return;
-        }
-
-        if (!userData?.emailVerified) {
-          setPendingAuth(value.email, value.password);
-          router.push(`/verify-email?email=${encodeURIComponent(value.email)}`);
           return;
         }
 
