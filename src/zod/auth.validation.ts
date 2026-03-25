@@ -174,6 +174,19 @@ const createProviderValidationSchema = z.object({
     path: ["confirmPassword"],
 });
 
+
+const providerValidationSchema = z.object({
+  name: z.string().min(2, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  registrationNumber: z.string().min(1, "Registration number is required"),
+  specialties: z.array(z.string()).min(1, "Select at least one specialty"),
+  contactNumber: z.string().min(11, "Valid contact number is required"),
+  address: z.string().min(5, "Address is too short"),
+  bio: z.string().min(10, "Bio must be at least 10 characters"),
+  profilePhoto: z.string().url("Profile photo is required"), // URL string asbe ImgBB theke
+});
+
 export const AuthValidation = {
     registerUserValidationSchema,
     loginUserValidationSchema,
@@ -182,4 +195,5 @@ export const AuthValidation = {
     forgetPasswordValidationSchema,
     resetPasswordValidationSchema,
     createProviderValidationSchema,
+    providerValidationSchema,
 };

@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import {
   getAllSpecialties,
   getMySpecialties,
@@ -12,46 +14,49 @@ import {
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "sonner"; // Sonner use koro for better UI
+import { toast } from "sonner";
 import { Loader2, Trash2, PlusCircle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 export default function ProviderSpecialtiesPage() {
   const [allSpecialties, setAllSpecialties] = useState<Specialty[]>([]);
-  // Ensure mySpecialties is ALWAYS an array
   const [mySpecialties, setMySpecialties] = useState<Specialty[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
+  const [singleSelect, setSingleSelect] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [adding, setAdding] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
   const providerToken = typeof window !== "undefined" ? localStorage.getItem("token") || "" : "";
 
-  const fetchSpecialties = async () => {
+  const fetchSpecialties = useCallback(async () => {
     setLoading(true);
     try {
       const [all, mine] = await Promise.all([
         getAllSpecialties(),
         getMySpecialties(providerToken),
       ]);
-
-      // API theke data array na ashle empty array set kora hoyeche
       setAllSpecialties(all?.data?.filter((s: any) => !s.isDeleted) || []);
-      
-      // Error fix: Ensure we are setting an array
-      const mineData = Array.isArray(mine?.data) ? mine.data : mine?.data?.result || [];
+      let mineData: Specialty[] = [];
+      if (Array.isArray(mine?.data)) {
+        mineData = mine.data as Specialty[];
+      } else if (mine?.data && Array.isArray((mine.data as any).result)) {
+        mineData = (mine.data as any).result;
+      }
       setMySpecialties(mineData);
-      
       setSelected([]);
-    } catch (e) {
+      setSingleSelect("");
+    } catch {
       toast.error("Failed to load specialties");
     } finally {
       setLoading(false);
     }
-  };
+  }, [providerToken]);
 
   useEffect(() => {
     fetchSpecialties();
-  }, []);
+  }, [fetchSpecialties]);
 
   const handleSelect = (id: string) => {
     setSelected((prev) =>
@@ -73,6 +78,22 @@ export default function ProviderSpecialtiesPage() {
     }
   };
 
+  // Single add (dropdown)
+  const handleSingleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!singleSelect) return;
+    setAdding(true);
+    try {
+      await addMySpecialties([singleSelect], providerToken);
+      toast.success("Specialty added to your profile");
+      fetchSpecialties();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || "Failed to add specialty");
+    } finally {
+      setAdding(false);
+    }
+  };
+
   const handleRemove = async (id: string) => {
     setRemovingId(id);
     try {
@@ -86,12 +107,8 @@ export default function ProviderSpecialtiesPage() {
     }
   };
 
-  // Safe filtering: mySpecialties array kina seta check kora hocche
   const availableSpecialties = allSpecialties.filter(
-    (s) => {
-        if (!Array.isArray(mySpecialties)) return true;
-        return !mySpecialties.some((m) => m.id === s.id);
-    }
+    (s) => Array.isArray(mySpecialties) ? !mySpecialties.some((m) => m.id === s.id) : true
   );
 
   return (
@@ -101,25 +118,24 @@ export default function ProviderSpecialtiesPage() {
         <h1 className="text-3xl font-black uppercase tracking-tight">Manage Specialties</h1>
       </div>
 
-      {/* Add Specialties Section */}
-      <div className="mb-10 p-6 border-2 border-dashed border-emerald-100 dark:border-emerald-900/30 rounded-[2rem] bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-        <h2 className="text-sm font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400 mb-4">Available Categories</h2>
-        
+      {/* Add Specialties Section (Multi-select) */}
+      <div className="mb-8 p-6 border-2 border-dashed border-emerald-100 dark:border-emerald-900/30 rounded-[2rem] bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+        <h2 className="text-sm font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400 mb-4">Add Multiple Specialties</h2>
         {loading ? (
-            <div className="flex justify-center py-4"><Loader2 className="animate-spin text-emerald-500" /></div>
+          <div className="flex justify-center py-4"><Loader2 className="animate-spin text-emerald-500" /></div>
         ) : availableSpecialties.length === 0 ? (
           <div className="text-muted-foreground text-sm italic">No new specialties available to add.</div>
         ) : (
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {availableSpecialties.map((s) => (
-                <div key={s.id} 
-                     onClick={() => handleSelect(s.id)}
-                     className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
-                        selected.includes(s.id) 
-                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30" 
-                        : "border-zinc-200 dark:border-zinc-800 hover:border-emerald-300"
-                     }`}>
+                <div key={s.id}
+                  onClick={() => handleSelect(s.id)}
+                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                    selected.includes(s.id)
+                      ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30"
+                      : "border-zinc-200 dark:border-zinc-800 hover:border-emerald-300"
+                  }`}>
                   <Checkbox
                     checked={selected.includes(s.id)}
                     onCheckedChange={() => handleSelect(s.id)}
@@ -129,10 +145,10 @@ export default function ProviderSpecialtiesPage() {
                 </div>
               ))}
             </div>
-            <Button 
-                onClick={handleAdd} 
-                disabled={adding || selected.length === 0}
-                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl px-8"
+            <Button
+              onClick={handleAdd}
+              disabled={adding || selected.length === 0}
+              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl px-8"
             >
               {adding ? <Loader2 className="animate-spin mr-2" /> : null}
               Add Selected ({selected.length})
@@ -141,10 +157,35 @@ export default function ProviderSpecialtiesPage() {
         )}
       </div>
 
+      {/* Add Single Specialty (Dropdown) */}
+      <div className="mb-10 p-6 border border-emerald-200 dark:border-emerald-900/30 rounded-2xl bg-white/80 dark:bg-slate-900/60 shadow-sm">
+        <h2 className="text-sm font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400 mb-4">Add Specialty to Profile</h2>
+        <form onSubmit={handleSingleAdd} className="flex flex-col sm:flex-row gap-3 items-center">
+          <Select value={singleSelect} onValueChange={setSingleSelect} disabled={adding || loading}>
+            <SelectTrigger className="w-64">
+              <SelectValue placeholder="Select a specialty to add" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableSpecialties.map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            type="submit"
+            disabled={adding || !singleSelect}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl px-8"
+          >
+            {adding ? <Loader2 className="animate-spin mr-2" /> : null}
+            Add to Profile
+          </Button>
+        </form>
+      </div>
+
       {/* My Specialties Table */}
       <div className="bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-[2rem] overflow-hidden shadow-xl">
         <div className="p-6 border-b border-zinc-100 dark:border-zinc-800">
-           <h2 className="text-sm font-black uppercase tracking-widest">Your Active Specialties</h2>
+          <h2 className="text-sm font-black uppercase tracking-widest">Your Active Specialties</h2>
         </div>
         <div className="overflow-x-auto">
           <Table>
@@ -173,11 +214,15 @@ export default function ProviderSpecialtiesPage() {
                   <TableRow key={s.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/30 transition-colors">
                     <TableCell className="font-bold flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white">
-                        {s.icon ? <img src={s.icon} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-emerald-100" />}
+                        {s.icon ? (
+                          <Image src={s.icon} alt="" width={32} height={32} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-emerald-100" />
+                        )}
                       </div>
                       {s.title}
                     </TableCell>
-                    <TableCell className="text-xs text-zinc-500 max-w-[200px] truncate">
+                    <TableCell className="text-xs text-zinc-500 max-w-50 truncate">
                       {s.description || "N/A"}
                     </TableCell>
                     <TableCell className="text-right pr-6">
