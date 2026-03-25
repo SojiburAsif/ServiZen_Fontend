@@ -17,7 +17,7 @@ import {
 
 
 
-import { LogOut, Home, LayoutDashboard } from "lucide-react";
+import { LogOut, LayoutDashboard } from "lucide-react";
 import { Route } from "@/types/Router.type";
 import { AdminRouters } from "@/Routers/adminRouter";
 import { ProviderRouters } from "@/Routers/ProviderRouter";
@@ -92,21 +92,6 @@ export function AppSidebar({
 
 
                         </div>
-                    </div>
-
-                    <div className="px-4 mb-6">
-                        <Link
-                            href="/"
-                            className={cn(
-                                "flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all duration-200",
-                                pathname === "/"
-                                    ? "bg-green-600 text-white shadow-xl shadow-green-500/25"
-                                    : "text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-900"
-                            )}
-                        >
-                            <Home size={18} />
-                            <span>Home</span>
-                        </Link>
                     </div>
 
                     <div className="space-y-4">

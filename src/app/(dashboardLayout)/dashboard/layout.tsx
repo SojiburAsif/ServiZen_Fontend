@@ -5,14 +5,6 @@ import { getUserInfo } from "@/services/auth.service";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -58,21 +50,14 @@ export default async function DashboardLayout({
               <SidebarTrigger className="-ml-1 text-slate-500 hover:text-green-600 dark:hover:text-green-400 transition-all rounded-lg p-2" />
               <Separator orientation="vertical" className="h-6 bg-slate-200 dark:bg-zinc-800" />
 
-              <Breadcrumb className="hidden sm:block">
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/" className="text-[11px] font-bold text-slate-500 hover:text-green-600 uppercase tracking-widest transition-colors">
-                      Home
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="text-slate-300 dark:text-zinc-700" />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage className="text-[11px] font-black text-green-600 dark:text-green-500 uppercase tracking-widest">
-                      {userRole} Portal
-                    </BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+              <div className="hidden flex-col sm:flex">
+                <span className="text-[9px] font-black uppercase tracking-[0.4rem] text-slate-400">
+                  Dashboard
+                </span>
+                <span className="text-xs font-black text-green-600 dark:text-green-500 tracking-widest">
+                  {userRole} Portal
+                </span>
+              </div>
             </div>
 
 

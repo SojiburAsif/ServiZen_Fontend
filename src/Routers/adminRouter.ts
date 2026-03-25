@@ -1,6 +1,5 @@
 import { Route } from "@/types/Router.type";
 import {
-    BarChart3,
     CalendarCheck,
     ClipboardList,
     CreditCard,
@@ -19,9 +18,8 @@ export const AdminRouters: Route[] = [
         title: "Dashboard",
         items: [
             { title: "Home", url: "/dashboard", icon: Home },
-            { title: "Stats", url: "/dashboard/stats", icon: BarChart3 },
-            { title: "Create Provider", url: "/dashboard/CreateProvider", icon: Settings },
-            { title: "Admin Profile", url: "/dashboard/profile", icon: UserCog },
+            { title: "Create Provider", url: "/dashboard/create-provider", icon: Settings },
+            { title: "My Profile", url: "/dashboard/my-profile", icon: UserCog },
             { title: "All Users", url: "/dashboard/users", icon: Users },
             { title: "All Providers", url: "/dashboard/providers", icon: UserSquare2 },
             { title: "All Services", url: "/dashboard/services", icon: Stethoscope },

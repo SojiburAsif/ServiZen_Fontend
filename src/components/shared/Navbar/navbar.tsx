@@ -15,7 +15,8 @@ import {
   Home,
   Info,
   Phone,
-  Bell
+  Bell,
+  User
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -129,6 +130,13 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                   </Button>
                 </Link>
 
+                <Link href="/dashboard/my-profile">
+                  <Button variant="ghost" className="text-sm font-medium text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400">
+                    <User className="size-4 mr-1.5" />
+                    My Profile
+                  </Button>
+                </Link>
+
                 {/* Notification Modal */}
                 {mounted ? (
                   <Dialog>
@@ -232,20 +240,23 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                        </div>
                      </div>
 
-                     <div className="flex gap-2">
-                       <Link href="/dashboard" className="inline-flex items-center justify-center px-3 py-2 rounded-md bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors">
-                         Go to Dashboard
-                       </Link>
-                       <Button
-                         variant="outline"
-                         onClick={handleLogout}
-                         disabled={isLoggingOut}
-                         className="text-rose-600 border-rose-300 hover:bg-rose-50"
-                       >
-                         <LogOut className="size-4 mr-2" />
-                         Logout
-                       </Button>
-                     </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Link href="/dashboard" className="inline-flex items-center justify-center px-3 py-2 rounded-md bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors">
+                        Go to Dashboard
+                      </Link>
+                      <Link href="/dashboard/my-profile" className="inline-flex items-center justify-center px-3 py-2 rounded-md border border-emerald-200 text-emerald-700 text-sm font-medium hover:bg-emerald-50 dark:border-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-950/30 transition-colors">
+                        View Profile
+                      </Link>
+                      <Button
+                        variant="outline"
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                        className="text-rose-600 border-rose-300 hover:bg-rose-50"
+                      >
+                        <LogOut className="size-4 mr-2" />
+                        Logout
+                      </Button>
+                    </div>
                    </div>
                  </DialogContent>
                </Dialog>
@@ -309,6 +320,9 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                       <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-2">
                         <Link href="/dashboard" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                            <LayoutDashboard className="size-5" /> Dashboard
+                        </Link>
+                        <Link href="/dashboard/my-profile" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                          <User className="size-5" /> My Profile
                         </Link>
                         <Link href="/notification" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                            <Bell className="size-5" /> Notifications
