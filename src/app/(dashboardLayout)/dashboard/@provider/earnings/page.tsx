@@ -120,29 +120,27 @@ export default function ProviderEarningsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-8">
-            {/* Header Skeleton */}
-            <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 animate-pulse">
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-2"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-96"></div>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
+          {/* Header Skeleton */}
+          <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 animate-pulse">
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-2"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-96"></div>
+          </div>
 
-            {/* Stats Cards Skeleton */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
-                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
-                    </div>
-                    <div className="h-12 w-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          {/* Stats Cards Skeleton */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
                   </div>
+                  <div className="h-12 w-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -151,37 +149,17 @@ export default function ProviderEarningsPage() {
 
   if (!stats) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-center h-64">
-            <p className="text-gray-600 dark:text-gray-400">Unable to load earnings data</p>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-600 dark:text-gray-400">Unable to load earnings data</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen text-gray-900 dark:text-white"
-         style={{
-           background: 'linear-gradient(135deg, #FAFAFA 0%, #E2F7D8 50%, #80F279 100%)'
-         }}
-         data-theme="light">
-
-      {/* Dark mode background */}
-      <div className="absolute inset-0 dark:block hidden"
-           style={{
-             background: 'linear-gradient(135deg, #050505 0%, #0a1f0a 50%, #052e05 100%)'
-           }}>
-      </div>
-
-      {/* Abstract background letters */}
-      <div className="absolute -bottom-20 -left-10 text-[300px] md:text-[400px] font-bold text-green-800/5 dark:text-green-500/5 leading-none select-none pointer-events-none transform -rotate-6 z-0">
-        S Z
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="space-y-8">
           {/* Header */}
           <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center justify-between">
@@ -400,6 +378,5 @@ export default function ProviderEarningsPage() {
           </Card>
         </div>
       </div>
-    </div>
   );
 }

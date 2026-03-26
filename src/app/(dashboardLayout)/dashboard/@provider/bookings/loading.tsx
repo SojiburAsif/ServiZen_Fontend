@@ -1,6 +1,9 @@
 export default function Loading() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#fafafa] via-[#e2f7d8] to-[#80f279] text-slate-900 dark:from-[#050505] dark:via-[#071507] dark:to-[#0a2b0a] dark:text-white">
+    <div className="relative min-h-[calc(100vh-88px)] w-full overflow-hidden bg-gradient-to-br from-[#FAFAFA] via-[#E2F7D8] to-[#80F279] dark:from-[#050505] dark:via-[#0a1f0a] dark:to-[#052e05] text-gray-900 dark:text-white selection:bg-green-300">
+      <div className="absolute -bottom-20 -left-10 text-[300px] md:text-[400px] font-bold text-green-800/5 dark:text-green-500/5 leading-none select-none pointer-events-none transform -rotate-6">
+        S Z
+      </div>
       <div className="pointer-events-none absolute -top-40 right-[-8rem] h-[32rem] w-[32rem] rounded-full bg-emerald-400/20 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-20 left-[-8rem] h-[28rem] w-[28rem] rounded-full bg-lime-400/20 blur-3xl" />
 

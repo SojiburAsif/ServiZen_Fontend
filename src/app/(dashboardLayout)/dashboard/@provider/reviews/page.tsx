@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import {
   Star,
@@ -16,6 +16,7 @@ import {
   Award,
   Users,
   BarChart3,
+  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ export default function ProviderReviewsPage() {
   const [query, setQuery] = useState("");
   const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const mountedRef = useRef(true);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -98,26 +100,8 @@ export default function ProviderReviewsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen text-gray-900 dark:text-white"
-           style={{
-             background: 'linear-gradient(135deg, #FAFAFA 0%, #E2F7D8 50%, #80F279 100%)'
-           }}
-           data-theme="light">
-        
-        {/* Dark mode background */}
-        <div className="absolute inset-0 dark:block hidden"
-             style={{
-               background: 'linear-gradient(135deg, #050505 0%, #0a1f0a 50%, #052e05 100%)'
-             }}>
-        </div>
-
-        {/* Abstract background letters */}
-        <div className="absolute -bottom-20 -left-10 text-[300px] md:text-[400px] font-bold text-green-800/5 dark:text-green-500/5 leading-none select-none pointer-events-none transform -rotate-6 z-0">
-          S Z
-        </div>
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
             {/* Header Skeleton */}
             <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
               <div className="animate-pulse">
@@ -189,31 +173,12 @@ export default function ProviderReviewsPage() {
             </div>
           </div>
         </div>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen text-gray-900 dark:text-white"
-         style={{
-           background: 'linear-gradient(135deg, #FAFAFA 0%, #E2F7D8 50%, #80F279 100%)'
-         }}
-         data-theme="light">
-      
-      {/* Dark mode background */}
-      <div className="absolute inset-0 dark:block hidden"
-           style={{
-             background: 'linear-gradient(135deg, #050505 0%, #0a1f0a 50%, #052e05 100%)'
-           }}>
-      </div>
-
-      {/* Abstract background letters */}
-      <div className="absolute -bottom-20 -left-10 text-[300px] md:text-[400px] font-bold text-green-800/5 dark:text-green-500/5 leading-none select-none pointer-events-none transform -rotate-6 z-0">
-        S Z
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="space-y-8">
           {/* Header */}
           <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center justify-between">
@@ -530,6 +495,5 @@ export default function ProviderReviewsPage() {
           )}
         </div>
       </div>
-    </div>
   );
 }

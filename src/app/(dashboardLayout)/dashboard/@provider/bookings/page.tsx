@@ -338,14 +338,11 @@ export default function BookingsPage() {
 
   if (loading && !bookings) {
     return (
-      <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#fafafa] via-[#e2f7d8] to-[#80f279] text-slate-900 dark:from-[#050505] dark:via-[#071507] dark:to-[#0a2b0a] dark:text-white">
-        <div className="pointer-events-none absolute -top-40 right-[-8rem] h-[32rem] w-[32rem] rounded-full bg-emerald-400/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 left-[-8rem] h-[28rem] w-[28rem] rounded-full bg-lime-400/20 blur-3xl" />
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="space-y-8">
-            <div className="animate-pulse rounded-[2rem] border border-white/40 bg-white/60 p-8 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60">
-              <div className="h-8 w-64 rounded-full bg-slate-200 dark:bg-slate-800" />
-              <div className="mt-4 h-4 w-96 rounded-full bg-slate-200 dark:bg-slate-800" />
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="space-y-8">
+          <div className="animate-pulse rounded-[2rem] border border-white/40 bg-white/60 p-8 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60">
+            <div className="h-8 w-64 rounded-full bg-slate-200 dark:bg-slate-800" />
+            <div className="mt-4 h-4 w-96 rounded-full bg-slate-200 dark:bg-slate-800" />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
@@ -380,7 +377,6 @@ export default function BookingsPage() {
             </div>
           </div>
         </div>
-      </div>
     );
   }
 
@@ -393,15 +389,9 @@ export default function BookingsPage() {
   const showingEnd = Math.min(currentPage * currentLimit, total);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#fafafa] via-[#e2f7d8] to-[#80f279] text-slate-900 dark:from-[#050505] dark:via-[#071507] dark:to-[#0a2b0a] dark:text-white">
-      <div className="pointer-events-none absolute -top-40 right-[-8rem] h-[32rem] w-[32rem] rounded-full bg-emerald-400/20 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-20 left-[-8rem] h-[28rem] w-[28rem] rounded-full bg-lime-400/20 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 -left-12 select-none text-[220px] font-black leading-none text-green-800/5 dark:text-green-500/5 md:text-[340px] lg:text-[420px]">
-        S Z
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="space-y-8">
+    <>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="space-y-8">
           {/* Header */}
           <div className="rounded-[2rem] border border-white/40 bg-white/70 p-6 shadow-[0_20px_80px_rgba(16,185,129,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60 sm:p-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -965,6 +955,6 @@ export default function BookingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }

@@ -1,6 +1,8 @@
+import LoadingBackground from "@/components/shared/static/LoadingBackground";
+
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <LoadingBackground>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
           {/* Header Skeleton */}
@@ -71,6 +73,6 @@ export default function Loading() {
           </div>
         </div>
       </div>
-    </div>
+    </LoadingBackground>
   );
 }
