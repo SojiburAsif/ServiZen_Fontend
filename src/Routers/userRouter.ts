@@ -15,10 +15,9 @@ export const UserRouters: Route[] = [
         items: [
             { title: "Home", url: "/dashboard", icon: Home },
             { title: "My Profile", url: "/dashboard/my-profile", icon: User },
-            { title: "My Bookings", url: "/dashboard/bookings", icon: CalendarDays },
-            { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
-            { title: "My Reviews", url: "/dashboard/reviews", icon: ClipboardList },
-            { title: "Support Tickets", url: "/dashboard/support", icon: CircleHelp },
+            { title: "My Bookings", url: "/dashboard/my-bookings", icon: CalendarDays },
+            { title: "My Payments", url: "/dashboard/my-payments", icon: CreditCard },
+            { title: "My Reviews", url: "/dashboard/my-reviews", icon: ClipboardList },
             { title: "Notifications", url: "/dashboard/notifications", icon: Bell }
         ],
     }
