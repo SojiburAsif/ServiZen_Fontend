@@ -5,8 +5,8 @@ import {
     ClipboardList,
     CreditCard,
     Home,
-    Settings,
     User,
+    Bell,
 } from "lucide-react";
 
 export const UserRouters: Route[] = [
@@ -19,7 +19,7 @@ export const UserRouters: Route[] = [
             { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
             { title: "My Reviews", url: "/dashboard/reviews", icon: ClipboardList },
             { title: "Support Tickets", url: "/dashboard/support", icon: CircleHelp },
-            { title: "Settings", url: "/dashboard/settings", icon: Settings }
+            { title: "Notifications", url: "/dashboard/notifications", icon: Bell }
         ],
     }
 ]

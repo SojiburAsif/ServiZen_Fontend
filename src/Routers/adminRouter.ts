@@ -11,6 +11,7 @@ import {
     UserCog,
     Users,
     UserSquare2,
+    Bell,
 } from "lucide-react";
 
 export const AdminRouters: Route[] = [
@@ -28,6 +29,7 @@ export const AdminRouters: Route[] = [
             { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
             { title: "Reviews & Ratings", url: "/dashboard/reviews", icon: ClipboardList },
             { title: "Financial Reports", url: "/dashboard/reports", icon: ShieldCheck },
+            { title: "Notifications", url: "/dashboard/notifications", icon: Bell }
         ],
     }
 ]

@@ -1,17 +1,16 @@
 import { Route } from "@/types/Router.type";
 import {
-    CalendarClock,
     CalendarDays,
     ClipboardList,
     CreditCard,
     Building,
     Home,
     PlusSquare,
-    Settings,
     Sparkles,
     Stethoscope,
     User,
     Wrench,
+    Bell,
 } from "lucide-react";
 
 export const ProviderRouters: Route[] = [
@@ -28,8 +27,7 @@ export const ProviderRouters: Route[] = [
             { title: "Specialties", url: "/dashboard/specialties", icon: Sparkles },
             { title: "Reviews", url: "/dashboard/reviews", icon: ClipboardList },
             { title: "Earnings & Payouts", url: "/dashboard/earnings", icon: CreditCard },
-            { title: "My Schedule", url: "/dashboard/schedule", icon: CalendarClock },
-            { title: "Settings", url: "/dashboard/settings", icon: Settings }
+            { title: "Notifications", url: "/dashboard/notifications", icon: Bell }
         ],
     }
 ]
