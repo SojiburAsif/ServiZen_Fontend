@@ -2,86 +2,75 @@
 
 import Link from "next/link";
 import { MoveLeft, Ghost, SearchX } from "lucide-react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-6 text-center">
+    <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-[#FAFAFA] via-[#E2F7D8] to-[#80F279] dark:from-[#050505] dark:via-[#0a1f0a] dark:to-[#052e05] text-gray-900 dark:text-white font-sans selection:bg-green-300 flex flex-col items-center justify-center p-6 text-center">
       
-      {/* Animated Icon Section */}
-      <motion.div
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="relative flex items-center justify-center mb-8"
-      >
-        <motion.div 
-          animate={{ rotate: [-5, 5, -5] }}
-          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-          className="text-emerald-500/20"
-        >
-          <SearchX size={150} strokeWidth={1} />
-        </motion.div>
-        <motion.div 
-          animate={{ y: [-10, 10, -10] }}
-          transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-          className="absolute text-emerald-600 dark:text-emerald-400"
-        >
-          <Ghost size={60} strokeWidth={1.5} />
-        </motion.div>
-      </motion.div>
+      {/* --- Background Watermark "SZ" --- */}
+      <div className="absolute -bottom-20 -left-10 text-[300px] md:text-[400px] font-bold text-green-800/5 dark:text-green-500/5 leading-none select-none pointer-events-none transform -rotate-6">
+        SZ
+      </div>
 
-      {/* Title & 404 Text */}
-      <motion.h1 
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-        className="text-8xl font-black text-zinc-900 dark:text-white drop-shadow-sm mb-4"
-      >
-        4<span className="text-emerald-500">0</span>4
-      </motion.h1>
+      {/* --- Main Content Container --- */}
+      <div className=" z-10 flex flex-col items-center">
+        
+        {/* Animated Icon Section */}
+        <div className="relative flex items-center justify-center mb-6">
+          <div className="text-green-600/10 dark:text-green-400/10">
+            <SearchX size={180} strokeWidth={0.5} />
+          </div>
+          <div className="absolute text-green-600 dark:text-green-400 animate-bounce transition-all duration-1000">
+            <Ghost size={80} strokeWidth={1.2} />
+          </div>
+        </div>
 
-      <motion.h2 
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-        className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 mb-4"
-      >
-        Oops! Page not found.
-      </motion.h2>
+        {/* 404 Header */}
+        <div className="space-y-2">
+          <h1 className="text-9xl font-black tracking-tighter text-zinc-900 dark:text-white drop-shadow-2xl">
+            4<span className="text-green-600 dark:text-green-500">0</span>4
+          </h1>
+          
+          <h2 className="text-3xl md:text-4xl font-extrabold text-zinc-800 dark:text-zinc-100 tracking-tight">
+            Lost in Space?
+          </h2>
+          
+          <p className="max-w-[500px] text-base md:text-lg text-zinc-600 dark:text-zinc-400 mx-auto font-medium leading-relaxed">
+            The page you{"'"}re looking for might have been moved or doesn{"'"}t exist anymore. 
+            Don{"'"}t worry, let{"'"}s get you back to safety.
+          </p>
+        </div>
 
-      <motion.p 
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-        className="max-w-[500px] text-zinc-600 dark:text-zinc-400 mb-8"
-      >
-        The page you are looking for might have been removed, had its name changed, or is temporarily unavailable. Let s get you back on track.
-      </motion.p>
-
-      {/* Buttons */}
-      <motion.div 
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.6, duration: 0.5 }}
-        className="flex flex-col sm:flex-row gap-4"
-      >
-        <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-8 shadow-lg shadow-emerald-500/20 group">
-          <Link href="/">
-            Return Home
-          </Link>
-        </Button>
-        <Button asChild size="lg" variant="outline" className="rounded-full px-8 border-emerald-200 dark:border-emerald-900 group">
-          <button onClick={() => window.history.back()}>
-            <MoveLeft className="mr-2 size-4 group-hover:-translate-x-1 transition-transform" />
+        {/* Action Buttons */}
+        <div className="mt-12 flex flex-col sm:flex-row gap-5">
+          <Button 
+            asChild 
+            size="lg" 
+            className="bg-zinc-900 dark:bg-green-600 hover:bg-zinc-800 dark:hover:bg-green-500 text-white rounded-2xl px-12 h-14 font-bold shadow-2xl shadow-green-900/20 transition-all hover:scale-105 active:scale-95"
+          >
+            <Link href="/">
+              Return Home
+            </Link>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="lg" 
+            onClick={() => window.history.back()}
+            className="rounded-2xl px-12 h-14 border-zinc-300 dark:border-zinc-700 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md font-bold transition-all hover:bg-white dark:hover:bg-zinc-900 group hover:scale-105 active:scale-95"
+          >
+            <MoveLeft className="mr-3 size-5 group-hover:-translate-x-2 transition-transform" />
             Go Back
-          </button>
-        </Button>
-      </motion.div>
+          </Button>
+        </div>
+      </div>
 
-      {/* Decorative Blob */}
-      <div className="absolute top-1/2 left-1/2 -z-10 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-[100px]" />
+      {/* Sub-decorative Elements */}
+      <div className="absolute top-0 right-0 p-10 opacity-10 pointer-events-none">
+        <div className="h-64 w-64 rounded-full border-[40px] border-green-400/20" />
+      </div>
+
     </div>
   );
 }
