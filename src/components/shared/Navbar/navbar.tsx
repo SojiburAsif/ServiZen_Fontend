@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Them from "@/components/features/Theme/them";
@@ -5,22 +6,26 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader, DialogDescription } from "@/components/ui/dialog";
 import { NotificationContent } from "@/app/(commonLayout)/notification/page";
-import { 
-  Menu, 
-  Search, 
-  LayoutDashboard, 
-  LogOut, 
+import { ProfileUpdateForm } from "@/components/features/ProfileUpdateForm";
+import {
+  Menu,
+  Search,
+  LayoutDashboard,
+  LogOut,
   Mail,
   Shield,
   Home,
   Info,
   Phone,
   Bell,
-  User
+  User,
+  Settings,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type NavbarUser = {
   name?: string;
@@ -29,6 +34,8 @@ type NavbarUser = {
   image?: string;
   emailVerified?: boolean;
   needPasswordChange?: boolean;
+  contactNumber?: string;
+  address?: string;
 };
 
 type NavbarProps = {
@@ -48,6 +55,9 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<NavbarUser | null>(initialUser);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [profileData, setProfileData] = useState<any>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const isLoggedIn = Boolean(user);
 
   useEffect(() => {
@@ -68,14 +78,56 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
       await fetch("/logout", {
         method: "POST",
       });
+
+      toast.success("Logged out successfully", {
+        description: "You have been logged out of your account.",
+        duration: 3000,
+      });
     } catch {
       // Ignore network errors and still clear client auth state.
+      toast.error("Logout completed", {
+        description: "You have been logged out (with network issues).",
+        duration: 3000,
+      });
     } finally {
       setUser(null);
       setIsLoggingOut(false);
       router.push("/login");
       router.refresh();
     }
+  };
+
+  const handleProfileModalOpen = async () => {
+    if (!user) return;
+
+    setIsProfileModalOpen(true);
+    setIsLoadingProfile(true);
+
+    try {
+      // Import the service functions dynamically to avoid SSR issues
+      const { getUserInfo } = await import("@/services/auth.service");
+      const { getLoggedInUserProfile } = await import("@/services/user.service");
+
+      const [userData, profileData] = await Promise.all([
+        getUserInfo(),
+        getLoggedInUserProfile()
+      ]);
+
+      setUser(userData);
+      setProfileData(profileData);
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
+      toast.error("Failed to load profile data");
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
+
+  const handleProfileUpdateSuccess = () => {
+    toast.success("Profile updated successfully!");
+    setIsProfileModalOpen(false);
+    // Optionally refresh user data
+    handleProfileModalOpen();
   };
 
   const renderDesktopLinks = () => (
@@ -103,9 +155,9 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
       <div className="mx-auto flex h-[88px] w-full max-w-7xl items-center justify-between px-6 lg:px-12">
         
         {/* --- Logo Section --- */}
-        <Link href="/" className="group flex items-center gap-2 transition-transform active:scale-95">
-          <img src="/favicon.ico" alt="" className="h-10 w-10" />
-          <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+        <Link href="/" className="group flex items-center gap-3 transition-transform active:scale-95">
+          <img src="/favicon.ico" alt="" className="h-12 w-12 transition-transform group-hover:scale-110" />
+          <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             Serv<span className="font-serif italic text-gray-500 dark:text-gray-400">ZEN</span>
           </span>
         </Link>
@@ -130,12 +182,63 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                   </Button>
                 </Link>
 
-                <Link href="/dashboard/my-profile">
-                  <Button variant="ghost" className="text-sm font-medium text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400">
+                {mounted ? (
+                  <Dialog open={isProfileModalOpen} onOpenChange={setIsProfileModalOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="text-sm font-medium text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400"
+                        onClick={handleProfileModalOpen}
+                      >
+                        <User className="size-4 mr-1.5" />
+                        My Profile
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[900px] md:max-w-[1000px] max-h-[85vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <User className="size-5" />
+                          Update Profile
+                        </DialogTitle>
+                        <DialogDescription>
+                          Update your profile information below.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="mt-4">
+                        {isLoadingProfile ? (
+                          <div className="flex items-center justify-center py-8">
+                            <Loader2 className="size-6 animate-spin" />
+                            <span className="ml-2">Loading profile...</span>
+                          </div>
+                        ) : profileData && user ? (
+                          <ProfileUpdateForm
+                            initialData={{
+                              name: profileData?.name || user?.name,
+                              email: profileData?.email || user?.email,
+                              contactNumber: (profileData?.provider?.contactNumber ?? profileData?.client?.contactNumber) || undefined,
+                              address: (profileData?.provider?.address ?? profileData?.client?.address) || undefined,
+                              image: profileData?.image || undefined,
+                            }}
+                            onSuccess={handleProfileUpdateSuccess}
+                          />
+                        ) : (
+                          <div className="text-center py-8 text-gray-500">
+                            Failed to load profile data. Please try again.
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="text-sm font-medium text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400"
+                    disabled
+                  >
                     <User className="size-4 mr-1.5" />
                     My Profile
                   </Button>
-                </Link>
+                )}
 
                 {/* Notification Modal */}
                 {mounted ? (
@@ -196,7 +299,7 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                {mounted ? (
                <Dialog>
                  <DialogTrigger asChild>
-                   <button className="flex items-center justify-center w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden ring-2 ring-transparent hover:ring-green-300 transition-all">
+                   <button className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden ring-2 ring-transparent hover:ring-green-300 transition-all">
                      {user?.image ? (
                       <img src={user.image} alt={user?.name || "User"} className="h-full w-full object-cover" />
                      ) : (
@@ -206,54 +309,56 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                  </DialogTrigger>
                  <DialogContent className="sm:max-w-md bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-gray-800">
                    <DialogHeader>
-                     <DialogTitle>My Profile</DialogTitle>
-                     <DialogDescription>
-                       Account details and quick actions.
-                     </DialogDescription>
+                     <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                       <User className="size-5 text-green-500" />
+                       My Profile
+                     </DialogTitle>
                    </DialogHeader>
 
                    <div className="space-y-4">
-                     <div className="flex items-center gap-3">
-                       <div className="h-12 w-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                     <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+                       <div className="h-14 w-14 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center ring-4 ring-white dark:ring-gray-900">
                          {user?.image ? (
                            <img src={user.image} alt={user?.name || "User"} className="h-full w-full object-cover" />
                          ) : (
-                           <span className="text-base font-semibold">{userInitial}</span>
+                           <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">{userInitial}</span>
                          )}
                        </div>
-                       <div>
-                         <p className="font-semibold text-gray-900 dark:text-gray-100">{user?.name || "User"}</p>
-                         <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || "No email"}</p>
+                       <div className="flex-1 min-w-0">
+                         <p className="text-lg font-bold text-gray-900 dark:text-white truncate">{user?.name || "User"}</p>
+                         <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1 truncate">
+                           <Mail className="size-4 flex-shrink-0" />
+                           {user?.email || "No email"}
+                         </p>
+                         {userRole && (
+                           <div className="flex items-center gap-1 mt-1">
+                             <Shield className="size-4 text-green-600 flex-shrink-0" />
+                             <span className="text-xs font-medium text-green-700 dark:text-green-300">{userRole}</span>
+                           </div>
+                         )}
                        </div>
                      </div>
 
-                     <div className="space-y-2 text-sm">
-                       {userRole && (
-                        <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                          <Shield className="size-4 text-green-600" />
-                          <span>Role: {userRole}</span>
-                        </div>
-                       )}
-                       <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                         <Mail className="size-4 text-green-600" />
-                         <span>{user?.email || "No email available"}</span>
-                       </div>
-                     </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <Link href="/dashboard" className="inline-flex items-center justify-center px-3 py-2 rounded-md bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors">
+                    <div className="grid grid-cols-1 gap-2">
+                      <Link href="/dashboard" className="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-all duration-200 hover:shadow-md">
+                        <LayoutDashboard className="size-4 mr-2" />
                         Go to Dashboard
                       </Link>
-                      <Link href="/dashboard/my-profile" className="inline-flex items-center justify-center px-3 py-2 rounded-md border border-emerald-200 text-emerald-700 text-sm font-medium hover:bg-emerald-50 dark:border-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-950/30 transition-colors">
-                        View Profile
+                      <Link href="/dashboard/my-profile" className="inline-flex items-center justify-center px-4 py-3 rounded-xl border border-emerald-200 text-emerald-700 text-sm font-medium hover:bg-emerald-50 dark:border-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-950/30 transition-all duration-200 hover:shadow-md">
+                        <Settings className="size-4 mr-2" />
+                        Manage Profile
                       </Link>
                       <Button
                         variant="outline"
                         onClick={handleLogout}
                         disabled={isLoggingOut}
-                        className="text-rose-600 border-rose-300 hover:bg-rose-50"
+                        className="w-full px-4 py-3 text-rose-600 border-rose-300 hover:bg-rose-50 dark:border-rose-900/40 dark:text-rose-400 dark:hover:bg-rose-950/30 transition-all duration-200 hover:shadow-md"
                       >
-                        <LogOut className="size-4 mr-2" />
+                        {isLoggingOut ? (
+                          <Loader2 className="size-4 mr-2 animate-spin" />
+                        ) : (
+                          <LogOut className="size-4 mr-2" />
+                        )}
                         Logout
                       </Button>
                     </div>
@@ -274,9 +379,13 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                  size="icon"
                  onClick={handleLogout}
                  disabled={isLoggingOut}
-                 className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                 className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 h-10 w-10"
                >
-                 <LogOut className="size-4" />
+                 {isLoggingOut ? (
+                   <Loader2 className="size-5 animate-spin" />
+                 ) : (
+                   <LogOut className="size-5" />
+                 )}
                </Button>
              </div>
           )}

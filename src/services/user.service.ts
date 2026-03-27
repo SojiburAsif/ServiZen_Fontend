@@ -227,3 +227,67 @@ export async function getLoggedInUserProfile(): Promise<LoggedInUserProfile | nu
 	}
 }
 
+export interface UpdateProfileData {
+	name?: string;
+	profilePhoto?: string;
+	contactNumber?: string;
+	address?: string;
+}
+
+export async function updateUserProfile(profileData: UpdateProfileData): Promise<LoggedInUserProfile | null> {
+	try {
+		const cookieStore = await cookies();
+		const accessToken = cookieStore.get("accessToken")?.value;
+		const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+		if (!accessToken && !sessionToken) {
+			throw new Error("No authentication token found");
+		}
+
+		const { BASE_API_URL } = getServerEnv();
+
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+		};
+		const forwardedCookies: string[] = [];
+
+		if (accessToken) {
+			headers.Authorization = `Bearer ${accessToken}`;
+			forwardedCookies.push(`accessToken=${accessToken}`);
+		}
+
+		if (sessionToken) {
+			headers["x-session-token"] = sessionToken;
+			forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+		}
+
+		if (forwardedCookies.length > 0) {
+			headers.Cookie = forwardedCookies.join("; ");
+		}
+
+		const res = await fetch(`${BASE_API_URL}/auth/me`, {
+			method: "PATCH",
+			headers,
+			body: JSON.stringify(profileData),
+			cache: "no-store",
+		});
+
+		if (!res.ok) {
+			const errorData = await res.json();
+			throw new Error(errorData.message || "Failed to update profile");
+		}
+
+		const json = await res.json();
+		const payload = json?.data as RawUserProfile | undefined;
+
+		if (!payload) {
+			throw new Error("Invalid response from server");
+		}
+
+		return normalizeProfilePayload(payload);
+	} catch (error) {
+		console.error("Failed to update user profile", error);
+		throw error;
+	}
+}
+
