@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { cookies } from "next/headers";
@@ -291,3 +292,250 @@ export async function updateUserProfile(profileData: UpdateProfileData): Promise
 	}
 }
 
+export interface AdminUser {
+	id: string;
+	email: string;
+	name?: string;
+	status: string;
+	Role: 'ADMIN' | 'PROVIDER' | 'USER';
+	emailVerified: boolean;
+	isGoogleLogin: boolean;
+	image?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface UsersListResponse {
+	data: AdminUser[];
+	meta: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
+	};
+}
+
+export interface DetailedUser {
+	id: string;
+	email: string;
+	name?: string;
+	status: string;
+	Role: 'ADMIN' | 'PROVIDER' | 'USER';
+	emailVerified: boolean;
+	isGoogleLogin: boolean;
+	image?: string;
+	createdAt: string;
+	updatedAt: string;
+	admin?: any; // Full admin profile details if user is admin
+	provider?: ProviderProfile | null;
+	client?: ClientProfile | null;
+}
+
+// সার্ভিস ফাংশনগুলো (নোট: এগুলা server actions হিসেবে ব্যবহার করলে ভালো হয়)
+export async function getAllUsers(page: number = 1, limit: number = 10): Promise<UsersListResponse | null> {
+    try {
+        const cookieStore = await cookies();
+        const accessToken = cookieStore.get('accessToken')?.value;
+        const sessionToken = cookieStore.get('better-auth.session_token')?.value;
+
+        if (!accessToken && !sessionToken) {
+            throw new Error('No authentication token found');
+        }
+
+        const { BASE_API_URL } = getServerEnv();
+
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
+        const forwardedCookies: string[] = [];
+
+        if (accessToken) {
+            headers.Authorization = `Bearer ${accessToken}`;
+            forwardedCookies.push(`accessToken=${accessToken}`);
+        }
+
+        if (sessionToken) {
+            headers['x-session-token'] = sessionToken;
+            forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+        }
+
+        if (forwardedCookies.length > 0) {
+            headers.Cookie = forwardedCookies.join('; ');
+        }
+
+        // API কল করার সময় backend expects query params
+        const res = await fetch(`${BASE_API_URL}/users/all?page=${page}&limit=${limit}`, {
+            method: 'GET',
+            headers,
+            cache: 'no-store',
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('API Error:', {
+                status: res.status,
+                statusText: res.statusText,
+                body: errorText
+            });
+            throw new Error(`Failed to fetch users: ${res.status} ${res.statusText}`);
+        }
+
+        const json = await res.json();
+        // পোস্টম্যান ডাটা অনুযায়ী return json.data (যা meta এবং data ধারণ করে)
+        return json.data; 
+    } catch (error) {
+        console.error('Error:', error);
+        return null;
+    }
+}
+
+export async function deleteUser(userId: string): Promise<boolean> {
+    try {
+        const cookieStore = await cookies();
+        const accessToken = cookieStore.get('accessToken')?.value;
+        const sessionToken = cookieStore.get('better-auth.session_token')?.value;
+
+        if (!accessToken && !sessionToken) {
+            throw new Error('No authentication token found');
+        }
+
+        const { BASE_API_URL } = getServerEnv();
+
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
+        const forwardedCookies: string[] = [];
+
+        if (accessToken) {
+            headers.Authorization = `Bearer ${accessToken}`;
+            forwardedCookies.push(`accessToken=${accessToken}`);
+        }
+
+        if (sessionToken) {
+            headers['x-session-token'] = sessionToken;
+            forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+        }
+
+        if (forwardedCookies.length > 0) {
+            headers.Cookie = forwardedCookies.join('; ');
+        }
+
+        const res = await fetch(`${BASE_API_URL}/users/${userId}`, {
+            method: 'DELETE',
+            headers,
+            cache: 'no-store',
+        });
+
+        if (!res.ok) {
+            throw new Error('Failed to delete user');
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+}
+
+export async function updateUserStatus(userId: string, status: string): Promise<boolean> {
+    try {
+        const cookieStore = await cookies();
+        const accessToken = cookieStore.get('accessToken')?.value;
+        const sessionToken = cookieStore.get('better-auth.session_token')?.value;
+
+        if (!accessToken && !sessionToken) {
+            throw new Error('No authentication token found');
+        }
+
+        const { BASE_API_URL } = getServerEnv();
+
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
+        const forwardedCookies: string[] = [];
+
+        if (accessToken) {
+            headers.Authorization = `Bearer ${accessToken}`;
+            forwardedCookies.push(`accessToken=${accessToken}`);
+        }
+
+        if (sessionToken) {
+            headers['x-session-token'] = sessionToken;
+            forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+        }
+
+        if (forwardedCookies.length > 0) {
+            headers.Cookie = forwardedCookies.join('; ');
+        }
+
+        const res = await fetch(`${BASE_API_URL}/users/${userId}/status`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({ status }),
+            cache: 'no-store',
+        });
+
+        if (!res.ok) {
+            throw new Error('Failed to update user status');
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+}
+export async function getUserById(userId: string): Promise<DetailedUser | null> {
+    try {
+        const cookieStore = await cookies();
+        const accessToken = cookieStore.get('accessToken')?.value;
+        const sessionToken = cookieStore.get('better-auth.session_token')?.value;
+
+        if (!accessToken && !sessionToken) {
+            throw new Error('No authentication token found');
+        }
+
+        const { BASE_API_URL } = getServerEnv();
+
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
+        const forwardedCookies: string[] = [];
+
+        if (accessToken) {
+            headers.Authorization = `Bearer ${accessToken}`;
+            forwardedCookies.push(`accessToken=${accessToken}`);
+        }
+
+        if (sessionToken) {
+            headers['x-session-token'] = sessionToken;
+            forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+        }
+
+        if (forwardedCookies.length > 0) {
+            headers.Cookie = forwardedCookies.join('; ');
+        }
+
+        const res = await fetch(`${BASE_API_URL}/users/${userId}`, {
+            method: 'GET',
+            headers,
+            cache: 'no-store',
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('API Error:', {
+                status: res.status,
+                statusText: res.statusText,
+                body: errorText
+            });
+            throw new Error(`Failed to fetch user: ${res.status} ${res.statusText}`);
+        }
+
+        const json = await res.json();
+        return json?.data as DetailedUser;
+    } catch (error) {
+        console.error('Failed to fetch user by ID', error);
+        return null;
+    }
+}

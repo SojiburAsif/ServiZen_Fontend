@@ -20,14 +20,13 @@ export const AdminRouters: Route[] = [
         items: [
             { title: "Home", url: "/dashboard", icon: Home },
             { title: "Create Provider", url: "/dashboard/create-provider", icon: Settings },
-            { title: "My Profile", url: "/dashboard/my-profile", icon: UserCog },
             { title: "All Users", url: "/dashboard/users", icon: Users },
             { title: "All Providers", url: "/dashboard/providers", icon: UserSquare2 },
             { title: "All Services", url: "/dashboard/services", icon: Stethoscope },
             { title: "All Bookings", url: "/dashboard/bookings", icon: CalendarCheck },
             { title: "Specialties", url: "/dashboard/specialties", icon: Sparkles },
             { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
-            { title: "Reviews & Ratings", url: "/dashboard/reviews", icon: ClipboardList },
+            { title: "Reviews & Ratings", url: "/dashboard/reviewsAdmin", icon: ClipboardList },
             { title: "Financial Reports", url: "/dashboard/reports", icon: ShieldCheck },
             { title: "Notifications", url: "/dashboard/notifications", icon: Bell }
         ],
