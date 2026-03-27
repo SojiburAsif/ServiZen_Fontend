@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-    User, Mail, Phone, MapPin, Camera, 
+import {
+    User, Mail, Phone, MapPin, Camera,
     Loader2, CheckCircle2, Circle, Sparkles,
-    ArrowRight,
-    ShieldCheck
+    ArrowRight, ShieldCheck, Upload, X
 } from "lucide-react";
 import { toast } from "sonner";
 import { updateUserProfile, UpdateProfileData } from "@/services/user.service";
 import { Progress } from "@/components/ui/progress";
+import { uploadToImgbb } from "@/lib/imageUpload.utils";
 
 interface ProfileUpdateFormProps {
     initialData: {
@@ -29,6 +29,9 @@ interface ProfileUpdateFormProps {
 
 export function ProfileUpdateForm({ initialData, onSuccess }: ProfileUpdateFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [previewImage, setPreviewImage] = useState<string | null>(initialData.image || null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState<UpdateProfileData>({
         name: initialData.name || "",
         profilePhoto: initialData.image || "",
@@ -38,7 +41,7 @@ export function ProfileUpdateForm({ initialData, onSuccess }: ProfileUpdateFormP
 
     const fields = [
         { key: 'name', label: 'Full Name', value: initialData.name, icon: User },
-        { key: 'image', label: 'Photo', value: initialData.image, icon: Camera },
+        { key: 'image', label: 'Photo', value: previewImage, icon: Camera },
         { key: 'contactNumber', label: 'Phone', value: initialData.contactNumber, icon: Phone },
         { key: 'address', label: 'Address', value: initialData.address, icon: MapPin },
     ];
@@ -48,6 +51,49 @@ export function ProfileUpdateForm({ initialData, onSuccess }: ProfileUpdateFormP
 
     const handleInputChange = (field: keyof UpdateProfileData, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleImageUpload = async (file: File) => {
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            toast.error("Please select a valid image file");
+            return;
+        }
+
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Image size must be less than 5MB");
+            return;
+        }
+
+        setIsUploading(true);
+        try {
+            const imageUrl = await uploadToImgbb(file);
+            setPreviewImage(imageUrl);
+            handleInputChange("profilePhoto", imageUrl);
+            toast.success("Image uploaded successfully!");
+        } catch (error: any) {
+            toast.error(error.message || "Failed to upload image");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            handleImageUpload(file);
+        }
+    };
+
+    const removeImage = () => {
+        setPreviewImage(null);
+        handleInputChange("profilePhoto", "");
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -132,20 +178,71 @@ export function ProfileUpdateForm({ initialData, onSuccess }: ProfileUpdateFormP
                     </div>
                 </div>
 
-                {/* Photo URL Field */}
+                {/* Photo Upload Field */}
                 <div className="group space-y-2">
-                    <Label htmlFor="profilePhoto" className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2 ml-1">
+                    <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2 ml-1">
                         <Camera className="size-4 text-emerald-500" />
-                        Profile Image Link
+                        Profile Photo
                     </Label>
-                    <Input
-                        id="profilePhoto"
-                        type="url"
-                        value={formData.profilePhoto}
-                        onChange={(e) => handleInputChange("profilePhoto", e.target.value)}
-                        placeholder="https://example.com/photo.jpg"
-                        className="h-12 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl px-4 focus-visible:ring-emerald-500/20 transition-all duration-200"
-                    />
+                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                        {/* Image Preview */}
+                        <div className="relative">
+                            <div className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center bg-slate-50 dark:bg-slate-800 overflow-hidden">
+                                {previewImage ? (
+                                    <img
+                                        src={previewImage}
+                                        alt="Profile preview"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <Camera className="size-8 text-slate-400" />
+                                )}
+                            </div>
+                            {previewImage && (
+                                <button
+                                    type="button"
+                                    onClick={removeImage}
+                                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                                >
+                                    <X className="size-3" />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Upload Button */}
+                        <div className="flex-1">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileSelect}
+                                className="hidden"
+                                disabled={isUploading}
+                            />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isUploading}
+                                className="w-full sm:w-auto h-12 px-6 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
+                            >
+                                {isUploading ? (
+                                    <>
+                                        <Loader2 className="mr-2 size-4 animate-spin" />
+                                        Uploading...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Upload className="mr-2 size-4" />
+                                        Choose Image
+                                    </>
+                                )}
+                            </Button>
+                            <p className="text-xs text-slate-500 mt-2">
+                                PNG, JPG up to 5MB
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-6">

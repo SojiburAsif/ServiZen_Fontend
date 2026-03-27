@@ -137,7 +137,7 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
         <Link 
           key={link.href} 
           href={link.href} 
-          className={`group flex items-center gap-1.5 text-sm font-medium transition-colors duration-300 ${
+          className={`group flex items-center gap-1 text-sm font-medium transition-colors duration-300 ${
             isActive 
               ? "text-green-600 dark:text-green-500" 
               : "text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400"
@@ -152,7 +152,7 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-green-900/10 bg-gradient-to-r from-[#F0F0F0] via-[#D5F0C8] to-[#70E06A] dark:from-[#030303] dark:via-[#081808] dark:to-[#032003] text-gray-900 dark:text-white font-sans shadow-sm backdrop-blur-md">
-      <div className="mx-auto flex h-[88px] w-full max-w-7xl items-center justify-between px-6 lg:px-12">
+      <div className="mx-auto flex h-[88px] w-full max-w-7xl items-center justify-between px-2 lg:px-5">
         
         {/* --- Logo Section --- */}
         <Link href="/" className="group flex items-center gap-3 transition-transform active:scale-95">

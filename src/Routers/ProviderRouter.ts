@@ -18,7 +18,6 @@ export const ProviderRouters: Route[] = [
         title: "Dashboard",
         items: [
             { title: "Home", url: "/dashboard", icon: Home },
-            { title: "My Profile", url: "/dashboard/my-profile", icon: User },
             { title: "My Provider Profile", url: "/dashboard/provider-profile", icon: Building },
             { title: "Bookings", url: "/dashboard/bookings", icon: CalendarDays },
             { title: "My Services", url: "/dashboard/my-services", icon: Stethoscope },
