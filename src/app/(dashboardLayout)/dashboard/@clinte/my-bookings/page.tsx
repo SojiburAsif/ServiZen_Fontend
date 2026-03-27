@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { ReviewForm } from "@/components/features/ReviewForm";
+import { Booking } from "@/types/booking.types";
+import { ReviewRecord } from "@/services/user.service";
+import { ReviewDialog } from "@/components/features/ReviewDialog";
 
 import {
   CalendarDays,
@@ -32,6 +36,7 @@ import {
   Mail,
   Phone,
   Hash,
+  AlertTriangle,
 } from "lucide-react";
 
 const formatDate = (value: string) =>
@@ -111,32 +116,12 @@ async function updateBookingStatus(bookingId: string, status: any) {
   }
 }
 
-async function submitReview(formData: FormData) {
-  "use server";
-  const bookingId = formData.get("bookingId") as string;
-  const serviceId = formData.get("serviceId") as string;
-  const rating = parseInt(formData.get("rating") as string);
-  const comment = formData.get("comment") as string;
-
-  try {
-    await createReview({
-      bookingId,
-      serviceId,
-      rating,
-      comment,
-    });
-    revalidatePath("/dashboard/my-bookings");
-  } catch (error) {
-    console.error("Failed to submit review", error);
-  }
-}
-
 function BookingDetailsDialog({
   booking,
   hasReview,
 }: {
-  booking: any;
-  hasReview: any;
+  booking: Booking;
+  hasReview: boolean;
 }) {
   return (
     <Dialog>
@@ -144,6 +129,7 @@ function BookingDetailsDialog({
         <Button
           size="sm"
           className="h-10 rounded-xl bg-emerald-600 px-4 text-white hover:bg-emerald-700"
+          suppressHydrationWarning={true}
         >
           <Eye className="mr-2 size-4" />
           View Details
@@ -298,18 +284,18 @@ function BookingDetailsDialog({
                 {hasReview ? (
                   <div className="space-y-4">
                     <div className="flex flex-wrap items-center gap-3">
-                      {renderStars(hasReview.rating)}
+                      {renderStars((hasReview as any).rating)}
                       <span className="text-sm text-slate-600 dark:text-slate-300">
-                        ({hasReview.rating}/5)
+                        ({(hasReview as any).rating}/5)
                       </span>
                     </div>
 
                     <div className="rounded-2xl bg-white/70 p-4 dark:bg-white/5">
-                      <p className="text-slate-900 dark:text-white">{hasReview.comment}</p>
+                      <p className="text-slate-900 dark:text-white">{(hasReview as any).comment}</p>
                     </div>
 
                     <p className="text-sm text-slate-600 dark:text-slate-300">
-                      Reviewed on {new Date(hasReview.createdAt).toLocaleDateString()}
+                      Reviewed on {new Date((hasReview as any).createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 ) : (
@@ -327,83 +313,78 @@ function BookingDetailsDialog({
   );
 }
 
-function ReviewDialog({
-  booking,
-}: {
-  booking: any;
-}) {
+function CancelBookingDialog({ booking }: { booking: Booking }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button
           size="sm"
-          variant="outline"
-          className="h-10 rounded-xl border-yellow-300 bg-yellow-50 px-4 text-yellow-800 hover:bg-yellow-100 dark:border-yellow-900 dark:bg-yellow-950 dark:text-yellow-200 dark:hover:bg-yellow-900"
+          variant="destructive"
+          className="h-8 w-28 rounded-full text-xs"
         >
-          <Star className="mr-2 size-4" />
-          Review
+          <XCircle className="mr-1 size-3" />
+          Cancel
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-[92vw] max-w-2xl rounded-3xl p-0 border border-white/20">
+      <DialogContent className="w-[95vw] max-w-md rounded-3xl border border-red-200/50 bg-gradient-to-br from-red-50 to-pink-50 p-0 shadow-2xl dark:border-red-500/20 dark:from-red-500/10 dark:to-pink-500/10">
         <div className="p-6">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-2xl font-bold">
-              <MessageSquare className="size-6 text-emerald-600" />
-              Write a Review
+          <DialogHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-500/20">
+              <AlertTriangle className="size-8 text-red-600 dark:text-red-400" />
+            </div>
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+              Cancel Booking
             </DialogTitle>
-            <DialogDescription>
-              Share your experience for {booking.service?.name}.
+            <DialogDescription className="text-slate-600 dark:text-slate-300">
+              Are you sure you want to cancel this booking? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
 
-          <form action={submitReview} className="mt-6 space-y-5">
-            <input type="hidden" name="bookingId" value={booking.id} />
-            <input type="hidden" name="serviceId" value={booking.serviceId} />
+          <div className="mt-6 rounded-2xl bg-white/70 p-4 dark:bg-white/5">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Hash className="size-4 text-slate-500" />
+                <span className="text-sm font-medium text-slate-900 dark:text-white">
+                  Booking #{String(booking.id).slice(-8)}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <CalendarDays className="size-4 text-slate-500" />
+                <span className="text-sm text-slate-600 dark:text-slate-300">
+                  {formatDate(booking.bookingDate)} at {formatTime(booking.bookingTime)}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <DollarSign className="size-4 text-slate-500" />
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                  ৳{booking.totalAmount}
+                </span>
+              </div>
+            </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor={`rating-${booking.id}`} className="text-slate-900 dark:text-white">
-                Rating
-              </Label>
-              <select
-                id={`rating-${booking.id}`}
-                name="rating"
-                required
-                defaultValue=""
-                className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-slate-900 outline-none transition focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+          <div className="mt-6 flex gap-3">
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex-1 rounded-2xl border-slate-200 bg-white/80 hover:bg-white dark:border-white/20 dark:bg-white/5 dark:hover:bg-white/10"
               >
-                <option value="" disabled>
-                  Select rating...
-                </option>
-                <option value="5">5 - Excellent</option>
-                <option value="4">4 - Very Good</option>
-                <option value="3">3 - Good</option>
-                <option value="2">2 - Fair</option>
-                <option value="1">1 - Poor</option>
-              </select>
-            </div>
+                Keep Booking
+              </Button>
+            </DialogTrigger>
 
-            <div className="space-y-2">
-              <Label htmlFor={`comment-${booking.id}`} className="text-slate-900 dark:text-white">
-                Comment
-              </Label>
-              <Textarea
-                id={`comment-${booking.id}`}
-                name="comment"
-                placeholder="Share your experience..."
-                className="min-h-[140px] rounded-xl border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-950"
-                required
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="h-12 w-full rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
-            >
-              <MessageSquare className="mr-2 size-4" />
-              Submit Review
-            </Button>
-          </form>
+            <form action={updateBookingStatus.bind(null, booking.id, "CANCELLED")} className="flex-1">
+              <Button
+                type="submit"
+                variant="destructive"
+                className="w-full rounded-2xl bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
+              >
+                <XCircle className="mr-2 size-4" />
+                Cancel Booking
+              </Button>
+            </form>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
@@ -417,12 +398,14 @@ export default async function MyBookingsPage() {
   if (!bookingsRes) return <p className="p-10">Failed to load bookings</p>;
 
   const bookings = bookingsRes.data || [];
-  const reviews = profile?.client?.reviews || [];
+  const reviews: ReviewRecord[] = profile?.client?.reviews || [];
 
-  const reviewsMap = reviews.reduce((acc: any, review: any) => {
-    acc[review.bookingId] = review;
+  const reviewsMap = reviews.reduce((acc: Record<string, ReviewRecord>, review: ReviewRecord) => {
+    if (review.bookingId) {
+      acc[review.bookingId] = review;
+    }
     return acc;
-  }, {});
+  }, {} as Record<string, ReviewRecord>);
 
   const completedCount = bookings.filter((b: any) => b.status === "COMPLETED").length;
   const pendingCount = bookings.filter((b: any) => b.status === "PENDING").length;
@@ -522,7 +505,7 @@ export default async function MyBookingsPage() {
               </thead>
 
               <tbody>
-                {bookings.map((booking: any, index: number) => {
+                {bookings.map((booking: Booking, index: number) => {
                   const hasReview = reviewsMap[booking.id];
                   const canReview = booking.status === "COMPLETED" && !hasReview;
                   const canChangeStatus =
@@ -601,26 +584,17 @@ export default async function MyBookingsPage() {
 
                       <td className="px-6 py-5 align-top">
                         {canChangeStatus ? (
-                          <form action={updateBookingStatus.bind(null, booking.id, "CANCELLED")}>
-                            <div className="flex flex-col gap-2">
-                              <Badge
-                                className={`flex w-28 items-center justify-center gap-1 rounded-full px-3 py-1 ${getStatusColor(
-                                  booking.status
-                                )}`}
-                              >
-                                {getStatusIcon(booking.status)}
-                                {booking.status}
-                              </Badge>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                className="h-8 w-28 rounded-full text-xs"
-                              >
-                                <XCircle className="mr-1 size-3" />
-                                Cancel
-                              </Button>
-                            </div>
-                          </form>
+                          <div className="flex flex-col gap-2">
+                            <Badge
+                              className={`flex w-28 items-center justify-center gap-1 rounded-full px-3 py-1 ${getStatusColor(
+                                booking.status
+                              )}`}
+                            >
+                              {getStatusIcon(booking.status)}
+                              {booking.status}
+                            </Badge>
+                            <CancelBookingDialog booking={booking} />
+                          </div>
                         ) : (
                           <Badge
                             className={`flex w-fit items-center gap-1 rounded-full px-3 py-1 ${getStatusColor(
@@ -647,7 +621,7 @@ export default async function MyBookingsPage() {
 
                       <td className="px-6 py-5 align-top">
                         <div className="flex flex-col gap-2">
-                          <BookingDetailsDialog booking={booking} hasReview={hasReview} />
+                          <BookingDetailsDialog booking={booking} hasReview={!!hasReview} />
 
                           {canReview && <ReviewDialog booking={booking} />}
 

@@ -7,6 +7,7 @@ import {
     Home,
     User,
     Bell,
+    MessageSquarePlus,
 } from "lucide-react";
 
 export const UserRouters: Route[] = [
@@ -18,6 +19,7 @@ export const UserRouters: Route[] = [
             { title: "My Bookings", url: "/dashboard/my-bookings", icon: CalendarDays },
             { title: "My Payments", url: "/dashboard/my-payments", icon: CreditCard },
             { title: "My Reviews", url: "/dashboard/my-reviews", icon: ClipboardList },
+            { title: "Add Review", url: "/dashboard/add-review", icon: MessageSquarePlus },
             { title: "Notifications", url: "/dashboard/notifications", icon: Bell }
         ],
     }
