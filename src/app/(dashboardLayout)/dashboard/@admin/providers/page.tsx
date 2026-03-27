@@ -6,6 +6,7 @@ import {
   getAllProviders,
   getProviderById,
   deleteProvider,
+  updateProviderStatus,
   ProviderListItem,
   ProviderDetailedProfile,
 } from "@/services/provider.service";
@@ -30,6 +31,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Mail,
   Trash2,
   Eye,
@@ -38,7 +46,6 @@ import {
   ShieldAlert,
   ChevronLeft,
   ChevronRight,
-  DollarSign,
   Briefcase,
   Loader2,
   Phone,
@@ -48,6 +55,10 @@ import {
   Building2,
   BadgeCheck,
   Users,
+  Edit2,
+  User,
+  AlertCircle,
+  DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -110,6 +121,8 @@ export default function AdminProvidersPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [detailedProvider, setDetailedProvider] = useState<ProviderDetailedProfile | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
+  const [providerToRestore, setProviderToRestore] = useState<ProviderListItem | null>(null);
 
   const fetchProviders = useCallback(async (page: number = 1) => {
     try {
@@ -221,6 +234,31 @@ export default function AdminProvidersPage() {
     if (isProcessing) return;
     setIsViewDialogOpen(false);
     setDetailedProvider(null);
+  };
+
+  const handleRestoreProvider = async () => {
+    if (!providerToRestore) return;
+
+    setIsProcessing(true);
+    try {
+      await updateProviderStatus(providerToRestore.id, false);
+      toast.success("Provider restored successfully");
+
+      setIsRestoreDialogOpen(false);
+      setProviderToRestore(null);
+
+      await fetchProviders(meta.page);
+    } catch (error) {
+      toast.error("Failed to restore provider");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const closeRestoreDialog = () => {
+    if (isProcessing) return;
+    setIsRestoreDialogOpen(false);
+    setProviderToRestore(null);
   };
 
   if (loading && providers.length === 0) {
@@ -449,19 +487,35 @@ export default function AdminProvidersPage() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="hover:text-rose-600"
-                            onClick={() => {
-                              setSelectedProvider(provider);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                            disabled={isProcessing}
-                            aria-label="Delete provider"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {provider.user?.status === "DELETED" ? (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="hover:text-emerald-600"
+                              onClick={() => {
+                                setProviderToRestore(provider);
+                                setIsRestoreDialogOpen(true);
+                              }}
+                              disabled={isProcessing}
+                              aria-label="Restore provider"
+                            >
+                              <User className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="hover:text-rose-600"
+                              onClick={() => {
+                                setSelectedProvider(provider);
+                                setIsDeleteDialogOpen(true);
+                              }}
+                              disabled={isProcessing}
+                              aria-label="Delete provider"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -653,6 +707,38 @@ export default function AdminProvidersPage() {
             >
               {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete Provider
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isRestoreDialogOpen} onOpenChange={closeRestoreDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-emerald-600" />
+              Restore Provider
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to restore{" "}
+              <span className="font-semibold text-foreground">
+                {providerToRestore?.name || "this provider"}
+              </span>
+              ? The provider will be able to access their account again.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={closeRestoreDialog} disabled={isProcessing}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRestoreProvider}
+              disabled={isProcessing}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Restore Provider
             </Button>
           </DialogFooter>
         </DialogContent>

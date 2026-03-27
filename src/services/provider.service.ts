@@ -199,7 +199,7 @@ export async function getAllProviders(page: number = 1, limit: number = 10): Pro
 			headers.Cookie = forwardedCookies.join("; ");
 		}
 
-		const response = await fetch(`${BASE_API_URL}/providers?page=${page}&limit=${limit}`, {
+		const response = await fetch(`${BASE_API_URL}/providers/admin/all?page=${page}&limit=${limit}`, {
 			method: "GET",
 			headers,
 			cache: "no-store",
@@ -222,13 +222,34 @@ export async function getAllProviders(page: number = 1, limit: number = 10): Pro
 
 export async function getProviderById(providerId: string): Promise<ProviderDetailedProfile | null> {
 	try {
+		const cookieStore = await cookies();
+		const accessToken = cookieStore.get("accessToken")?.value;
+		const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
 		const { BASE_API_URL } = getServerEnv();
+
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+		};
+		const forwardedCookies: string[] = [];
+
+		if (accessToken) {
+			headers.Authorization = `Bearer ${accessToken}`;
+			forwardedCookies.push(`accessToken=${accessToken}`);
+		}
+
+		if (sessionToken) {
+			headers["x-session-token"] = sessionToken;
+			forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+		}
+
+		if (forwardedCookies.length > 0) {
+			headers.Cookie = forwardedCookies.join("; ");
+		}
 
 		const response = await fetch(`${BASE_API_URL}/providers/${providerId}`, {
 			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-			},
+			headers,
 			cache: "no-store",
 		});
 
@@ -289,6 +310,55 @@ export async function updateProvider(providerId: string, updateData: UpdateProvi
 		return true;
 	} catch (error) {
 		console.error('Failed to update provider', error);
+		throw error;
+	}
+}
+
+export async function updateProviderStatus(providerId: string, isDeleted: boolean): Promise<boolean> {
+	try {
+		const cookieStore = await cookies();
+		const accessToken = cookieStore.get("accessToken")?.value;
+		const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+		if (!accessToken && !sessionToken) {
+			throw new Error('No authentication token found');
+		}
+
+		const { BASE_API_URL } = getServerEnv();
+
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+		};
+		const forwardedCookies: string[] = [];
+
+		if (accessToken) {
+			headers.Authorization = `Bearer ${accessToken}`;
+			forwardedCookies.push(`accessToken=${accessToken}`);
+		}
+
+		if (sessionToken) {
+			headers["x-session-token"] = sessionToken;
+			forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+		}
+
+		if (forwardedCookies.length > 0) {
+			headers.Cookie = forwardedCookies.join("; ");
+		}
+
+		const response = await fetch(`${BASE_API_URL}/providers/admin/${providerId}/status`, {
+			method: "PATCH",
+			headers,
+			body: JSON.stringify({ isDeleted }),
+			cache: "no-store",
+		});
+
+		if (!response.ok) {
+			throw new Error('Failed to update provider status');
+		}
+
+		return true;
+	} catch (error) {
+		console.error('Failed to update provider status', error);
 		throw error;
 	}
 }
