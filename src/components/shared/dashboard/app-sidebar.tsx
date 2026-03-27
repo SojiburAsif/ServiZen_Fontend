@@ -17,7 +17,8 @@ import {
 
 
 
-import { LogOut, LayoutDashboard } from "lucide-react";
+import { LogOut, LayoutDashboard, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Route } from "@/types/Router.type";
 import { AdminRouters } from "@/Routers/adminRouter";
 import { ProviderRouters } from "@/Routers/ProviderRouter";
@@ -58,15 +59,30 @@ export function AppSidebar({
         }
 
         setIsLoggingOut(true);
+        const loadingToast = toast.loading("Logging out...", {
+            description: "Please wait while we log you out.",
+        });
 
         try {
             await fetch("/logout", { method: "POST" });
-        } catch {
-            // Ignore network failure and continue client-side logout flow.
+            toast.success("Logged out successfully!", {
+                description: "You have been logged out of your account.",
+                duration: 3000,
+                id: loadingToast,
+            });
+        } catch (error) {
+            toast.error("Logout completed", {
+                description: "You have been logged out (with network issues).",
+                duration: 3000,
+                id: loadingToast,
+            });
         } finally {
             setIsLoggingOut(false);
-            router.push("/login");
-            router.refresh();
+            setTimeout(() => {
+                router.refresh();
+                router.push("/login");
+
+            }, 500);
         }
     };
 
@@ -150,10 +166,14 @@ export function AppSidebar({
                             disabled={isLoggingOut}
                             className="flex items-center gap-3 w-full px-4 py-4 rounded-2xl
               font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 
-              border border-transparent hover:border-rose-200 dark:hover:border-rose-500/20 transition-all duration-200"
+              border border-transparent hover:border-rose-200 dark:hover:border-rose-500/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <LogOut size={18} />
-                            <span className="text-sm">Logout Session</span>
+                            {isLoggingOut ? (
+                                <Loader2 size={18} className="animate-spin" />
+                            ) : (
+                                <LogOut size={18} />
+                            )}
+                            <span className="text-sm">{isLoggingOut ? "Logging out..." : "Logout Session"}</span>
                         </button>
                     </div>
                 </div>
