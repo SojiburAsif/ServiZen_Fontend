@@ -327,37 +327,37 @@ function CancelBookingDialog({ booking }: { booking: Booking }) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-[95vw] max-w-md rounded-3xl border border-red-200/50 bg-gradient-to-br from-red-50 to-pink-50 p-0 shadow-2xl dark:border-red-500/20 dark:from-red-500/10 dark:to-pink-500/10">
+      <DialogContent className="w-[95vw] max-w-md rounded-3xl border border-red-200/50 bg-black p-0 shadow-2xl dark:border-red-500/20 dark:bg-black">
         <div className="p-6">
           <DialogHeader className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-500/20">
               <AlertTriangle className="size-8 text-red-600 dark:text-red-400" />
             </div>
-            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+            <DialogTitle className="text-xl font-bold text-white">
               Cancel Booking
             </DialogTitle>
-            <DialogDescription className="text-slate-600 dark:text-slate-300">
+            <DialogDescription className="text-slate-300">
               Are you sure you want to cancel this booking? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="mt-6 rounded-2xl bg-white/70 p-4 dark:bg-white/5">
+          <div className="mt-6 rounded-2xl bg-white/10 p-4 border border-white/20">
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <Hash className="size-4 text-slate-500" />
-                <span className="text-sm font-medium text-slate-900 dark:text-white">
+                <Hash className="size-4 text-slate-400" />
+                <span className="text-sm font-medium text-white">
                   Booking #{String(booking.id).slice(-8)}
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <CalendarDays className="size-4 text-slate-500" />
-                <span className="text-sm text-slate-600 dark:text-slate-300">
+                <CalendarDays className="size-4 text-slate-400" />
+                <span className="text-sm text-slate-300">
                   {formatDate(booking.bookingDate)} at {formatTime(booking.bookingTime)}
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <DollarSign className="size-4 text-slate-500" />
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                <DollarSign className="size-4 text-slate-400" />
+                <span className="text-sm font-semibold text-white">
                   ৳{booking.totalAmount}
                 </span>
               </div>

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { MessageSquarePlus, Info, Sparkles, CheckCircle2, Loader2 } from "lucide-react";
 import { env } from "@/lib/env";
 import { Booking } from "@/types/booking.types";
+import { toast } from "sonner";
 
 interface AddReviewFormProps {
   unreviewedBookings: Booking[];
@@ -56,10 +57,19 @@ export function AddReviewForm({ unreviewedBookings }: AddReviewFormProps) {
       }
 
       setSuccess(true);
+      toast.success("Review submitted successfully!", {
+        description: "Thank you for your valuable feedback.",
+        duration: 4000,
+      });
       // Reset form
       (e.target as HTMLFormElement).reset();
     } catch (err: any) {
-      setError(err.message);
+      const errorMessage = err.message || "Failed to submit review. Please try again.";
+      setError(errorMessage);
+      toast.error("Review submission failed", {
+        description: errorMessage,
+        duration: 5000,
+      });
     } finally {
       setIsSubmitting(false);
     }

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { MessageSquare, Loader2 } from "lucide-react";
 import { env } from "@/lib/env";
 import { Booking } from "@/types/booking.types";
+import { toast } from "sonner";
 
 interface ReviewFormProps {
   booking: Booking;
@@ -55,9 +56,18 @@ export function ReviewForm({ booking, onSuccess }: ReviewFormProps) {
 
       // Success, refresh page data and close dialog
       router.refresh();
+      toast.success("Review submitted successfully!", {
+        description: "Thank you for your feedback.",
+        duration: 4000,
+      });
       onSuccess?.();
     } catch (err: any) {
-      setError(err.message);
+      const errorMessage = err.message || "Failed to submit review. Please try again.";
+      setError(errorMessage);
+      toast.error("Review submission failed", {
+        description: errorMessage,
+        duration: 5000,
+      });
     } finally {
       setIsSubmitting(false);
     }
