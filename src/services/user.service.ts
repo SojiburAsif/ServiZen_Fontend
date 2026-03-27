@@ -300,6 +300,7 @@ export interface AdminUser {
 	Role: 'ADMIN' | 'PROVIDER' | 'USER';
 	emailVerified: boolean;
 	isGoogleLogin: boolean;
+	isDeleted?: boolean;
 	image?: string;
 	createdAt: string;
 	updatedAt: string;
@@ -437,7 +438,7 @@ export async function deleteUser(userId: string): Promise<boolean> {
     }
 }
 
-export async function updateUserStatus(userId: string, status: string): Promise<boolean> {
+export async function updateUserStatus(userId: string, status?: string, isDeleted?: boolean): Promise<boolean> {
     try {
         const cookieStore = await cookies();
         const accessToken = cookieStore.get('accessToken')?.value;
@@ -468,10 +469,19 @@ export async function updateUserStatus(userId: string, status: string): Promise<
             headers.Cookie = forwardedCookies.join('; ');
         }
 
+        // Build request body with at least one field
+        const requestBody: any = {};
+        if (status !== undefined) requestBody.status = status;
+        if (isDeleted !== undefined) requestBody.isDeleted = isDeleted;
+
+        if (Object.keys(requestBody).length === 0) {
+            throw new Error('At least one field (status or isDeleted) must be provided');
+        }
+
         const res = await fetch(`${BASE_API_URL}/users/${userId}/status`, {
             method: 'PATCH',
             headers,
-            body: JSON.stringify({ status }),
+            body: JSON.stringify(requestBody),
             cache: 'no-store',
         });
 

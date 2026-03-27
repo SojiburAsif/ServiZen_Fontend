@@ -97,18 +97,38 @@ export default function AllUsersPage() {
     const handleStatusUpdate = async () => {
         if (!selectedUser) return;
         
-        // Validation: Cannot update self or deleted users
+        // Validation: Cannot update self
         if (selectedUser.id === CURRENT_ADMIN_ID) {
             return toast.error("You cannot change your own status!");
         }
-        if (selectedUser.status === "DELETED") {
-            return toast.error("Cannot update status of a deleted user.");
+
+        // Special handling for deleted users - allow restoration
+        if (selectedUser.isDeleted && newStatus === "ACTIVE") {
+            // Allow restoration: set isDeleted to false and status to ACTIVE
+            setIsProcessing(true);
+            try {
+                await updateUserStatus(selectedUser.id, "ACTIVE", false);
+                toast.success("User has been restored successfully!");
+                setIsStatusDialogOpen(false);
+                fetchUsers(meta.page);
+            } catch (error) {
+                toast.error("Failed to restore user");
+            } finally {
+                setIsProcessing(false);
+            }
+            return;
         }
 
+        // Prevent changing status to ACTIVE if user is already deleted
+        if (selectedUser.isDeleted && newStatus === "ACTIVE") {
+            return toast.error("Cannot change status to ACTIVE for deleted users. Use restoration instead.");
+        }
+
+        // Normal status update for non-deleted users
         setIsProcessing(true);
         try {
             await updateUserStatus(selectedUser.id, newStatus);
-            toast.success(`User is now ${newStatus}`);
+            toast.success(`User status updated to ${newStatus}`);
             setIsStatusDialogOpen(false);
             fetchUsers(meta.page);
         } catch (error) {
@@ -279,6 +299,7 @@ export default function AllUsersPage() {
                                             <TableCell className="text-center">
                                                 <Badge className={`${statusColors[user.status]} border shadow-none px-3 py-1 font-black rounded-full text-[10px]`}>
                                                     {user.status}
+                                                    {user.isDeleted && <span className="ml-1 text-xs">(Deleted)</span>}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-right px-8">
@@ -289,10 +310,14 @@ export default function AllUsersPage() {
                                                         label="View Details"
                                                     />
                                                     <ActionButton 
-                                                        icon={<Edit2 size={16}/>} 
-                                                        color="hover:bg-amber-50 hover:text-amber-600" 
-                                                        disabled={user.status === 'DELETED' || user.id === CURRENT_ADMIN_ID}
-                                                        onClick={() => { setSelectedUser(user); setNewStatus(user.status); setIsStatusDialogOpen(true); }} 
+                                                        icon={user.isDeleted ? <User size={16}/> : <Edit2 size={16}/>} 
+                                                        color={user.isDeleted ? "hover:bg-emerald-50 hover:text-emerald-600" : "hover:bg-amber-50 hover:text-amber-600"} 
+                                                        disabled={user.id === CURRENT_ADMIN_ID}
+                                                        onClick={() => { 
+                                                            setSelectedUser(user); 
+                                                            setNewStatus(user.isDeleted ? "ACTIVE" : user.status); 
+                                                            setIsStatusDialogOpen(true); 
+                                                        }} 
                                                     />
                                                     <ActionButton 
                                                         icon={<Trash2 size={16}/>} 
@@ -406,25 +431,44 @@ export default function AllUsersPage() {
             <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
                 <DialogContent className="rounded-3xl">
                     <DialogHeader>
-                        <DialogTitle className="text-2xl font-black">Change Status</DialogTitle>
-                        <DialogDescription>Setting new permissions for {selectedUser?.name}</DialogDescription>
+                        <DialogTitle className="text-2xl font-black">
+                            {selectedUser?.isDeleted ? "Restore User" : "Change Status"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {selectedUser?.isDeleted 
+                                ? `Restoring access for ${selectedUser?.name}`
+                                : `Setting new permissions for ${selectedUser?.name}`
+                            }
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="py-6 space-y-4">
-                        <Select value={newStatus} onValueChange={setNewStatus}>
-                            <SelectTrigger className="h-14 rounded-2xl border-muted-foreground/20">
-                                <SelectValue placeholder="Select Status" />
-                            </SelectTrigger>
-                            <SelectContent className="rounded-xl">
-                                <SelectItem value="ACTIVE">✅ Active Account</SelectItem>
-                                <SelectItem value="BLOCKED">🚫 Block Access</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        {selectedUser?.isDeleted ? (
+                            <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl">
+                                <div className="flex items-center gap-3 text-emerald-700 dark:text-emerald-400">
+                                    <User className="h-5 w-5" />
+                                    <div>
+                                        <p className="font-bold">Restore User Account</p>
+                                        <p className="text-sm">This will reactivate the user and restore their access.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <Select value={newStatus} onValueChange={setNewStatus}>
+                                <SelectTrigger className="h-14 rounded-2xl border-muted-foreground/20">
+                                    <SelectValue placeholder="Select Status" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl">
+                                    <SelectItem value="ACTIVE">✅ Active Account</SelectItem>
+                                    <SelectItem value="BLOCKED">🚫 Block Access</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        )}
                     </div>
                     <DialogFooter>
                         <Button variant="ghost" onClick={() => setIsStatusDialogOpen(false)} className="rounded-xl">Cancel</Button>
                         <Button onClick={handleStatusUpdate} disabled={isProcessing} className="rounded-xl px-8 bg-primary hover:bg-primary/90">
                             {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Update Now
+                            {selectedUser?.isDeleted ? "Restore User" : "Update Now"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
