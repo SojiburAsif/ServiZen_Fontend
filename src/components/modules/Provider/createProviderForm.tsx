@@ -81,7 +81,7 @@ export const CreateProviderForm = ({ specialties = [] }: { specialties: any[] })
     setValue("specialties", next, { shouldValidate: true });
   };
 
-const onSubmit = async (values: TProviderValues) => {
+  const onSubmit = async (values: TProviderValues) => {
     setLoading(true);
     const toastId = toast.loading("Creating provider account...");
     
@@ -92,17 +92,37 @@ const onSubmit = async (values: TProviderValues) => {
         toast.success("✅ Provider account created successfully!", { id: toastId });
         reset();
       } else {
-        // Backend theke message ashle sheta dekhabe
-        toast.error(res?.message || "Failed to create provider account.", { id: toastId });
+        // Check for specific error messages
+        let errorMessage = res?.message || "Failed to create provider account.";
+        
+        // Handle "Provider creation failed: Request failed with status code 500"
+        if (errorMessage.includes("Provider creation failed: Request failed with status code 500")) {
+          errorMessage = "Email already exists! Please use a different email address.";
+        }
+        
+        toast.error(errorMessage, { id: toastId });
       }
     } catch (err: any) {
       // 500 error holeo jodi backend specific message pathay (e.g. Email already exists)
       const backendError = err?.response?.data?.message || err?.response?.data?.error;
+      const backendErrorMessage = err?.response?.data?.errorSources?.[0]?.message;
       
       let finalErrorMessage = "Something went wrong on the server.";
 
-      if (backendError) {
+      // Check for email already exists in various backend response formats
+      const hasEmailExistsError = 
+        (backendError && (backendError.toLowerCase().includes("email already exists") || 
+                         backendError.toLowerCase().includes("user email already exists"))) ||
+        (backendErrorMessage && (backendErrorMessage.toLowerCase().includes("email already exists") || 
+                                backendErrorMessage.toLowerCase().includes("user email already exists")));
+
+      if (hasEmailExistsError) {
+        finalErrorMessage = "Email already exists! Please use a different email address.";
+      } else if (backendError) {
         finalErrorMessage = backendError;
+      } else if (err.message && err.message.includes("Request failed with status code 500")) {
+        // If it's a generic 500 error, assume it might be email exists
+        finalErrorMessage = "Email already exists! Please use a different email address.";
       } else if (err.message.includes("500")) {
         // Jodi specific message na thake kintu status 500 hoy
         finalErrorMessage = "Internal Server Error (500). Please check if the email already exists.";

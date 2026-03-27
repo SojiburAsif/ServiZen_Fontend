@@ -174,13 +174,34 @@ export async function getProviderSelfProfile(): Promise<ProviderSelfProfile | nu
 
 export async function getAllProviders(page: number = 1, limit: number = 10): Promise<ProviderListResponse | null> {
 	try {
+		const cookieStore = await cookies();
+		const accessToken = cookieStore.get("accessToken")?.value;
+		const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
 		const { BASE_API_URL } = getServerEnv();
+
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+		};
+		const forwardedCookies: string[] = [];
+
+		if (accessToken) {
+			headers.Authorization = `Bearer ${accessToken}`;
+			forwardedCookies.push(`accessToken=${accessToken}`);
+		}
+
+		if (sessionToken) {
+			headers["x-session-token"] = sessionToken;
+			forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+		}
+
+		if (forwardedCookies.length > 0) {
+			headers.Cookie = forwardedCookies.join("; ");
+		}
 
 		const response = await fetch(`${BASE_API_URL}/providers?page=${page}&limit=${limit}`, {
 			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-			},
+			headers,
 			cache: "no-store",
 		});
 
