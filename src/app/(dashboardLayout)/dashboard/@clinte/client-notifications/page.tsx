@@ -11,10 +11,7 @@ import {
   X,
   CheckCheck,
   Filter,
-  Home,
-  LayoutDashboard
 } from "lucide-react";
-import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -111,33 +108,13 @@ export default function NotificationsPage() {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Navigation Breadcrumbs */}
-        <div className="flex items-center gap-2 mb-6">
-          <Link href="/">
-            <Button variant="outline" size="sm" className="bg-white/80 dark:bg-black/80 backdrop-blur-sm border-gray-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
-              <Home className="h-4 w-4 mr-2" />
-              Home
-            </Button>
-          </Link>
-          <span className="text-gray-400">/</span>
-          <Link href="/dashboard">
-            <Button variant="outline" size="sm" className="bg-white/80 dark:bg-black/80 backdrop-blur-sm border-gray-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
-              <LayoutDashboard className="h-4 w-4 mr-2" />
-              Dashboard
-            </Button>
-          </Link>
-          <span className="text-gray-400">/</span>
-          <span className="text-sm font-medium text-green-600 dark:text-green-400">Notifications</span>
-        </div>
-
         <div className="space-y-8">
           {/* Header */}
           <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  Notifications
+                  Client Notifications
                 </h1>
                 <p className="text-lg text-gray-600 dark:text-gray-400">
                   Stay updated with your latest activities and important alerts

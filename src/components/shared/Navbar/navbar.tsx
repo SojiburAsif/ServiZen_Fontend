@@ -18,6 +18,7 @@ import {
   Info,
   Phone,
   Bell,
+  BellRing,
   User,
   Settings,
   Loader2
@@ -40,15 +41,25 @@ function ClientNotificationBell() {
   const { unreadCount } = useNotifications();
   return (
     <DialogTrigger asChild>
-      <Button size="icon" variant="ghost" className="relative text-gray-500 hover:text-gray-900 rounded-full dark:text-gray-400 dark:hover:text-white transition-colors">
-        <Bell className="size-4" />
-        {unreadCount > 0 ? (
-          <span className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        ) : (
-           <span className="absolute right-2.5 top-2.5 flex size-1.5 rounded-full bg-orange-500"></span>
-        )}
+      <Button 
+        size="icon" 
+        variant="ghost" 
+        className="relative flex items-center justify-center p-2 rounded-xl transition-all duration-300 hover:bg-green-100 hover:text-green-600 dark:hover:bg-green-900/30 dark:hover:text-green-400 group focus:ring-2 focus:ring-green-500/50"
+      >
+        <div className="relative">
+          {unreadCount > 0 ? (
+             <BellRing className="size-5 sm:size-6 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:scale-110 drop-shadow-md animate-bounce" />
+          ) : (
+             <Bell className="size-5 sm:size-6 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:scale-110 drop-shadow-md" />
+          )}
+          {unreadCount > 0 ? (
+            <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 md:h-5 md:w-5 items-center justify-center rounded-full bg-gradient-to-tr from-green-500 to-emerald-400 text-[9px] md:text-[10px] font-bold text-white shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse ring-2 ring-white dark:ring-[#030303]">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          ) : (
+             <span className="absolute -top-0.5 -right-0.5 flex size-2 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]"></span>
+          )}
+        </div>
       </Button>
     </DialogTrigger>
   );
@@ -287,7 +298,7 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                          <NotificationContent />
                       </div>
                       <div className="p-4 border-t border-gray-100 dark:border-gray-800/50 bg-gray-50 dark:bg-black/50 text-center">
-                        <Link href="/notification" className="text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
+                        <Link href="/notifications" className="text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
                           View all notifications
                         </Link>
                       </div>

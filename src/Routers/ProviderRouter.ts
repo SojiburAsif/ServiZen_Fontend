@@ -26,7 +26,7 @@ export const ProviderRouters: Route[] = [
             { title: "Specialties", url: "/dashboard/specialties", icon: Sparkles },
             { title: "Reviews", url: "/dashboard/reviews", icon: ClipboardList },
             { title: "Earnings & Payouts", url: "/dashboard/earnings", icon: CreditCard },
-            { title: "Notifications", url: "/dashboard/notifications", icon: Bell }
+            { title: "Notifications", url: "/dashboard/provider-notifications", icon: Bell }
         ],
     }
 ]

@@ -27,7 +27,7 @@ export const AdminRouters: Route[] = [
             { title: "Specialties", url: "/dashboard/specialties", icon: Sparkles },
             { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
             { title: "Reviews & Ratings", url: "/dashboard/reviewsAdmin", icon: ClipboardList },
-            { title: "Notifications", url: "/dashboard/notifications", icon: Bell }
+            { title: "Notifications", url: "/dashboard/admin-notifications", icon: Bell }
         ],
     }
 ]

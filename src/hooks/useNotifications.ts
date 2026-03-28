@@ -2,27 +2,16 @@
 
 import useSWR from 'swr';
 import { getMyNotifications, getProviderNotifications, markNotificationAsRead, Notification } from '@/services/notification.service';
-import { jwtUtils } from '@/lib/jwtUtils';
+import { getUserRoleFromServer } from '@/app/actions/getUserRole';
 import { useEffect, useState } from 'react';
 import { Howl } from 'howler';
+import { toast } from 'sonner';
 
 const fetcher = async () => {
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("accessToken="))
-    ?.split("=")[1];
-
-  let role = "USER";
-  if (token) {
-    try {
-      const decoded = jwtUtils.decodedToken(token);
-      const r = (decoded?.role as string) || "USER";
-      role = r === "CLIENT" ? "USER" : r;
-    } catch(e) {}
-  }
-
   const filters = { page: 1, limit: 10 };
   let res;
+
+  const role = await getUserRoleFromServer();
 
   if (role === "PROVIDER") {
     res = await getProviderNotifications(filters);
@@ -44,7 +33,7 @@ export function useNotifications() {
     volume: 0.5,
   }) : null);
 
-  // Play sound when new unread notifications arrive
+  // Play sound and show toast when new unread notifications arrive
   useEffect(() => {
     if (data) {
       const currentUnread = data.filter(n => !n.isRead).length;
@@ -52,6 +41,17 @@ export function useNotifications() {
       const prevUnread = previousParam ? parseInt(previousParam) : 0;
       
       if (currentUnread > prevUnread) {
+        // We have a new notification! Let's find the newest unread one.
+        const unreadNotifs = data.filter(n => !n.isRead);
+        if (unreadNotifs.length > 0) {
+           const latest = unreadNotifs[0]; // Assuming first is latest
+           toast(latest.title, {
+             description: latest.message,
+             duration: 5000,
+             icon: "🔔",
+             position: "top-right"
+           });
+        }
         sound?.play();
       }
       
