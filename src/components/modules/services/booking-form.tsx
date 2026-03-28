@@ -1,6 +1,7 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { type ServiceRecord } from "@/services/services.service";
 import { jwtUtils } from "@/lib/jwtUtils";
 import { handleBookLater, handleBookNow } from "../../../app/(commonLayout)/actions/booking-actions";
@@ -8,193 +9,77 @@ import LocationSelector from "@/components/shared/LocationSelector";
 import { Role } from "@/app/constants/role";
 import { useRouter } from "next/navigation";
 import {
-  AlertCircle,
   CalendarIcon,
   CreditCard,
   Loader2,
-  MapPin,
-  X,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-
 
 interface BookingFormProps {
   service: ServiceRecord;
 }
 
-type BookingType = "now" | "later";
-
 const timeSlots = [
-  "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
-  "15:00", "15:30", "16:00", "16:30", "17:00", "17:30",
-  "18:00", "18:30", "19:00", "19:30", "20:00", "20:30",
+  "09:00 AM", "10:30 AM", "12:00 PM", "01:30 PM", "03:00 PM", "04:30 PM", "06:00 PM", "07:30 PM"
 ];
 
-function canUserBookServices(userRole: string | null): boolean {
-  // Allow booking if user has any role assigned
-  return userRole !== null && userRole !== undefined;
-}
-
-function getUserRoleFromCookies(): string | null {
-  try {
-    const accessToken = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("accessToken="))
-      ?.split("=")[1];
-
-    if (!accessToken) return null;
-
-    const decoded = jwtUtils.decodedToken(accessToken);
-    const rawRole = String(decoded?.role || "").toUpperCase();
-    
-    // Map raw role to Role constants
-    const userRole = rawRole === "ADMIN"
-      ? Role.ADMIN
-      : rawRole === "PROVIDER"
-        ? Role.PROVIDER
-        : Role.CLIENT;
-        
-    return userRole;
-  } catch (error) {
-    console.error("Failed to decode user role:", error);
-    return null;
-  }
-}
-
-const formatMinDate = (date: Date) => date.toISOString().split("T")[0];
-
 export function BookingForm({ service }: BookingFormProps) {
-  const [bookingType, setBookingType] = useState<BookingType>("now");
+  const [bookingType, setBookingType] = useState<"now" | "later">("now");
   const [isOpen, setIsOpen] = useState(false);
-  const [locationError, setLocationError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [isLoadingRole, setIsLoadingRole] = useState(true);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const [latitude, setLatitude] = useState<string>("");
-  const [longitude, setLongitude] = useState<string>("");
-  const [bookingDate, setBookingDate] = useState<string>("");
-  const [bookingTime, setBookingTime] = useState<string>("");
-  const [city, setCity] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [city, setCity] = useState("");
+  const [address, setAddress] = useState("");
 
   const router = useRouter();
 
   useEffect(() => {
-    const role = getUserRoleFromCookies();
-    setUserRole(role);
-    setIsLoadingRole(false);
-  }, []);
-
-  const isClient = true; // Always allow booking per user request
-  const canBook = true; 
-  const isPriceValid = true; // service.price >= 60; // Minimum ৳60 for Stripe
-
-  const today = useMemo(() => new Date(), []);
-  const maxDate = useMemo(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() + 3);
-    return d;
-  }, []);
-
-  const getCurrentLocation = () => {
-    setLocationError(null);
-
-    if (!navigator.geolocation) {
-      setLocationError("Geolocation is not supported by this browser.");
-      return;
+    const accessToken = document.cookie.split("; ").find(r => r.startsWith("accessToken="))?.split("=")[1];
+    if (accessToken) {
+      const decoded = jwtUtils.decodedToken(accessToken);
+      setUserRole(decoded?.role?.toUpperCase() || null);
     }
+  }, []);
 
-    setIsGettingLocation(true);
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLatitude(String(position.coords.latitude));
-        setLongitude(String(position.coords.longitude));
-        setIsGettingLocation(false);
-        setLocationError(null);
-      },
-      (error) => {
-        setIsGettingLocation(false);
-        setLocationError("Unable to get your location. Please enter address manually.");
-        console.error("Geolocation error:", error.message || error);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
-
-  const handleLocationSelect = (location: { lat: number; lng: number; address: string }) => {
-    setSelectedLocation(location);
-    setLatitude(String(location.lat));
-    setLongitude(String(location.lng));
-    setAddress(location.address);
-    // Extract city from address (simple extraction)
-    const addressParts = location.address.split(',');
-    setCity(addressParts[addressParts.length - 2]?.trim() || addressParts[0]?.trim() || '');
-    setLocationError(null);
-  };
-
-  const resetForm = () => {
-    setBookingType("now");
-    setLocationError(null);
-    setSubmitError(null);
-    setLatitude("");
-    setLongitude("");
-    setBookingDate("");
-    setBookingTime("");
-    setCity("");
-    setAddress("");
-    setSelectedLocation(null);
+  const handleLocationSelect = (loc: { lat: number; lng: number; address: string }) => {
+    setLatitude(String(loc.lat));
+    setLongitude(String(loc.lng));
+    setAddress(loc.address);
+    const parts = loc.address.split(',');
+    setCity(parts[parts.length - 2]?.trim() || "Dinajpur");
   };
 
   const handleSubmit = async (formData: FormData) => {
-    setSubmitError(null);
     setIsSubmitting(true);
-
     try {
-      // Check minimum payment amount for Stripe (approximately $0.50 USD = 60 BDT)
-      const minAmount = 60; // BDT
-      if (bookingType === "now" && service.price < minAmount) {
-        throw new Error(`Service price (৳${service.price}) is below the minimum payment requirement of ৳${minAmount}. Please choose a different service or contact support.`);
+      if (bookingType === "now" && service.price < 60) {
+        throw new Error("Minimum booking amount is ৳60");
       }
 
-      const bookingAction = bookingType === "now" ? handleBookNow : handleBookLater;
-      const result = await bookingAction(formData);
+      const action = bookingType === "now" ? handleBookNow : handleBookLater;
+      const result = await action(formData);
 
       if (result.success) {
-        if (bookingType === "now" && 'paymentUrl' in result && result.paymentUrl) {
-          toast.success("Booking initiated. Redirecting to payment...");
-          // Redirect to Stripe checkout
+        // Fix: Use type narrowing or 'in' operator to check for paymentUrl
+        if (bookingType === "now" && "paymentUrl" in result && result.paymentUrl) {
           window.location.href = result.paymentUrl;
         } else {
-          toast.success("Booking confirmed successfully!");
-          // For book later, close dialog and show success
+          toast.success("Service Booked Successfully!");
           setIsOpen(false);
-          resetForm();
-          // Redirect to user's bookings page when booking is successful
-          if (userRole === Role.CLIENT || userRole === "USER") {
-             router.push('/dashboard/my-bookings');
-          } else {
-             router.push('/dashboard');
-          }
+          router.push(userRole === Role.CLIENT ? '/dashboard/my-bookings' : '/dashboard');
         }
       } else {
-        toast.error(result.error || "An unexpected error occurred");
-        setSubmitError(result.error || "An unexpected error occurred");
+        toast.error((result as any).error || "Something went wrong");
       }
-    } catch (error) {
-      console.error("Booking submission error:", error);
-      const msg = error instanceof Error ? error.message : "An unexpected error occurred";
-      toast.error(msg);
-      setSubmitError(msg);
+    } catch (err: any) {
+      toast.error(err.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -202,256 +87,99 @@ export function BookingForm({ service }: BookingFormProps) {
 
   return (
     <>
-      <button
+      <Button
         onClick={() => setIsOpen(true)}
-        className="btn btn-primary rounded-full px-8 text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition disabled:opacity-60"
-        disabled={false}
+        className="w-full h-14 rounded-2xl bg-emerald-500 text-black font-semibold text-lg hover:bg-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all active:scale-95"
       >
-        Book Now
-      </button>
+        BOOKING NOW
+      </Button>
 
       {isOpen && (
-        <dialog className="modal modal-open">
-          <div className="modal-box max-w-3xl overflow-y-auto max-h-[90vh]">
-            <form method="dialog">
-              <button 
-                className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-                onClick={(e) => { e.preventDefault(); setIsOpen(false); resetForm(); }}
-              >
-                ✕
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-[#0A0A0A] border border-zinc-800 p-8 shadow-2xl">
+            
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h3 className="text-3xl font-semibold text-white">Complete Booking</h3>
+                <p className="text-zinc-500 text-sm mt-1">Fill the details to confirm your service.</p>
+              </div>
+              <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-zinc-900 rounded-full transition-colors">
+                <CheckCircle2 className="h-6 w-6 text-zinc-600 rotate-45" />
               </button>
-            </form>
-            <h3 className="font-bold text-2xl mb-2">Book {service.name}</h3>
-            <p className="text-sm opacity-70 mb-6">
-              Fill in the details below to schedule your service booking.
-            </p>
+            </div>
 
             <form action={handleSubmit} className="space-y-6">
-            <input type="hidden" name="serviceId" value={service.id} />
+              <input type="hidden" name="serviceId" value={service.id} />
+              <input type="hidden" name="latitude" value={latitude} />
+              <input type="hidden" name="longitude" value={longitude} />
 
-            <div className="rounded-xl border bg-muted/40 p-4">
-              <h3 className="mb-3 font-semibold">Service Details</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Service:</span>
-                  <p className="font-medium">{service.name}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Price:</span>
-                  <p className={`font-medium ${service.price < 60 ? 'text-red-600' : 'text-green-600'}`}>
-                    ৳{service.price}
-                    {service.price < 60 && (
-                      <span className="text-xs text-red-500 block">
-                        Below minimum (৳60 required)
-                      </span>
-                    )}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Duration:</span>
-                  <p className="font-medium">{service.duration || "N/A"}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Provider:</span>
-                  <p className="font-medium">{service.provider?.name || "N/A"}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-sm font-medium">Booking Type</label>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Button
+              <div className="grid grid-cols-2 gap-4 p-1 bg-zinc-900 rounded-2xl border border-zinc-800">
+                <button
                   type="button"
-                  variant={bookingType === "now" ? "default" : "outline"}
                   onClick={() => setBookingType("now")}
-                  className="h-12"
+                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all ${bookingType === "now" ? "bg-emerald-500 text-black shadow-lg" : "text-zinc-500 hover:text-white"}`}
                 >
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Book Now & Pay
-                </Button>
-                <Button
+                  <CreditCard className="h-4 w-4" /> Pay Now
+                </button>
+                <button
                   type="button"
-                  variant={bookingType === "later" ? "default" : "outline"}
                   onClick={() => setBookingType("later")}
-                  className="h-12"
+                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all ${bookingType === "later" ? "bg-emerald-500 text-black shadow-lg" : "text-zinc-500 hover:text-white"}`}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  Book Later
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {bookingType === "now"
-                  ? "Payment will be processed immediately."
-                  : "You can pay later within the allowed payment window."}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Booking Date</label>
-                <Input
-                  type="date"
-                  name="bookingDate"
-                  required
-                  min={formatMinDate(today)}
-                  max={formatMinDate(maxDate)}
-                  value={bookingDate}
-                  onChange={(e) => setBookingDate(e.target.value)}
-                />
+                  <CalendarIcon className="h-4 w-4" /> Book Later
+                </button>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Booking Time</label>
-                <select
-                  name="bookingTime"
-                  required
-                  value={bookingTime}
-                  onChange={(e) => setBookingTime(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                  <option value="">Select time</option>
-                  {timeSlots.map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <label className="text-sm font-medium">Service Location</label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={getCurrentLocation}
-                  disabled={isGettingLocation}
-                  className="text-xs"
-                >
-                  {isGettingLocation ? (
-                    <>
-                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                      Locating...
-                    </>
-                  ) : (
-                    <>
-                      <MapPin className="mr-1 h-3 w-3" />
-                      Use Current Location
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {locationError && (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{locationError}</AlertDescription>
-                </Alert>
-              )}
-
-              {submitError && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{submitError}</AlertDescription>
-                </Alert>
-              )}
-
-              <LocationSelector
-                onLocationSelect={handleLocationSelect}
-                initialLocation={selectedLocation || undefined}
-              />
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">City</label>
-                  <Input
-                    type="text"
-                    name="city"
-                    placeholder="Enter city"
-                    required
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                  <label className="text-xs font-semibold text-zinc-500 uppercase ml-1">Preferred Date</label>
+                  <Input 
+                    type="date" name="bookingDate" required 
+                    className="bg-zinc-900 border-zinc-800 rounded-xl h-12 text-white focus:ring-emerald-500"
                   />
                 </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Latitude</label>
-                    <Input
-                      type="number"
-                      name="latitude"
-                      step="any"
-                      placeholder="Lat"
-                      required
-                      value={latitude}
-                      onChange={(e) => setLatitude(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Longitude</label>
-                    <Input
-                      type="number"
-                      name="longitude"
-                      step="any"
-                      placeholder="Lng"
-                      required
-                      value={longitude}
-                      onChange={(e) => setLongitude(e.target.value)}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-zinc-500 uppercase ml-1">Preferred Time</label>
+                  <select name="bookingTime" required className="w-full h-12 bg-zinc-900 border border-zinc-800 rounded-xl px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Full Address</label>
-                <Textarea
-                  name="address"
-                  placeholder="Enter complete address with landmarks"
-                  required
-                  minLength={10}
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="min-h-[100px]"
+              <div className="space-y-4 pt-2">
+                <label className="text-xs font-semibold text-zinc-500 uppercase ml-1">Service Location</label>
+                <LocationSelector onLocationSelect={handleLocationSelect} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input placeholder="City" name="city" value={city} onChange={(e)=>setCity(e.target.value)} required className="bg-zinc-900 border-zinc-800 rounded-xl h-12" />
+                  <div className="flex gap-2">
+                    <Input placeholder="Lat" value={latitude} readOnly className="bg-zinc-800/50 border-zinc-800 rounded-xl h-12 text-zinc-500" />
+                    <Input placeholder="Lng" value={longitude} readOnly className="bg-zinc-800/50 border-zinc-800 rounded-xl h-12 text-zinc-500" />
+                  </div>
+                </div>
+                <Textarea 
+                  placeholder="Street Address & House No." 
+                  name="address" value={address} 
+                  onChange={(e)=>setAddress(e.target.value)}
+                  className="bg-zinc-900 border-zinc-800 rounded-2xl min-h-[100px]" 
                 />
               </div>
-            </div>
 
-            <div className="modal-action flex-col sm:flex-row gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => { setIsOpen(false); resetForm(); }}
-                className="btn btn-outline flex-1"
-                disabled={isSubmitting}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary flex-1"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <span className="loading loading-spinner"></span>
-                    Processing...
-                  </>
-                ) : bookingType === "now" ? (
-                  "Pay ৳" + service.price
-                ) : (
-                  "Confirm Booking"
-                )}
-              </button>
-            </div>
-          </form>
+              <div className="flex items-center gap-4 pt-4 border-t border-zinc-800">
+                <div className="flex-1">
+                  <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-tighter">Total Price</p>
+                  <p className="text-2xl font-semibold text-emerald-500">৳{service.price}</p>
+                </div>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="flex-[2] h-14 rounded-2xl bg-white text-black font-semibold hover:bg-emerald-500 transition-all disabled:opacity-50"
+                >
+                  {isSubmitting ? <Loader2 className="animate-spin" /> : "CONFIRM BOOKING"}
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
-        <form method="dialog" className="modal-backdrop" onClick={() => { setIsOpen(false); resetForm(); }}>
-          <button>close</button>
-        </form>
-      </dialog>
       )}
     </>
   );

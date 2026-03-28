@@ -27,6 +27,8 @@ export const PublicServicesGrid = ({
 }: PublicServicesGridProps) => {
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
 
   const filteredServices = useMemo(() => {
     let list = [...initialServices];
@@ -36,34 +38,75 @@ export const PublicServicesGrid = ({
     if (selectedCategory !== "all") {
       list = list.filter((s) => s.specialty?.id === selectedCategory);
     }
+    if (minPrice) {
+      list = list.filter((s) => (s.price || 0) >= parseInt(minPrice));
+    }
+    if (maxPrice) {
+      list = list.filter((s) => (s.price || 0) <= parseInt(maxPrice));
+    }
     return list;
-  }, [initialServices, query, selectedCategory]);
+  }, [initialServices, query, selectedCategory, minPrice, maxPrice]);
 
   return (
     <div className="space-y-10">
       {/* Search & Filter - Modern Glassmorphism */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white/50 dark:bg-zinc-900/50 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 backdrop-blur-xl shadow-sm">
-        <div className="relative w-full md:max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-          <Input
-            placeholder="What service are you looking for?"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="pl-12 h-12 bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 rounded-2xl focus:ring-2 focus:ring-green-500 transition-all"
-          />
+      <div className="flex flex-col gap-4 bg-white/50 dark:bg-zinc-900/50 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 backdrop-blur-xl shadow-sm">
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="relative w-full md:max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <Input
+              placeholder="What service are you looking for?"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="pl-12 h-12 bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 rounded-2xl focus:ring-2 focus:ring-green-500 transition-all"
+            />
+          </div>
+          <div className="flex w-full md:w-auto gap-3">
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full md:w-[200px] h-12 rounded-2xl bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 font-medium">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                <SelectItem value="all">All Categories</SelectItem>
+                {specialties.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div className="flex w-full md:w-auto gap-3">
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-full md:w-[200px] h-12 rounded-2xl bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 font-medium">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl">
-              <SelectItem value="all">All Categories</SelectItem>
-              {specialties.map((s) => (
-                <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
+        {/* Price Filter */}
+        <div className="flex flex-col sm:flex-row gap-3 items-center">
+          <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 whitespace-nowrap">Price Range (৳):</span>
+          <div className="flex gap-3 w-full sm:w-auto">
+            <Input
+              type="number"
+              placeholder="Min"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              className="w-24 h-10 bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-green-500 transition-all text-xs"
+            />
+            <span className="text-zinc-400 flex items-center">-</span>
+            <Input
+              type="number"
+              placeholder="Max"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              className="w-24 h-10 bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-green-500 transition-all text-xs"
+            />
+            {(minPrice || maxPrice) && (
+              <button
+                onClick={() => {
+                  setMinPrice("");
+                  setMaxPrice("");
+                }}
+                className="px-3 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-xs font-semibold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
