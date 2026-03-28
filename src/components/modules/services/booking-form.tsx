@@ -95,16 +95,16 @@ export function BookingForm({ service }: BookingFormProps) {
       </Button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-[#0A0A0A] border border-zinc-800 p-8 shadow-2xl">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 dark:bg-black/90 backdrop-blur-sm">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-zinc-800 p-8 shadow-2xl">
             
             <div className="flex justify-between items-start mb-8">
               <div>
-                <h3 className="text-3xl font-semibold text-white">Complete Booking</h3>
-                <p className="text-zinc-500 text-sm mt-1">Fill the details to confirm your service.</p>
+                <h3 className="text-3xl font-semibold text-gray-900 dark:text-white">Complete Booking</h3>
+                <p className="text-gray-600 dark:text-zinc-500 text-sm mt-1">Fill the details to confirm your service.</p>
               </div>
-              <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-zinc-900 rounded-full transition-colors">
-                <CheckCircle2 className="h-6 w-6 text-zinc-600 rotate-45" />
+              <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-full transition-colors">
+                <CheckCircle2 className="h-6 w-6 text-gray-400 dark:text-zinc-600 rotate-45" />
               </button>
             </div>
 
@@ -113,18 +113,18 @@ export function BookingForm({ service }: BookingFormProps) {
               <input type="hidden" name="latitude" value={latitude} />
               <input type="hidden" name="longitude" value={longitude} />
 
-              <div className="grid grid-cols-2 gap-4 p-1 bg-zinc-900 rounded-2xl border border-zinc-800">
+              <div className="grid grid-cols-2 gap-4 p-1 bg-gray-100 dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setBookingType("now")}
-                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all ${bookingType === "now" ? "bg-emerald-500 text-black shadow-lg" : "text-zinc-500 hover:text-white"}`}
+                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all ${bookingType === "now" ? "bg-emerald-500 text-black shadow-lg" : "text-gray-600 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white"}`}
                 >
                   <CreditCard className="h-4 w-4" /> Pay Now
                 </button>
                 <button
                   type="button"
                   onClick={() => setBookingType("later")}
-                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all ${bookingType === "later" ? "bg-emerald-500 text-black shadow-lg" : "text-zinc-500 hover:text-white"}`}
+                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all ${bookingType === "later" ? "bg-emerald-500 text-black shadow-lg" : "text-gray-600 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white"}`}
                 >
                   <CalendarIcon className="h-4 w-4" /> Book Later
                 </button>
@@ -132,41 +132,41 @@ export function BookingForm({ service }: BookingFormProps) {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase ml-1">Preferred Date</label>
+                  <label className="text-xs font-semibold text-gray-600 dark:text-zinc-500 uppercase ml-1">Preferred Date</label>
                   <Input 
                     type="date" name="bookingDate" required 
-                    className="bg-zinc-900 border-zinc-800 rounded-xl h-12 text-white focus:ring-emerald-500"
+                    className="bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-800 rounded-xl h-12 text-gray-900 dark:text-white focus:ring-emerald-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-zinc-500 uppercase ml-1">Preferred Time</label>
-                  <select name="bookingTime" required className="w-full h-12 bg-zinc-900 border border-zinc-800 rounded-xl px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <label className="text-xs font-semibold text-gray-600 dark:text-zinc-500 uppercase ml-1">Preferred Time</label>
+                  <select name="bookingTime" required className="w-full h-12 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-800 rounded-xl px-4 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
               </div>
 
               <div className="space-y-4 pt-2">
-                <label className="text-xs font-semibold text-zinc-500 uppercase ml-1">Service Location</label>
+                <label className="text-xs font-semibold text-gray-600 dark:text-zinc-500 uppercase ml-1">Service Location</label>
                 <LocationSelector onLocationSelect={handleLocationSelect} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input placeholder="City" name="city" value={city} onChange={(e)=>setCity(e.target.value)} required className="bg-zinc-900 border-zinc-800 rounded-xl h-12" />
+                  <Input placeholder="City" name="city" value={city} onChange={(e)=>setCity(e.target.value)} required className="bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-800 rounded-xl h-12 text-gray-900 dark:text-white" />
                   <div className="flex gap-2">
-                    <Input placeholder="Lat" value={latitude} readOnly className="bg-zinc-800/50 border-zinc-800 rounded-xl h-12 text-zinc-500" />
-                    <Input placeholder="Lng" value={longitude} readOnly className="bg-zinc-800/50 border-zinc-800 rounded-xl h-12 text-zinc-500" />
+                    <Input placeholder="Lat" value={latitude} readOnly className="bg-gray-100 dark:bg-zinc-800/50 border-gray-300 dark:border-zinc-800 rounded-xl h-12 text-gray-600 dark:text-zinc-500" />
+                    <Input placeholder="Lng" value={longitude} readOnly className="bg-gray-100 dark:bg-zinc-800/50 border-gray-300 dark:border-zinc-800 rounded-xl h-12 text-gray-600 dark:text-zinc-500" />
                   </div>
                 </div>
                 <Textarea 
                   placeholder="Street Address & House No." 
                   name="address" value={address} 
                   onChange={(e)=>setAddress(e.target.value)}
-                  className="bg-zinc-900 border-zinc-800 rounded-2xl min-h-[100px]" 
+                  className="bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-800 rounded-2xl min-h-[100px] text-gray-900 dark:text-white" 
                 />
               </div>
 
-              <div className="flex items-center gap-4 pt-4 border-t border-zinc-800">
+              <div className="flex items-center gap-4 pt-4 border-t border-gray-200 dark:border-zinc-800">
                 <div className="flex-1">
-                  <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-tighter">Total Price</p>
+                  <p className="text-[10px] font-semibold text-gray-600 dark:text-zinc-500 uppercase tracking-tighter">Total Price</p>
                   <p className="text-2xl font-semibold text-emerald-500">৳{service.price}</p>
                 </div>
                 <Button 

@@ -10,7 +10,12 @@ export default function Loading() {
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
       ></div>
 
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      {/* Decorative Background Text */}
+      <div className="pointer-events-none absolute -bottom-20 -left-10 select-none text-[300px] md:text-[400px] font-bold text-green-800/5 dark:text-green-500/5 leading-none">
+        S Z
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="relative mb-12 px-6 py-8">
           <div className="relative">
