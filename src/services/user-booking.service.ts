@@ -2,6 +2,8 @@
 
 import { cookies } from "next/headers";
 import { getServerEnv } from "@/lib/env";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export interface UserBookingClient {
   id: string;
@@ -312,4 +314,64 @@ export async function cancelUserBooking(bookingId: string): Promise<boolean> {
     console.error("Failed to cancel booking", error);
     return false;
   }
+}
+
+function getString(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function getNumber(formData: FormData, key: string) {
+  const value = formData.get(key);
+  if (typeof value !== "string" || !value.trim()) return NaN;
+  return Number(value);
+}
+
+async function handleBooking(formData: FormData, mode: "now" | "later") {
+  const serviceId = getString(formData, "serviceId");
+  const bookingDate = getString(formData, "bookingDate");
+  const bookingTime = getString(formData, "bookingTime");
+  const address = getString(formData, "address");
+  const city = getString(formData, "city");
+  const latitude = getNumber(formData, "latitude");
+  const longitude = getNumber(formData, "longitude");
+
+  if (!serviceId || !bookingDate || !bookingTime || !address || !city || Number.isNaN(latitude) || Number.isNaN(longitude)) {
+    throw new Error("Please fill all required booking fields.");
+  }
+
+  const payload = {
+    serviceId,
+    bookingDate,
+    bookingTime,
+    address,
+    city,
+    latitude,
+    longitude,
+  };
+
+  const result = mode === "now"
+    ? await bookServiceNow(payload)
+    : await bookServiceLater(payload);
+
+  if (!result) {
+    throw new Error("Booking failed. Please try again.");
+  }
+
+  revalidatePath("/bookings");
+  revalidatePath(`/services/${serviceId}`);
+
+  if (result.paymentUrl) {
+    redirect(result.paymentUrl);
+  }
+
+  redirect("/bookings");
+}
+
+export async function handleBookNow(formData: FormData) {
+  return handleBooking(formData, "now");
+}
+
+export async function handleBookLater(formData: FormData) {
+  return handleBooking(formData, "later");
 }

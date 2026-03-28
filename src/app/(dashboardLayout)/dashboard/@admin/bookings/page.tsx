@@ -953,10 +953,7 @@ export default function AdminBookingsPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-dashed border-green-300 bg-green-50 p-4 text-sm text-green-800 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-300">
-              Backend enum এখন <span className="font-semibold">PENDING / ACCEPTED / WORKING / COMPLETED / CANCELLED</span> এবং{" "}
-              <span className="font-semibold">UNPAID / PAID / REFUNDED</span> — এই code ঠিক সেই অনুযায়ী update করা হয়েছে।
-            </div>
+           
           </div>
 
           <DialogFooter className="gap-2">

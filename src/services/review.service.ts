@@ -81,13 +81,29 @@ const normalizeReviewListResponse = (
   query?: ReviewListQuery,
 ): ApiResponse<ReviewRecord[]> => {
   const payload = response.data;
-  const list = Array.isArray(payload)
-    ? payload
-    : Array.isArray(payload?.data)
-      ? payload.data
-      : [];
 
-  const nestedMeta = response.meta ?? (!Array.isArray(payload) ? payload?.meta : undefined);
+  // Handle nested response structure from backend
+  let list: ReviewRecord[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let nestedMeta: any = undefined;
+
+  if (Array.isArray(payload)) {
+    // Direct array response
+    list = payload;
+  } else if (payload && typeof payload === 'object') {
+    if (Array.isArray(payload.data)) {
+      // Backend response structure: { data: { meta: {...}, data: [...] } }
+      list = payload.data;
+      nestedMeta = payload.meta;
+    } else if (Array.isArray(payload)) {
+      // Fallback for array in data
+      list = payload;
+    } else {
+      // Empty or invalid response
+      list = [];
+    }
+  }
+
   const normalizedMeta = buildPaginationMeta(nestedMeta, query, list.length);
 
   return {
@@ -152,4 +168,15 @@ export const deleteReview = async (
   return httpClient.delete<null>(`${REVIEWS_BASE}/${reviewId}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
+};
+
+// Get All Reviews (Admin only)
+export const getAllReviews = async (
+  query?: ReviewListQuery,
+): Promise<ApiResponse<ReviewRecord[]>> => {
+  const response = await httpClient.get<ReviewRecord[] | ReviewListEnvelope>(REVIEWS_BASE, {
+    params: sanitizeQueryParams(query),
+  });
+
+  return normalizeReviewListResponse(response, query);
 };

@@ -13,6 +13,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { getServiceById, type ServiceRecord } from "@/services/services.service";
+import { BookingForm } from "@/components/modules/services/booking-form";
 
 type ServiceDetailsPageProps = {
   params: Promise<{ id: string }>;
@@ -34,7 +35,7 @@ export default async function ServiceDetailsPage({ params }: ServiceDetailsPageP
 
   try {
     const response = await getServiceById(serviceId);
-    service = response.data ?? null;
+    service = response?.data ?? null;
   } catch (error) {
     console.error("Error fetching service:", error);
   }
@@ -181,12 +182,7 @@ export default async function ServiceDetailsPage({ params }: ServiceDetailsPageP
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                className="h-14 rounded-full bg-emerald-600 px-8 text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition hover:bg-emerald-700"
-                disabled={!service.isActive}
-              >
-                {service.isActive ? "Book Now" : "Unavailable"}
-              </Button>
+              <BookingForm service={service} />
 
               <Button
                 asChild
