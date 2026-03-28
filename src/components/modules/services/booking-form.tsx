@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { type ServiceRecord } from "@/services/services.service";
-import { jwtUtils } from "@/lib/jwtUtils";
+import { getUserRoleFromServer } from "@/app/actions/getUserRole";
 import { handleBookLater, handleBookNow } from "../../../app/(commonLayout)/actions/booking-actions";
 import LocationSelector from "@/components/shared/LocationSelector";
 import { Role } from "@/app/constants/role";
@@ -41,11 +41,17 @@ export function BookingForm({ service }: BookingFormProps) {
   const router = useRouter();
 
   useEffect(() => {
-    const accessToken = document.cookie.split("; ").find(r => r.startsWith("accessToken="))?.split("=")[1];
-    if (accessToken) {
-      const decoded = jwtUtils.decodedToken(accessToken);
-      setUserRole(decoded?.role?.toUpperCase() || null);
+    async function fetchRole() {
+      try {
+        const role = await getUserRoleFromServer();
+        if (role) {
+          setUserRole(role.toUpperCase());
+        }
+      } catch (error) {
+        console.error("Error fetching role:", error);
+      }
     }
+    fetchRole();
   }, []);
 
   const handleLocationSelect = (loc: { lat: number; lng: number; address: string }) => {
@@ -88,7 +94,28 @@ export function BookingForm({ service }: BookingFormProps) {
   return (
     <>
       <Button
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+        
+          if (!userRole) {
+            toast.error("Please login to book a service");
+            router.push('/login');
+            return;
+          }
+
+          if (userRole === Role.PROVIDER) {
+            toast.error("Providers cannot book services. Please use a Client account.");
+            return;
+          }
+
+         
+          if (userRole !== Role.CLIENT) {
+            toast.error("Only registered clients can book this service.");
+            return;
+          }
+
+         
+          setIsOpen(true);
+        }}
         className="w-full h-14 rounded-2xl bg-emerald-500 text-black font-semibold text-lg hover:bg-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all active:scale-95"
       >
         BOOKING NOW
@@ -97,7 +124,7 @@ export function BookingForm({ service }: BookingFormProps) {
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 dark:bg-black/90 backdrop-blur-sm">
           <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-zinc-800 p-8 shadow-2xl">
-            
+
             <div className="flex justify-between items-start mb-8">
               <div>
                 <h3 className="text-3xl font-semibold text-gray-900 dark:text-white">Complete Booking</h3>
@@ -133,8 +160,8 @@ export function BookingForm({ service }: BookingFormProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-gray-600 dark:text-zinc-500 uppercase ml-1">Preferred Date</label>
-                  <Input 
-                    type="date" name="bookingDate" required 
+                  <Input
+                    type="date" name="bookingDate" required
                     className="bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-800 rounded-xl h-12 text-gray-900 dark:text-white focus:ring-emerald-500"
                   />
                 </div>
@@ -150,17 +177,17 @@ export function BookingForm({ service }: BookingFormProps) {
                 <label className="text-xs font-semibold text-gray-600 dark:text-zinc-500 uppercase ml-1">Service Location</label>
                 <LocationSelector onLocationSelect={handleLocationSelect} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input placeholder="City" name="city" value={city} onChange={(e)=>setCity(e.target.value)} required className="bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-800 rounded-xl h-12 text-gray-900 dark:text-white" />
+                  <Input placeholder="City" name="city" value={city} onChange={(e) => setCity(e.target.value)} required className="bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-800 rounded-xl h-12 text-gray-900 dark:text-white" />
                   <div className="flex gap-2">
                     <Input placeholder="Lat" value={latitude} readOnly className="bg-gray-100 dark:bg-zinc-800/50 border-gray-300 dark:border-zinc-800 rounded-xl h-12 text-gray-600 dark:text-zinc-500" />
                     <Input placeholder="Lng" value={longitude} readOnly className="bg-gray-100 dark:bg-zinc-800/50 border-gray-300 dark:border-zinc-800 rounded-xl h-12 text-gray-600 dark:text-zinc-500" />
                   </div>
                 </div>
-                <Textarea 
-                  placeholder="Street Address & House No." 
-                  name="address" value={address} 
-                  onChange={(e)=>setAddress(e.target.value)}
-                  className="bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-800 rounded-2xl min-h-[100px] text-gray-900 dark:text-white" 
+                <Textarea
+                  placeholder="Street Address & House No."
+                  name="address" value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-800 rounded-2xl min-h-[100px] text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -169,8 +196,8 @@ export function BookingForm({ service }: BookingFormProps) {
                   <p className="text-[10px] font-semibold text-gray-600 dark:text-zinc-500 uppercase tracking-tighter">Total Price</p>
                   <p className="text-2xl font-semibold text-emerald-500">৳{service.price}</p>
                 </div>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={isSubmitting}
                   className="flex-[2] h-14 rounded-2xl bg-white text-black font-semibold hover:bg-emerald-500 transition-all disabled:opacity-50"
                 >

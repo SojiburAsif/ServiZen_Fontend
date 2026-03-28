@@ -127,7 +127,7 @@ export default async function ServiceDetailsPage({ params }: ServiceDetailsPageP
             </div>
 
             <div className="space-y-6 rounded-3xl border border-gray-200 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/80 p-8 backdrop-blur-xl">
-              <div>
+              <div className="">
                 <p className="text-xs font-semibold uppercase text-gray-600 dark:text-zinc-500 tracking-widest mb-1">Service Fee</p>
                 <div className="flex items-end justify-between">
                   <p className="text-5xl font-semibold text-emerald-500">
@@ -137,7 +137,7 @@ export default async function ServiceDetailsPage({ params }: ServiceDetailsPageP
                 </div>
               </div>
               
-              <div className="pt-2">
+              <div className="pt-2  ">
                 <BookingForm service={service} />
               </div>
 
