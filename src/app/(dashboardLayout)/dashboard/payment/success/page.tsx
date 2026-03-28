@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PaymentSuccessClient from "./PaymentSuccessClient";
 
 export default async function PaymentSuccessPage({ searchParams }: { searchParams: Promise<{ booking_id?: string; session_id?: string }> }) {
   const { booking_id } = await searchParams;
 
   return (
     <div className="flex h-[80vh] items-center justify-center">
-      <div className="mx-auto max-w-md text-center bg-card p-8 rounded-2xl shadow-sm border">
+      <PaymentSuccessClient />
+      <div className="mx-auto max-w-md text-center bg-card p-8 rounded-2xl shadow-sm border border-green-200/50 dark:border-green-900/50">
         <div className="flex justify-center mb-6">
           <CheckCircle2 className="h-20 w-20 text-emerald-500" />
         </div>

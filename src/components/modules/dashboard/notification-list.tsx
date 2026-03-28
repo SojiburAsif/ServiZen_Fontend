@@ -1,214 +1,117 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useNotifications } from "@/hooks/useNotifications";
 import { formatDistanceToNow } from "date-fns";
-import { Bell, BellRing, CheckCircle, AlertCircle, CreditCard, Calendar, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Bell, CheckCircle2, AlertCircle, Calendar, CreditCard, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { markNotificationAsRead, getMyNotifications, getProviderNotifications, type Notification } from "@/services/notification.service";
-import { jwtUtils } from "@/lib/jwtUtils";
+import { Button } from "@/components/ui/button";
 
-interface NotificationListProps {
-  userRole: "USER" | "PROVIDER" | "ADMIN";
-  limit?: number;
-  onNotificationClick?: (bookingId?: string) => void;
-}
+export function NotificationList() {
+  const { notifications, isLoading, markAsRead, markAllAsRead } = useNotifications();
 
-export function NotificationList({ userRole, limit = 10, onNotificationClick }: NotificationListProps) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [markingAsRead, setMarkingAsRead] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadNotifications();
-  }, [userRole]);
-
-  const loadNotifications = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const result = userRole === "PROVIDER"
-        ? await getProviderNotifications({ limit })
-        : await getMyNotifications({ limit });
-
-      if (result) {
-        setNotifications(result.data);
-      } else {
-        setError("Failed to load notifications");
-      }
-    } catch (err) {
-      console.error("Error loading notifications:", err);
-      setError("Failed to load notifications");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleMarkAsRead = async (notificationId: string) => {
-    try {
-      setMarkingAsRead(notificationId);
-      const success = await markNotificationAsRead(notificationId);
-
-      if (success) {
-        setNotifications(prev =>
-          prev.map(notif =>
-            notif.id === notificationId ? { ...notif, isRead: true } : notif
-          )
-        );
-      }
-    } catch (err) {
-      console.error("Error marking notification as read:", err);
-    } finally {
-      setMarkingAsRead(null);
-    }
-  };
-
-  const handleNotificationClick = (notification: Notification) => {
-    if (!notification.isRead) {
-      handleMarkAsRead(notification.id);
-    }
-    if (onNotificationClick) {
-      onNotificationClick(notification.bookingId);
-    }
-  };
-
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "PAYMENT_COMPLETED":
-      case "BOOKING_PAYMENT_PAID_FOR_PROVIDER":
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case "PAYMENT_REMINDER":
-        return <CreditCard className="w-5 h-5 text-yellow-600" />;
-      case "BOOKING_COMPLETED":
-        return <CheckCircle className="w-5 h-5 text-blue-600" />;
-      case "BOOKING_CANCELLED_BY_USER":
-        return <XCircle className="w-5 h-5 text-red-600" />;
-      case "BOOKING_CREATED_FOR_PROVIDER":
-        return <Calendar className="w-5 h-5 text-blue-600" />;
-      default:
-        return <Bell className="w-5 h-5 text-gray-600" />;
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "PAYMENT_COMPLETED":
-      case "BOOKING_PAYMENT_PAID_FOR_PROVIDER":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "PAYMENT_REMINDER":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "BOOKING_COMPLETED":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "BOOKING_CANCELLED_BY_USER":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "BOOKING_CREATED_FOR_PROVIDER":
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  if (loading) {
+  if (isLoading && notifications.length === 0) {
     return (
-      <div className="space-y-3">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="p-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-5 h-5 bg-gray-200 rounded"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-        <p className="text-red-600">{error}</p>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={loadNotifications}
-          className="mt-3"
-        >
-          Try Again
-        </Button>
+      <div className="flex flex-col items-center justify-center py-20">
+        <Loader2 className="h-10 w-10 animate-spin text-green-600 dark:text-green-500 mb-4" />
+        <p className="text-gray-500 dark:text-gray-400 font-medium">Loading your notifications...</p>
       </div>
     );
   }
 
   if (notifications.length === 0) {
     return (
-      <div className="text-center py-8">
-        <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-        <p className="text-gray-500">No notifications yet</p>
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="bg-gray-100 dark:bg-gray-900 rounded-full p-6 mb-6 inline-flex">
+          <Bell className="h-12 w-12 text-gray-400 dark:text-gray-600" />
+        </div>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white">All caught up!</h3>
+        <p className="text-gray-500 dark:text-gray-400 mt-2">You don t have any new notifications.</p>
       </div>
     );
   }
 
-  return (
-    <div className="max-h-[400px] overflow-y-auto">
-      <div className="space-y-3">
-        {notifications.map((notification) => (
-          <Card
-            key={notification.id}
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              !notification.isRead ? "bg-blue-50 border-blue-200" : "bg-white"
-            }`}
-            onClick={() => handleNotificationClick(notification)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  {getNotificationIcon(notification.type)}
-                </div>
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
+  return (
+    <div className="w-full max-w-4xl mx-auto space-y-6">
+      {unreadCount > 0 && (
+        <div className="flex justify-end mb-4">
+          <Button 
+            onClick={() => markAllAsRead()}
+            variant="outline" 
+            className="border-green-600 text-green-700 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20 rounded-full px-6"
+          >
+            Mark all as read
+          </Button>
+        </div>
+      )}
+      
+      <div className="space-y-4">
+        {notifications.map((notification, index) => {
+          const isUnread = !notification.isRead;
+          const isPositive = notification.type.includes("COMPLETED") || notification.type.includes("PAID");
+          const isWarning = notification.type.includes("CANCELLED") || notification.type.includes("REMINDER");
+          const Icon = isPositive ? CheckCircle2 : isWarning ? AlertCircle : (notification.type.includes("PAYMENT") ? CreditCard : Calendar);
+
+          return (
+            <motion.div
+              key={notification.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              onClick={() => {
+                if (isUnread) markAsRead(notification.id);
+              }}
+              className={`group relative flex flex-col sm:flex-row gap-5 p-5 md:p-6 rounded-3xl border transition-all duration-300 cursor-pointer overflow-hidden ${
+                isUnread 
+                  ? "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-900/50 shadow-sm hover:shadow-md hover:border-green-300 dark:hover:border-green-800" 
+                  : "bg-white dark:bg-[#0a0a0a] border-gray-100 dark:border-gray-900 opacity-80 hover:opacity-100 hover:border-gray-200 dark:hover:border-gray-800"
+              }`}
+            >
+              {isUnread && (
+                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-green-400 to-green-600 dark:from-green-500 dark:to-green-700"></div>
+              )}
+              
+              <div className="flex items-start gap-5 flex-1">
+                <div className={`flex-shrink-0 size-12 rounded-full flex items-center justify-center border ${
+                  isPositive ? "bg-green-100 border-green-200 text-green-700 dark:bg-green-900/40 dark:border-green-800 dark:text-green-400" :
+                  isWarning ? "bg-orange-100 border-orange-200 text-orange-700 dark:bg-orange-900/40 dark:border-orange-800 dark:text-orange-400" :
+                  "bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-800 dark:text-blue-400"
+                }`}>
+                  <Icon className="size-6" />
+                </div>
+                
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <h4 className={`text-sm font-medium truncate ${
-                      !notification.isRead ? "text-blue-900" : "text-gray-900"
-                    }`}>
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-1">
+                    <h4 className={`text-base font-bold pr-6 ${isUnread ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"}`}>
                       {notification.title}
                     </h4>
-                    <Badge
-                      variant="outline"
-                      className={`text-xs ml-2 flex-shrink-0 ${getTypeColor(notification.type)}`}
-                    >
+                    <Badge variant="outline" className={`whitespace-nowrap shrink-0 ${
+                      isPositive ? "text-green-700 border-green-200 dark:text-green-400 dark:border-green-800" :
+                      isWarning ? "text-orange-700 border-orange-200 dark:text-orange-400 dark:border-orange-800" :
+                      "text-blue-700 border-blue-200 dark:text-blue-400 dark:border-blue-800"
+                    }`}>
                       {notification.type.replace(/_/g, " ").toLowerCase()}
                     </Badge>
                   </div>
-
-                  <p className={`text-sm mt-1 ${
-                    !notification.isRead ? "text-blue-800" : "text-gray-600"
-                  }`}>
+                  <p className={`text-sm mb-3 leading-relaxed ${isUnread ? "text-gray-700 dark:text-gray-300 font-medium" : "text-gray-500 dark:text-gray-500"}`}>
                     {notification.message}
                   </p>
-
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-gray-500">
-                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                    </span>
-
-                    {!notification.isRead && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    )}
-                  </div>
+                  <p className="text-xs font-semibold text-gray-400 dark:text-gray-600 flex items-center gap-1.5 uppercase tracking-wider">
+                    {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                  </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+
+              {isUnread && (
+                <div className="absolute right-5 sm:right-6 top-6 sm:top-1/2 sm:-translate-y-1/2">
+                  <span className="flex size-3 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.8)] animate-pulse"></span>
+                </div>
+              )}
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

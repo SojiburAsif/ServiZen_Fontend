@@ -24,6 +24,36 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useNotifications } from "@/hooks/useNotifications";
+
+function MobileNotificationBadge() {
+  const { unreadCount } = useNotifications();
+  if (unreadCount === 0) return null;
+  return (
+    <span className="ml-auto bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
+      {unreadCount > 9 ? '9+' : unreadCount} new
+    </span>
+  );
+}
+
+function ClientNotificationBell() {
+  const { unreadCount } = useNotifications();
+  return (
+    <DialogTrigger asChild>
+      <Button size="icon" variant="ghost" className="relative text-gray-500 hover:text-gray-900 rounded-full dark:text-gray-400 dark:hover:text-white transition-colors">
+        <Bell className="size-4" />
+        {unreadCount > 0 ? (
+          <span className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        ) : (
+           <span className="absolute right-2.5 top-2.5 flex size-1.5 rounded-full bg-orange-500"></span>
+        )}
+      </Button>
+    </DialogTrigger>
+  );
+}
+
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -243,12 +273,7 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                 {/* Notification Modal */}
                 {mounted ? (
                   <Dialog>
-                    <DialogTrigger asChild>
-                      <Button size="icon" variant="ghost" className="relative text-gray-500 hover:text-gray-900 rounded-full dark:text-gray-400 dark:hover:text-white transition-colors">
-                        <Bell className="size-4" />
-                        <span className="absolute right-2.5 top-2.5 flex size-1.5 rounded-full bg-orange-500"></span>
-                      </Button>
-                    </DialogTrigger>
+                    <ClientNotificationBell />
                     <DialogContent className="sm:max-w-[425px] md:max-w-2xl bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-gray-800 p-0 overflow-hidden">
                       <DialogHeader className="p-6 pb-2">
                         <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -435,6 +460,7 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                         </Link>
                         <Link href="/notification" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                            <Bell className="size-5" /> Notifications
+                           <MobileNotificationBadge />
                         </Link>
                       </div>
                     )}

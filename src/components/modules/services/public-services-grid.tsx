@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -11,370 +11,144 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ArrowRight,
-  BadgeCheck,
-  Clock3,
-  Search,
-  Sparkles,
-  Star,
-  Tag,
-  UserRound,
-} from "lucide-react";
-
+import { Search, Star, MapPin, Heart, ShieldCheck } from "lucide-react";
 import type { ServiceRecord } from "@/services/services.service";
-
-type PaginationMeta = {
-  page?: number;
-  limit?: number;
-  total?: number;
-  totalPages?: number;
-};
-
-type SpecialtyOption = {
-  id: string;
-  title: string;
-};
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type PublicServicesGridProps = {
   initialServices: ServiceRecord[];
-  initialMeta?: PaginationMeta | null;
-  specialties?: SpecialtyOption[];
+  initialMeta?: any;
+  specialties?: { id: string; title: string }[];
 };
-
-const formatCurrency = (value?: number | null) =>
-  new Intl.NumberFormat("en-BD", {
-    style: "currency",
-    currency: "BDT",
-    maximumFractionDigits: 0,
-  }).format(value ?? 0);
 
 export const PublicServicesGrid = ({
   initialServices,
-  initialMeta,
   specialties = [],
 }: PublicServicesGridProps) => {
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "paused">("all");
-  const [sortOption, setSortOption] = useState<
-    "recommended" | "price-low" | "price-high" | "name-asc"
-  >("recommended");
 
   const filteredServices = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
     let list = [...initialServices];
-
-    if (normalizedQuery) {
-      list = list.filter((service) => {
-        const target = `${service.name ?? ""} ${service.description ?? ""} ${service.specialty?.title ?? ""}`.toLowerCase();
-        return target.includes(normalizedQuery);
-      });
+    if (query) {
+      list = list.filter((s) => s.name?.toLowerCase().includes(query.toLowerCase()));
     }
-
     if (selectedCategory !== "all") {
-      list = list.filter((service) => service.specialty?.id === selectedCategory);
+      list = list.filter((s) => s.specialty?.id === selectedCategory);
     }
-
-    if (statusFilter !== "all") {
-      list = list.filter((service) =>
-        statusFilter === "active" ? service.isActive : !service.isActive,
-      );
-    }
-
-    switch (sortOption) {
-      case "price-low":
-        list = list.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-        break;
-      case "price-high":
-        list = list.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
-        break;
-      case "name-asc":
-        list = list.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
-        break;
-      default:
-        list = list.sort((a, b) => Number(b.isActive) - Number(a.isActive));
-        break;
-    }
-
     return list;
-  }, [initialServices, query, selectedCategory, statusFilter, sortOption]);
-
-  const totalServices = initialMeta?.total ?? initialServices.length;
-  const totalCount = filteredServices.length;
-  const activeCount = filteredServices.filter((s) => s.isActive).length;
+  }, [initialServices, query, selectedCategory]);
 
   return (
-    <section className="relative overflow-hidden rounded-[2rem] border border-white/40 bg-transparent p-4 shadow-[0_25px_120px_rgba(15,23,42,0.18)] backdrop-blur-2xl dark:border-white/10 dark:bg-transparent sm:p-6 lg:p-8">
-      <div className="pointer-events-none absolute -right-20 top-0 h-72 w-72 rounded-full bg-emerald-400/15 blur-3xl" />
-      <div className="pointer-events-none absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-lime-400/15 blur-3xl" />
-
-      <div className="relative mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-2xl">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-green-600/30 bg-green-500/15 px-4 py-2 text-sm font-semibold text-green-700 dark:border-green-400/30 dark:bg-green-500/20 dark:text-green-300">
-            <Sparkles className="h-4 w-4" />
-            Premium services collection
-          </div>
-
-          <h2 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white sm:text-4xl lg:text-5xl">
-            Our Services
-          </h2>
-
-          <p className="mt-4 max-w-xl text-sm leading-7 text-gray-600 dark:text-slate-300 sm:text-base">
-            Explore trusted professionals, verified service providers, and
-            quick booking-ready offers made for your convenience.
-          </p>
+    <div className="space-y-10">
+      {/* Search & Filter - Modern Glassmorphism */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white/50 dark:bg-zinc-900/50 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 backdrop-blur-xl shadow-sm">
+        <div className="relative w-full md:max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Input
+            placeholder="What service are you looking for?"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-12 h-12 bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 rounded-2xl focus:ring-2 focus:ring-green-500 transition-all"
+          />
         </div>
-
-        <div className="grid grid-cols-3 gap-3 sm:min-w-[320px]">
-          <div className="rounded-2xl border border-white/50 bg-white/20 p-4 text-center shadow-sm backdrop-blur dark:border-white/10 dark:bg-black/40">
-            <div className="mb-1 flex items-center justify-center gap-1 text-green-600 dark:text-green-400">
-              <Star className="h-4 w-4 fill-current" />
-              <span className="text-xl font-black">{totalCount}</span>
-            </div>
-            <p className="text-xs font-medium text-gray-500 dark:text-slate-400">
-              Total
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-white/50 bg-white/20 p-4 text-center shadow-sm backdrop-blur dark:border-white/10 dark:bg-black/40">
-            <div className="mb-1 flex items-center justify-center gap-1 text-green-600 dark:text-green-400">
-              <BadgeCheck className="h-4 w-4" />
-              <span className="text-xl font-black">{activeCount}</span>
-            </div>
-            <p className="text-xs font-medium text-gray-500 dark:text-slate-400">
-              Active
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-white/50 bg-white/20 p-4 text-center shadow-sm backdrop-blur dark:border-white/10 dark:bg-black/40">
-            <div className="mb-1 flex items-center justify-center gap-1 text-green-600 dark:text-green-400">
-              <Tag className="h-4 w-4" />
-              <span className="text-xl font-black">{specialties.length}</span>
-            </div>
-            <p className="text-xs font-medium text-gray-500 dark:text-slate-400">
-              Categories
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="relative mb-8 grid gap-4 lg:grid-cols-[1.1fr_0.5fr_0.5fr_0.5fr]">
-        <div className="space-y-2">
-          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-slate-400">
-            Search
-          </div>
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-green-600 dark:text-green-400" />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search by title, specialty, or keyword"
-              className="h-14 rounded-2xl border-white/40 bg-white/60 pl-11 text-sm shadow-inner shadow-white/40 placeholder:text-gray-500 focus-visible:border-green-400 focus-visible:ring-green-400/20 dark:border-white/10 dark:bg-black/40 dark:text-white"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-slate-400">
-            Category
-          </div>
+        <div className="flex w-full md:w-auto gap-3">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="h-14 rounded-2xl border-white/40 bg-white/60 text-sm text-gray-700 shadow-inner shadow-white/40 focus:ring-green-400/20 dark:border-white/10 dark:bg-black/40 dark:text-white">
-              <SelectValue placeholder="All categories" />
+            <SelectTrigger className="w-full md:w-[200px] h-12 rounded-2xl bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 font-medium">
+              <SelectValue placeholder="All Categories" />
             </SelectTrigger>
-            <SelectContent className="rounded-2xl border border-white/20 bg-white/90 text-gray-700 shadow-2xl dark:border-white/10 dark:bg-black/80 dark:text-slate-100">
-              <SelectItem value="all">All categories</SelectItem>
-              {specialties.map((specialty) => (
-                <SelectItem key={specialty.id} value={specialty.id}>
-                  {specialty.title}
-                </SelectItem>
+            <SelectContent className="rounded-2xl">
+              <SelectItem value="all">All Categories</SelectItem>
+              {specialties.map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-
-        <div className="space-y-2">
-          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-slate-400">
-            Status
-          </div>
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as typeof statusFilter)}>
-            <SelectTrigger className="h-14 rounded-2xl border-white/40 bg-white/60 text-sm text-gray-700 shadow-inner shadow-white/40 focus:ring-green-400/20 dark:border-white/10 dark:bg-black/40 dark:text-white">
-              <SelectValue placeholder="All statuses" />
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl border border-white/20 bg-white/90 text-gray-700 shadow-2xl dark:border-white/10 dark:bg-black/80 dark:text-slate-100">
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="active">Available now</SelectItem>
-              <SelectItem value="paused">Paused</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-slate-400">
-            Sort by
-          </div>
-          <Select value={sortOption} onValueChange={(value) => setSortOption(value as typeof sortOption)}>
-            <SelectTrigger className="h-14 rounded-2xl border-white/40 bg-white/60 text-sm text-gray-700 shadow-inner shadow-white/40 focus:ring-green-400/20 dark:border-white/10 dark:bg-black/40 dark:text-white">
-              <SelectValue placeholder="Recommended" />
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl border border-white/20 bg-white/90 text-gray-700 shadow-2xl dark:border-white/10 dark:bg-black/80 dark:text-slate-100">
-              <SelectItem value="recommended">Recommended</SelectItem>
-              <SelectItem value="price-low">Price: Low to High</SelectItem>
-              <SelectItem value="price-high">Price: High to Low</SelectItem>
-              <SelectItem value="name-asc">Name: A-Z</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
-      {specialties.length > 0 && (
-        <div className="relative mb-8">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-green-600/30 bg-green-500/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-green-700 dark:border-green-400/30 dark:bg-green-500/20 dark:text-green-300">
-            Browse by focus
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => setSelectedCategory("all")}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition duration-200 ${
-                selectedCategory === "all"
-                  ? "border-gray-900 bg-gray-900 text-white shadow-lg dark:border-white dark:bg-white dark:text-gray-950"
-                  : "border-white/40 bg-white/50 text-gray-600 backdrop-blur hover:border-green-300 hover:text-green-600 dark:border-white/10 dark:bg-black/40 dark:text-slate-300"
-              }`}
-            >
-              All
-            </button>
-            {specialties.slice(0, 10).map((specialty) => (
-              <button
-                key={specialty.id}
-                type="button"
-                onClick={() => setSelectedCategory(specialty.id)}
-                className={`rounded-full border px-4 py-2 text-sm font-semibold transition duration-200 ${
-                  selectedCategory === specialty.id
-                    ? "border-green-500 bg-green-500 text-white shadow-lg"
-                    : "border-white/40 bg-white/50 text-gray-600 backdrop-blur hover:border-green-300 hover:text-green-600 dark:border-white/10 dark:bg-black/40 dark:text-slate-300"
-                }`}
-              >
-                {specialty.title}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="relative grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {filteredServices.map((service) => (
-          <Link
+      {/* Grid Layout */}
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {filteredServices.map((service: any) => (
+          <div
             key={service.id}
-            href={`/services/${service.id}`}
-            className="group relative overflow-hidden rounded-[1.5rem] border border-white/50 bg-white shadow-[0_10px_40px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(15,23,42,0.14)] dark:border-white/10 dark:bg-slate-900/80"
+            className="group relative flex flex-col overflow-hidden rounded-[2.5rem] bg-white dark:bg-[#0F0F0F] border border-zinc-100 dark:border-zinc-800 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(34,197,94,0.1)]"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/0 via-transparent to-green-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-            <div className="relative aspect-[3/2] overflow-hidden bg-gray-100 dark:bg-slate-800">
-              {service.imageUrl ? (
-                <img
-                  src={service.imageUrl}
-                  alt={service.name}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center bg-gradient-to-br from-green-600 to-lime-500 text-white">
-                  <div className="text-center">
-                    <Sparkles className="mx-auto mb-2 h-6 w-6 animate-pulse" />
-                    <p className="text-xs font-semibold">No Preview</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-
-              <div className="absolute left-3 top-3">
-                <Badge className="rounded-full border-0 bg-white/95 px-3 py-1 text-xs font-semibold text-gray-900 shadow-lg backdrop-blur dark:bg-black/90 dark:text-white">
-                  {service.specialty?.title || "General"}
-                </Badge>
-              </div>
-
-              <div className="absolute right-3 top-3">
-                <div
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold shadow-lg backdrop-blur ${
-                    service.isActive
-                      ? "bg-green-500 text-white"
-                      : "bg-red-500 text-white"
-                  }`}
-                >
-                  <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
-                  {service.isActive ? "Active" : "Paused"}
-                </div>
-              </div>
-
-              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-xs font-medium backdrop-blur">
-                  <UserRound className="h-3 w-3" />
-                  Verified
-                </div>
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-xs font-medium backdrop-blur">
-                  <Clock3 className="h-3 w-3" />
-                  Fast
-                </div>
-              </div>
-            </div>
-
-            <div className="relative p-4">
-              <div className="mb-2 flex items-start justify-between gap-2">
-                <h3 className="line-clamp-1 flex-1 text-lg font-bold text-gray-900 transition-colors group-hover:text-green-600 dark:text-white">
-                  {service.name}
-                </h3>
-                <span className="shrink-0 rounded-full bg-green-500/10 px-2.5 py-1 text-xs font-bold text-green-700 dark:text-green-300">
-                  {formatCurrency(service.price)}
+            {/* Image Section */}
+            <div className="relative aspect-[16/11] overflow-hidden">
+              <img
+                src={service.imageUrl || "https://via.placeholder.com/400x300"}
+                alt={service.name}
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              
+              <div className="absolute inset-x-4 top-4 flex items-center justify-between">
+                <span className="flex items-center gap-1.5 rounded-full bg-white/95 dark:bg-black/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-green-600 shadow-xl backdrop-blur-md">
+                  <ShieldCheck className="h-3 w-3" /> Verified
                 </span>
-              </div>
-
-              <p className="line-clamp-2 text-sm leading-5 text-gray-600 dark:text-slate-300 mb-3">
-                {service.description ||
-                  "Professional service with reliable support and easy booking."}
-              </p>
-
-              <div className="flex items-center justify-between">
-                <div className="text-xs font-semibold uppercase tracking-[0.15em] text-gray-400">
-                  View details
-                </div>
-
-                <div className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-white transition-transform duration-300 group-hover:translate-x-0.5 group-hover:rotate-12">
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </div>
+                <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 dark:bg-black/80 text-zinc-400 hover:text-rose-500 transition-all active:scale-90">
+                  <Heart className="h-5 w-5" />
+                </button>
               </div>
             </div>
-          </Link>
+
+            {/* Content Section */}
+            <div className="flex flex-col p-7">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                  {service.specialty?.title || "Pro Service"}
+                </span>
+                <div className="flex items-center gap-1.5 rounded-full bg-green-50 dark:bg-green-500/10 px-2.5 py-1 text-xs font-bold text-green-600">
+                  <Star className="h-3.5 w-3.5 fill-current" />
+                  {service.provider?.averageRating?.toFixed(1) || "5.0"}
+                </div>
+              </div>
+
+              <h3 className="mb-6 text-2xl font-black leading-tight tracking-tight group-hover:text-green-600 transition-colors line-clamp-1">
+                {service.name}
+              </h3>
+
+              {/* Provider Mini Info */}
+              <div className="flex items-center gap-3 mb-6 p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50">
+                <Avatar className="h-8 w-8 border border-white dark:border-zinc-800">
+                  <AvatarImage src={service.provider?.profilePhoto} />
+                  <AvatarFallback>{service.provider?.name?.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold">{service.provider?.name}</span>
+                  <span className="text-[10px] text-zinc-500">Professional Provider</span>
+                </div>
+              </div>
+
+              <div className="mt-auto flex items-center justify-between pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-1">Starting Price</p>
+                  <span className="text-2xl font-black text-black dark:text-white">
+                    ৳{service.price}
+                  </span>
+                </div>
+                <Link
+                  href={`/services/${service.id}`}
+                  className="rounded-2xl bg-black dark:bg-white px-6 py-3 text-sm font-black text-white dark:text-black transition-all hover:bg-green-600 dark:hover:bg-green-600 hover:text-white"
+                >
+                  Book Now
+                </Link>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
 
       {filteredServices.length === 0 && (
-        <div className="relative rounded-[1.5rem] border border-dashed border-gray-300 bg-white/60 px-6 py-20 text-center text-gray-500 dark:border-white/10 dark:bg-black/40 dark:text-slate-300">
-          <Sparkles className="mx-auto mb-3 h-10 w-10 text-green-500 animate-pulse" />
-          <p className="text-lg font-semibold text-gray-700 dark:text-white">
-            No services available right now.
-          </p>
-          <p className="mt-2 text-sm">
-            Please check back later or explore other categories for more options.
-          </p>
+        <div className="py-32 text-center">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-900 mb-6">
+            <Search className="h-8 w-8 text-zinc-400" />
+          </div>
+          <h3 className="text-xl font-bold">No services found</h3>
+          <p className="text-zinc-500 mt-2">Try adjusting your search or filters.</p>
         </div>
       )}
-
-      {initialMeta?.total ? (
-        <div className="relative mt-8 flex flex-col gap-3 rounded-2xl border border-white/50 bg-white/20 px-5 py-4 text-sm text-gray-600 shadow-sm backdrop-blur dark:border-white/10 dark:bg-black/40 dark:text-slate-300 lg:flex-row lg:items-center lg:justify-between">
-          <span>Showing {totalCount} refined result{totalCount === 1 ? "" : "s"}</span>
-          <span>Total catalogue: {totalServices}</span>
-          <span>Page {initialMeta.page ?? 1}</span>
-        </div>
-      ) : (
-        <div className="relative mt-8 rounded-2xl border border-white/30 bg-white/10 px-5 py-4 text-sm text-gray-600 shadow-sm backdrop-blur dark:border-white/10 dark:bg-black/30 dark:text-slate-300">
-          Showing {totalCount} curated service{totalCount === 1 ? "" : "s"}
-        </div>
-      )}
-    </section>
+    </div>
   );
 };

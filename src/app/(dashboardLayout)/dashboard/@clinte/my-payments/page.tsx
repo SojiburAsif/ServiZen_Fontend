@@ -17,7 +17,7 @@ export default async function MyPaymentsPage() {
     );
   }
 
-  const { data: payments, meta } = paymentsResponse;
+  const { data: payments = [], meta = { total: 0, limit: 10 } } = paymentsResponse;
 
   return (
     <main className="relative min-h-screen w-full bg-gradient-to-br from-[#F5FFF3] via-white to-[#DFF9E2] px-4 py-12 text-gray-900 dark:from-[#010F08] dark:via-[#041F0E] dark:to-[#03200F] dark:text-white">
@@ -45,10 +45,10 @@ export default async function MyPaymentsPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">
-                        ${payment.amount}
+                        ${payment?.amount || 0}
                       </CardTitle>
                       <p className="text-sm text-slate-600 dark:text-slate-300">
-                        Transaction #{payment.transactionId?.slice(-8)}
+                        Transaction #{payment?.transactionId?.slice(-8) || "N/A"}
                       </p>
                     </div>
                     <Badge className="rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
@@ -59,19 +59,19 @@ export default async function MyPaymentsPage() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-100">
                     <Wrench className="size-4 text-emerald-500" />
-                    <span>{payment.booking.service.name}</span>
+                    <span>{payment?.booking?.service?.name || "Service Unavailable"}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-100">
                     <UserIcon className="size-4 text-emerald-500" />
-                    <span>{payment.booking.provider.name}</span>
+                    <span>{payment?.booking?.provider?.name || "Unknown Provider"}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-100">
                     <CalendarDays className="size-4 text-emerald-500" />
-                    <span>{formatDate(payment.createdAt)}</span>
+                    <span>{payment?.createdAt ? formatDate(payment.createdAt) : "N/A"}</span>
                   </div>
                   <div className="pt-4 text-xs text-slate-500 dark:text-slate-400">
-                    <p>Booking Status: {payment.booking.status}</p>
-                    <p>Payment Status: {payment.booking.paymentStatus}</p>
+                    <p>Booking Status: {payment?.booking?.status || "N/A"}</p>
+                    <p>Payment Status: {payment?.booking?.paymentStatus || "N/A"}</p>
                   </div>
                 </CardContent>
               </Card>
