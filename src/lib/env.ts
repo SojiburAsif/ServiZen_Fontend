@@ -5,6 +5,7 @@ const publicEnvSchema = z.object({
   NEXT_PUBLIC_APP_NAME: z.string().min(1, "NEXT_PUBLIC_APP_NAME is required"),
   NEXT_PUBLIC_APP_ORIGIN: z.string().url("NEXT_PUBLIC_APP_ORIGIN must be a valid URL").optional(),
   NEXT_PUBLIC_IIMGBB_KEY: z.string().min(1, "NEXT_PUBLIC_IIMGBB_KEY is required"),
+  NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: z.string().optional(),
 });
 
 const serverEnvSchema = z.object({

@@ -39,6 +39,8 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
+import { PayNowAction } from "@/components/modules/Bookings/PayNowAction";
+
 const formatDate = (value: string) =>
   new Date(value).toLocaleDateString("en-GB", {
     day: "numeric",
@@ -608,15 +610,22 @@ export default async function MyBookingsPage() {
                       </td>
 
                       <td className="px-6 py-5 align-top">
-                        <Badge
-                          className={`rounded-full px-3 py-1 ${
-                            booking.paymentStatus === "PAID"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                          }`}
-                        >
-                          {booking.paymentStatus}
-                        </Badge>
+                        <div className="flex flex-col gap-2">
+                          <Badge
+                            className={`w-fit rounded-full px-3 py-1 ${
+                              booking.paymentStatus === "PAID"
+                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                            }`}
+                          >
+                            {booking.paymentStatus}
+                          </Badge>
+                          {booking.paymentStatus === "UNPAID" && 
+                           booking.status !== "CANCELLED" && 
+                           (new Date().getTime() - new Date(booking.createdAt).getTime() <= 30 * 60 * 1000) && (
+                            <PayNowAction bookingId={booking.id} />
+                          )}
+                        </div>
                       </td>
 
                       <td className="px-6 py-5 align-top">

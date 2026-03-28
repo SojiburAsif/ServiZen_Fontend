@@ -62,6 +62,240 @@ export interface BookingFilters {
   serviceId?: string;
 }
 
+export interface CreateBookingRequest {
+  serviceId: string;
+  bookingDate: string;
+  bookingTime: string;
+  address: string;
+  city?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface CreateBookingResponse {
+  success: boolean;
+  message: string;
+  data: {
+    booking: Booking;
+    payment: {
+      id: string;
+      amount: number;
+      transactionId: string;
+      stripeEventId: string | null;
+      status: "UNPAID" | "PAID";
+      paymentGatewayData: any;
+      createdAt: string;
+      updatedAt: string;
+      bookingId: string;
+    } | null;
+    paymentUrl: string | null;
+    payType: "PAY_NOW" | "PAY_LATER";
+    paymentDueAt: string;
+  };
+}
+
+export async function createBookingNow(data: CreateBookingRequest): Promise<CreateBookingResponse | null> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+    if (!accessToken && !sessionToken) {
+      return null;
+    }
+
+    const { BASE_API_URL } = getServerEnv();
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    const forwardedCookies: string[] = [];
+
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+      forwardedCookies.push(`accessToken=${accessToken}`);
+    }
+
+    if (sessionToken) {
+      headers["x-session-token"] = sessionToken;
+      forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+    }
+
+    if (forwardedCookies.length > 0) {
+      headers.Cookie = forwardedCookies.join("; ");
+    }
+
+    const response = await fetch(`${BASE_API_URL}/bookings/book-now`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(data),
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = await response.json();
+    return payload;
+  } catch (error) {
+    console.error("Failed to create booking now", error);
+    return null;
+  }
+}
+
+export async function createBookingLater(data: CreateBookingRequest): Promise<CreateBookingResponse | null> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+    if (!accessToken && !sessionToken) {
+      return null;
+    }
+
+    const { BASE_API_URL } = getServerEnv();
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    const forwardedCookies: string[] = [];
+
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+      forwardedCookies.push(`accessToken=${accessToken}`);
+    }
+
+    if (sessionToken) {
+      headers["x-session-token"] = sessionToken;
+      forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+    }
+
+    if (forwardedCookies.length > 0) {
+      headers.Cookie = forwardedCookies.join("; ");
+    }
+
+    const response = await fetch(`${BASE_API_URL}/bookings/book-later`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(data),
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = await response.json();
+    return payload;
+  } catch (error) {
+    console.error("Failed to create booking later", error);
+    return null;
+  }
+}
+
+export async function initiatePayment(bookingId: string): Promise<{ success: boolean; message: string; data?: { bookingId: string; paymentId: string; paymentUrl: string; paymentDueAt: string } } | null> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+    if (!accessToken && !sessionToken) {
+      return null;
+    }
+
+    const { BASE_API_URL } = getServerEnv();
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    const forwardedCookies: string[] = [];
+
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+      forwardedCookies.push(`accessToken=${accessToken}`);
+    }
+
+    if (sessionToken) {
+      headers["x-session-token"] = sessionToken;
+      forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+    }
+
+    if (forwardedCookies.length > 0) {
+      headers.Cookie = forwardedCookies.join("; ");
+    }
+
+    const response = await fetch(`${BASE_API_URL}/bookings/${bookingId}/initiate-payment`, {
+      method: "POST",
+      headers,
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = await response.json();
+    return payload;
+  } catch (error) {
+    console.error("Failed to initiate payment", error);
+    return null;
+  }
+}
+
+export async function confirmPayment(bookingId: string, sessionId: string): Promise<{ success: boolean; message: string; data?: any } | null> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+    if (!accessToken && !sessionToken) {
+      return null;
+    }
+
+    const { BASE_API_URL } = getServerEnv();
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    const forwardedCookies: string[] = [];
+
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+      forwardedCookies.push(`accessToken=${accessToken}`);
+    }
+
+    if (sessionToken) {
+      headers["x-session-token"] = sessionToken;
+      forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+    }
+
+    if (forwardedCookies.length > 0) {
+      headers.Cookie = forwardedCookies.join("; ");
+    }
+
+    const response = await fetch(`${BASE_API_URL}/bookings/${bookingId}/confirm-payment?sessionId=${sessionId}`, {
+      method: "POST",
+      headers,
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = await response.json();
+    return payload;
+  } catch (error) {
+    console.error("Failed to confirm payment", error);
+    return null;
+  }
+}
+
 export async function getProviderBookings(filters: BookingFilters = {}): Promise<BookingsResponse | null> {
   try {
     const cookieStore = await cookies();

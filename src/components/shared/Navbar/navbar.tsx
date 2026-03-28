@@ -5,7 +5,7 @@ import Them from "@/components/features/Theme/them";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader, DialogDescription } from "@/components/ui/dialog";
-import { NotificationContent } from "@/app/(commonLayout)/notification/page";
+import { NotificationContent } from "@/components/shared/NotificationContent";
 import { ProfileUpdateForm } from "@/components/features/ProfileUpdateForm";
 import {
   Menu,

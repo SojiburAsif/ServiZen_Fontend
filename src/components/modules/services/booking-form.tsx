@@ -1,32 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { type ServiceRecord } from "@/services/services.service";
+import { jwtUtils } from "@/lib/jwtUtils";
+import { handleBookLater, handleBookNow } from "../../../app/(commonLayout)/actions/booking-actions";
+import LocationSelector from "@/components/shared/LocationSelector";
+import { Role } from "@/app/constants/role";
+import { useRouter } from "next/navigation";
 import {
   AlertCircle,
   CalendarIcon,
   CreditCard,
   Loader2,
   MapPin,
-  UserX,
+  X,
 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 
-
-import { type ServiceRecord } from "@/services/services.service";
-import { jwtUtils } from "@/lib/jwtUtils";
-import { handleBookLater, handleBookNow } from "@/services/user-booking.service";
 
 interface BookingFormProps {
   service: ServiceRecord;
@@ -42,7 +36,8 @@ const timeSlots = [
 ];
 
 function canUserBookServices(userRole: string | null): boolean {
-  return userRole === "USER";
+  // Allow booking if user has any role assigned
+  return userRole !== null && userRole !== undefined;
 }
 
 function getUserRoleFromCookies(): string | null {
@@ -55,7 +50,16 @@ function getUserRoleFromCookies(): string | null {
     if (!accessToken) return null;
 
     const decoded = jwtUtils.decodedToken(accessToken);
-    return (decoded?.role as string) || null;
+    const rawRole = String(decoded?.role || "").toUpperCase();
+    
+    // Map raw role to Role constants
+    const userRole = rawRole === "ADMIN"
+      ? Role.ADMIN
+      : rawRole === "PROVIDER"
+        ? Role.PROVIDER
+        : Role.CLIENT;
+        
+    return userRole;
   } catch (error) {
     console.error("Failed to decode user role:", error);
     return null;
@@ -72,6 +76,7 @@ export function BookingForm({ service }: BookingFormProps) {
   const [isLoadingRole, setIsLoadingRole] = useState(true);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [latitude, setLatitude] = useState<string>("");
   const [longitude, setLongitude] = useState<string>("");
@@ -79,6 +84,9 @@ export function BookingForm({ service }: BookingFormProps) {
   const [bookingTime, setBookingTime] = useState<string>("");
   const [city, setCity] = useState<string>("");
   const [address, setAddress] = useState<string>("");
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     const role = getUserRoleFromCookies();
@@ -86,8 +94,9 @@ export function BookingForm({ service }: BookingFormProps) {
     setIsLoadingRole(false);
   }, []);
 
-  const isClient = canUserBookServices(userRole);
-  const canBook = isClient && service.isActive;
+  const isClient = true; // Always allow booking per user request
+  const canBook = true; 
+  const isPriceValid = true; // service.price >= 60; // Minimum ৳60 for Stripe
 
   const today = useMemo(() => new Date(), []);
   const maxDate = useMemo(() => {
@@ -116,81 +125,108 @@ export function BookingForm({ service }: BookingFormProps) {
       (error) => {
         setIsGettingLocation(false);
         setLocationError("Unable to get your location. Please enter address manually.");
-        console.error("Geolocation error:", error);
+        console.error("Geolocation error:", error.message || error);
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
+  const handleLocationSelect = (location: { lat: number; lng: number; address: string }) => {
+    setSelectedLocation(location);
+    setLatitude(String(location.lat));
+    setLongitude(String(location.lng));
+    setAddress(location.address);
+    // Extract city from address (simple extraction)
+    const addressParts = location.address.split(',');
+    setCity(addressParts[addressParts.length - 2]?.trim() || addressParts[0]?.trim() || '');
+    setLocationError(null);
+  };
+
   const resetForm = () => {
     setBookingType("now");
     setLocationError(null);
+    setSubmitError(null);
     setLatitude("");
     setLongitude("");
     setBookingDate("");
     setBookingTime("");
     setCity("");
     setAddress("");
+    setSelectedLocation(null);
   };
 
-  const bookingAction = bookingType === "now" ? handleBookNow : handleBookLater;
+  const handleSubmit = async (formData: FormData) => {
+    setSubmitError(null);
+    setIsSubmitting(true);
+
+    try {
+      // Check minimum payment amount for Stripe (approximately $0.50 USD = 60 BDT)
+      const minAmount = 60; // BDT
+      if (bookingType === "now" && service.price < minAmount) {
+        throw new Error(`Service price (৳${service.price}) is below the minimum payment requirement of ৳${minAmount}. Please choose a different service or contact support.`);
+      }
+
+      const bookingAction = bookingType === "now" ? handleBookNow : handleBookLater;
+      const result = await bookingAction(formData);
+
+      if (result.success) {
+        if (bookingType === "now" && 'paymentUrl' in result && result.paymentUrl) {
+          toast.success("Booking initiated. Redirecting to payment...");
+          // Redirect to Stripe checkout
+          window.location.href = result.paymentUrl;
+        } else {
+          toast.success("Booking confirmed successfully!");
+          // For book later, close dialog and show success
+          setIsOpen(false);
+          resetForm();
+          // Redirect to user's bookings page when booking is successful
+          if (userRole === Role.CLIENT || userRole === "USER") {
+             router.push('/dashboard/my-bookings');
+          } else {
+             router.push('/dashboard');
+          }
+        }
+      } else {
+        toast.error(result.error || "An unexpected error occurred");
+        setSubmitError(result.error || "An unexpected error occurred");
+      }
+    } catch (error) {
+      console.error("Booking submission error:", error);
+      const msg = error instanceof Error ? error.message : "An unexpected error occurred";
+      toast.error(msg);
+      setSubmitError(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) resetForm();
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button
-          className="h-14 rounded-full bg-emerald-600 px-8 text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition hover:bg-emerald-700 disabled:opacity-60"
-          disabled={isLoadingRole}
-        >
-          {isLoadingRole ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Checking...
-            </>
-          ) : (
-            "Book Now"
-          )}
-        </Button>
-      </DialogTrigger>
+    <>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="btn btn-primary rounded-full px-8 text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition disabled:opacity-60"
+        disabled={false}
+      >
+        Book Now
+      </button>
 
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Book {service.name}</DialogTitle>
-          <DialogDescription>
-            Fill in the details below to schedule your service booking.
-          </DialogDescription>
-        </DialogHeader>
+      {isOpen && (
+        <dialog className="modal modal-open">
+          <div className="modal-box max-w-3xl overflow-y-auto max-h-[90vh]">
+            <form method="dialog">
+              <button 
+                className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                onClick={(e) => { e.preventDefault(); setIsOpen(false); resetForm(); }}
+              >
+                ✕
+              </button>
+            </form>
+            <h3 className="font-bold text-2xl mb-2">Book {service.name}</h3>
+            <p className="text-sm opacity-70 mb-6">
+              Fill in the details below to schedule your service booking.
+            </p>
 
-        {!isClient && !isLoadingRole && (
-          <Alert>
-            <UserX className="h-4 w-4" />
-            <AlertDescription>
-              Only clients can book services. Your current role:{" "}
-              {userRole || "Unknown"}.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {isClient && (
-          <form
-            action={async (formData) => {
-              try {
-                setIsSubmitting(true);
-                await bookingAction(formData);
-                setIsOpen(false);
-                resetForm();
-              } finally {
-                setIsSubmitting(false);
-              }
-            }}
-            className="space-y-6"
-          >
+            <form action={handleSubmit} className="space-y-6">
             <input type="hidden" name="serviceId" value={service.id} />
 
             <div className="rounded-xl border bg-muted/40 p-4">
@@ -202,7 +238,14 @@ export function BookingForm({ service }: BookingFormProps) {
                 </div>
                 <div>
                   <span className="text-muted-foreground">Price:</span>
-                  <p className="font-medium">৳{service.price}</p>
+                  <p className={`font-medium ${service.price < 60 ? 'text-red-600' : 'text-green-600'}`}>
+                    ৳{service.price}
+                    {service.price < 60 && (
+                      <span className="text-xs text-red-500 block">
+                        Below minimum (৳60 required)
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Duration:</span>
@@ -309,6 +352,18 @@ export function BookingForm({ service }: BookingFormProps) {
                 </Alert>
               )}
 
+              {submitError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{submitError}</AlertDescription>
+                </Alert>
+              )}
+
+              <LocationSelector
+                onLocationSelect={handleLocationSelect}
+                initialLocation={selectedLocation || undefined}
+              />
+
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">City</label>
@@ -365,45 +420,39 @@ export function BookingForm({ service }: BookingFormProps) {
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
-              <Button
+            <div className="modal-action flex-col sm:flex-row gap-3 pt-2">
+              <button
                 type="button"
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-                className="flex-1"
+                onClick={() => { setIsOpen(false); resetForm(); }}
+                className="btn btn-outline flex-1"
                 disabled={isSubmitting}
               >
                 Cancel
-              </Button>
-
-              <Button
+              </button>
+              <button
                 type="submit"
-                className="flex-1"
-                disabled={
-                  isSubmitting ||
-                  !bookingDate ||
-                  !bookingTime ||
-                  !city.trim() ||
-                  !address.trim() ||
-                  !latitude ||
-                  !longitude
-                }
+                className="btn btn-primary flex-1"
+                disabled={isSubmitting}
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <span className="loading loading-spinner"></span>
                     Processing...
                   </>
                 ) : bookingType === "now" ? (
-                  "Book & Pay Now"
+                  "Pay ৳" + service.price
                 ) : (
-                  "Book for Later"
+                  "Confirm Booking"
                 )}
-              </Button>
+              </button>
             </div>
           </form>
-        )}
-      </DialogContent>
-    </Dialog>
+        </div>
+        <form method="dialog" className="modal-backdrop" onClick={() => { setIsOpen(false); resetForm(); }}>
+          <button>close</button>
+        </form>
+      </dialog>
+      )}
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertAction } from "@/components/ui/alert-action";
 import { InfoIcon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
+import { Suspense } from "react";
 
 export default function LoginPage() {
   return (
@@ -17,7 +18,9 @@ export default function LoginPage() {
       <div className="absolute -right-20 -top-20 h-72 w-72 md:h-96 md:w-96 rounded-full bg-emerald-500/10 blur-[90px] md:blur-[120px] dark:bg-emerald-600/5"></div>
       <div className="relative z-10 w-full flex justify-center">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-2xl">
-          <LoginForm />
+          <Suspense fallback={<div className="h-64 flex items-center justify-center">Loading...</div>}>
+            <LoginForm />
+          </Suspense>
         </div>
       </div>
     </section>

@@ -4,7 +4,7 @@ import { NotificationList } from "@/components/modules/dashboard/notification-li
 import { useEffect, useState } from "react";
 import { jwtUtils } from "@/lib/jwtUtils";
 
-export default function NotificationsPage() {
+export default function ClientNotificationsPage() {
   const [userRole, setUserRole] = useState<"USER" | "PROVIDER" | "ADMIN">("USER");
 
   useEffect(() => {
@@ -21,10 +21,10 @@ export default function NotificationsPage() {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
-        <p className="text-gray-600 mt-2">Stay updated with your service bookings and important messages.</p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+        <p className="text-gray-600 mt-1">Stay updated with your service bookings and important messages.</p>
       </div>
 
       <NotificationList userRole={userRole} />
