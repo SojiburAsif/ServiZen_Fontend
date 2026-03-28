@@ -7,6 +7,7 @@ import OurServices from "@/components/shared/static/OurServices";
 import Professional from "@/components/shared/static/OurServices";
 import OurSuccessful from "@/components/shared/static/OurSuccessful";
 import OurTeam from "@/components/shared/static/OurTeam";
+import FeaturedServices from "@/components/shared/static/FeaturedServices";
 
 
 
@@ -18,6 +19,7 @@ export default function Home() {
 
       <HeroSection></HeroSection>
       <Features></Features>
+      <FeaturedServices></FeaturedServices>
       <OurServices></OurServices>
       <MarqueePage></MarqueePage>
       <OurSuccessful></OurSuccessful>

@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@react-google-maps/api": "^2.20.8",
     "@tanstack/react-devtools": "^0.9.9",
