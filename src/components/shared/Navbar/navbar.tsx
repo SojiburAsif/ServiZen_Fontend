@@ -5,6 +5,7 @@ import Them from "@/components/features/Theme/them";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader, DialogDescription } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { NotificationContent } from "@/components/shared/NotificationContent";
 import { ProfileUpdateForm } from "@/components/features/ProfileUpdateForm";
 import {
@@ -223,18 +224,8 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                   </Button>
                 </Link>
 
-                {mounted ? (
+                {mounted && (
                   <Dialog open={isProfileModalOpen} onOpenChange={setIsProfileModalOpen}>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="text-sm font-medium text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400"
-                        onClick={handleProfileModalOpen}
-                      >
-                        <User className="size-4 mr-1.5" />
-                        My Profile
-                      </Button>
-                    </DialogTrigger>
                     <DialogContent className="sm:max-w-[900px] md:max-w-[1000px] max-h-[85vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
@@ -270,15 +261,6 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                       </div>
                     </DialogContent>
                   </Dialog>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    className="text-sm font-medium text-gray-700 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400"
-                    disabled
-                  >
-                    <User className="size-4 mr-1.5" />
-                    My Profile
-                  </Button>
                 )}
 
                 {/* Notification Modal */}
@@ -333,74 +315,64 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
           ) : (
              <div className="flex items-center gap-3">
                {mounted ? (
-               <Dialog>
-                 <DialogTrigger asChild>
-                   <button className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden ring-2 ring-transparent hover:ring-green-300 transition-all">
+               <DropdownMenu>
+                 <DropdownMenuTrigger asChild>
+                   <button className="flex items-center justify-center w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden ring-2 ring-transparent hover:ring-green-500 transition-all focus:outline-none">
                      {user?.image ? (
-                      <img src={user.image} alt={user?.name || "User"} className="h-full w-full object-cover" />
+                       <img src={user.image} alt={user?.name || "User"} className="h-full w-full object-cover" />
                      ) : (
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{userInitial}</span>
+                       <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{userInitial}</span>
                      )}
                    </button>
-                 </DialogTrigger>
-                 <DialogContent className="sm:max-w-md bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-gray-800">
-                   <DialogHeader>
-                     <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                       <User className="size-5 text-green-500" />
-                       My Profile
-                     </DialogTitle>
-                   </DialogHeader>
-
-                   <div className="space-y-4">
-                     <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
-                       <div className="h-14 w-14 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center ring-4 ring-white dark:ring-gray-900">
-                         {user?.image ? (
-                           <img src={user.image} alt={user?.name || "User"} className="h-full w-full object-cover" />
-                         ) : (
-                           <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">{userInitial}</span>
-                         )}
-                       </div>
-                       <div className="flex-1 min-w-0">
-                         <p className="text-lg font-bold text-gray-900 dark:text-white truncate">{user?.name || "User"}</p>
-                         <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1 truncate">
-                           <Mail className="size-4 flex-shrink-0" />
-                           {user?.email || "No email"}
-                         </p>
-                         {userRole && (
-                           <div className="flex items-center gap-1 mt-1">
-                             <Shield className="size-4 text-green-600 flex-shrink-0" />
-                             <span className="text-xs font-medium text-green-700 dark:text-green-300">{userRole}</span>
-                           </div>
-                         )}
-                       </div>
+                 </DropdownMenuTrigger>
+                 <DropdownMenuContent className="w-64 p-2 mt-2 bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl space-y-2 relative right-2" align="end">
+                   
+                   <div className="flex items-center gap-3 p-3 mb-2 rounded-xl bg-gray-50 dark:bg-gray-900/50">
+                     <div className="h-10 w-10 text-white rounded-full overflow-hidden bg-gray-200 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                       {user?.image ? (
+                         <img src={user.image} alt={user?.name || "User"} className="h-full w-full object-cover" />
+                       ) : (
+                         <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{userInitial}</span>
+                       )}
                      </div>
-
-                    <div className="grid grid-cols-1 gap-2">
-                      <Link href="/dashboard" className="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-all duration-200 hover:shadow-md">
-                        <LayoutDashboard className="size-4 mr-2" />
-                        Go to Dashboard
-                      </Link>
-                      <Link href="/dashboard/my-profile" className="inline-flex items-center justify-center px-4 py-3 rounded-xl border border-emerald-200 text-emerald-700 text-sm font-medium hover:bg-emerald-50 dark:border-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-950/30 transition-all duration-200 hover:shadow-md">
-                        <Settings className="size-4 mr-2" />
-                        Manage Profile
-                      </Link>
-                      <Button
-                        variant="outline"
-                        onClick={handleLogout}
-                        disabled={isLoggingOut}
-                        className="w-full px-4 py-3 text-rose-600 border-rose-300 hover:bg-rose-50 dark:border-rose-900/40 dark:text-rose-400 dark:hover:bg-rose-950/30 transition-all duration-200 hover:shadow-md"
-                      >
-                        {isLoggingOut ? (
-                          <Loader2 className="size-4 mr-2 animate-spin" />
-                        ) : (
-                          <LogOut className="size-4 mr-2" />
-                        )}
-                        Logout
-                      </Button>
-                    </div>
+                     <div className="flex flex-col min-w-0">
+                       <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{user?.name || "User"}</p>
+                       <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email || "No email"}</p>
+                     </div>
                    </div>
-                 </DialogContent>
-               </Dialog>
+
+                   <DropdownMenuItem asChild className="p-0">
+                     <Link href="/dashboard" className="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full cursor-pointer">
+                       <LayoutDashboard className="size-4 mr-3 text-gray-500 group-hover:text-green-600" />
+                       Dashboard
+                     </Link>
+                   </DropdownMenuItem>
+                   
+                   <DropdownMenuItem asChild className="p-0">
+                     <button onClick={handleProfileModalOpen} className="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full cursor-pointer text-left">
+                       <Settings className="size-4 mr-3 text-gray-500 group-hover:text-emerald-600" />
+                       My Profile
+                     </button>
+                   </DropdownMenuItem>
+
+                   <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800 my-2" />
+
+                   <DropdownMenuItem asChild className="p-0">
+                     <button
+                       onClick={handleLogout}
+                       disabled={isLoggingOut}
+                       className="flex items-center w-full px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                     >
+                       {isLoggingOut ? (
+                         <Loader2 className="size-4 mr-3 animate-spin" />
+                       ) : (
+                         <LogOut className="size-4 mr-3" />
+                       )}
+                       Log out
+                     </button>
+                   </DropdownMenuItem>
+                 </DropdownMenuContent>
+               </DropdownMenu>
                ) : (
                 <button className="flex items-center justify-center w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden ring-2 ring-transparent">
                   {user?.image ? (
@@ -410,19 +382,6 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                   )}
                 </button>
                )}
-               <Button
-                 variant="ghost"
-                 size="icon"
-                 onClick={handleLogout}
-                 disabled={isLoggingOut}
-                 className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 h-10 w-10"
-               >
-                 {isLoggingOut ? (
-                   <Loader2 className="size-5 animate-spin" />
-                 ) : (
-                   <LogOut className="size-5" />
-                 )}
-               </Button>
              </div>
           )}
 

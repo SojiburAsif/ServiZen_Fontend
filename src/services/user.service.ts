@@ -549,3 +549,133 @@ export async function getUserById(userId: string): Promise<DetailedUser | null> 
         return null;
     }
 }
+
+export interface CreateAdminPayload {
+    name: string;
+    email: string;
+    password?: string;
+    contactNumber?: string;
+    address?: string;
+    profilePhoto?: string;
+    role?: "ADMIN";
+}
+
+export async function createAdmin(payload: CreateAdminPayload) {
+    try {
+        const cookieStore = await cookies();
+        const accessToken = cookieStore.get("accessToken")?.value;
+        const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+        const { BASE_API_URL } = getServerEnv();
+
+        const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+        };
+        const forwardedCookies: string[] = [];
+
+        if (accessToken) {
+            headers.Authorization = `Bearer ${accessToken}`;
+            forwardedCookies.push(`accessToken=${accessToken}`);
+        }
+
+        if (sessionToken) {
+            headers["x-session-token"] = sessionToken;
+            forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+        }
+
+        if (forwardedCookies.length > 0) {
+            headers.Cookie = forwardedCookies.join("; ");
+        }
+
+        const res = await fetch(`${BASE_API_URL}/users/create-admin`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(payload),
+        });
+
+        const json = await res.json();
+        
+        if (!res.ok) {
+            throw new Error(json.message || `Failed to create admin: ${res.status}`);
+        }
+
+        return json;
+    } catch (error: any) {
+        console.error("Error creating admin:", error);
+        throw new Error(error.message || "Something went wrong while creating admin");
+    }
+}
+
+
+
+export interface AdminProfileData {
+    id: string;
+    name: string;
+    email: string;
+    contactNumber?: string;
+    profilePhoto?: string;
+    createdAt: string;
+    user: {
+        id: string;
+        email: string;
+        name: string;
+        status: string;
+        emailVerified: boolean;
+        Role: string;
+    }
+}
+
+export interface AdminsListResponse {
+    data: AdminProfileData[];
+    meta: {
+        page: number;
+        limit: number;
+        total: number;
+    };
+}
+
+export async function getAllAdmins(page: number = 1, limit: number = 10): Promise<AdminsListResponse | null> {
+    try {
+        const cookieStore = await cookies();
+        const accessToken = cookieStore.get("accessToken")?.value;
+        const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+        const { BASE_API_URL } = getServerEnv();
+
+        const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+        };
+        const forwardedCookies: string[] = [];
+
+        if (accessToken) {
+            headers.Authorization = `Bearer ${accessToken}`;
+            forwardedCookies.push(`accessToken=${accessToken}`);
+        }
+
+        if (sessionToken) {
+            headers["x-session-token"] = sessionToken;
+            forwardedCookies.push(`better-auth.session_token=${sessionToken}`);
+        }
+
+        if (forwardedCookies.length > 0) {
+            headers.Cookie = forwardedCookies.join("; ");
+        }
+
+        const res = await fetch(`${BASE_API_URL}/users/admins?page=${page}&limit=${limit}`, {
+            method: "GET",
+            headers,
+            cache: "no-store",
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error("API Error fetching admins:", errorText);
+            throw new Error(`Failed to fetch admins: ${res.status}`);
+        }
+
+        const json = await res.json();
+        return json.data as AdminsListResponse;
+    } catch (error) {
+        console.error("Error fetching admins:", error);
+        return null;
+    }
+}
+
