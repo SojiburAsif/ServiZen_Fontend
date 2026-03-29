@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader, Dialog
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { NotificationContent } from "@/components/shared/NotificationContent";
 import { ProfileUpdateForm } from "@/components/features/ProfileUpdateForm";
+import { ChangePasswordForm } from "@/components/modules/Auth/changePasswordForm";
 import {
   Menu,
   Search,
@@ -99,6 +100,7 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
   const [user, setUser] = useState<NavbarUser | null>(initialUser);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [profileData, setProfileData] = useState<any>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const isLoggedIn = Boolean(user);
@@ -293,9 +295,22 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                     <span className="absolute right-2.5 top-2.5 flex size-1.5 rounded-full bg-orange-500"></span>
                   </Button>
                 )}
+
+                {/* Change Password Modal */}
+                {mounted && (
+                  <Dialog open={isChangePasswordModalOpen} onOpenChange={setIsChangePasswordModalOpen}>
+                    <DialogContent className="p-0 border-none bg-transparent shadow-none sm:max-w-xl">
+                      <DialogTitle className="sr-only">Change Password</DialogTitle>
+                      <DialogDescription className="sr-only">Change your account password.</DialogDescription>
+                      <ChangePasswordForm 
+                        onSuccess={() => setIsChangePasswordModalOpen(false)} 
+                        onCancel={() => setIsChangePasswordModalOpen(false)} 
+                      />
+                    </DialogContent>
+                  </Dialog>
+                )}
               </>
             )}
-
             <Them />
           </div>
 
@@ -357,10 +372,10 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                    </DropdownMenuItem>
 
                    <DropdownMenuItem asChild className="p-0">
-                     <Link href="/change-password" className="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full cursor-pointer">
-                       <Lock className="size-4 mr-3 text-gray-500 group-hover:text-orange-500" />
+                     <button onClick={() => setIsChangePasswordModalOpen(true)} className="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full cursor-pointer text-left">
+                       <Lock className="size-4 mr-3 text-gray-500 group-hover:text-green-500" />
                        Change Password
-                     </Link>
+                     </button>
                    </DropdownMenuItem>
 
                    <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800 my-2" />
@@ -436,9 +451,9 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                         <Link href="/dashboard/my-profile" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                           <User className="size-5" /> My Profile
                         </Link>
-                        <Link href="/change-password" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-orange-500 dark:hover:text-orange-400">
+                        <button onClick={() => setIsChangePasswordModalOpen(true)} className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-500 dark:hover:text-green-400 w-full text-left">
                           <Lock className="size-5" /> Change Password
-                        </Link>
+                        </button>
                         <Link href="/notification" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                            <Bell className="size-5" /> Notifications
                            <MobileNotificationBadge />
