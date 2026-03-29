@@ -13,7 +13,7 @@ export default function DashboardLoading() {
       <DashboardStatGridSkeleton cards={3} />
       <div className="grid gap-6 lg:grid-cols-2">
         <DashboardChartSkeleton bars={6} />
-        <DashboardCardListSkeleton cards={3} />
+        <DashboardCardListSkeleton count={3} />
       </div>
       <DashboardTableSkeleton rows={4} columns={4} />
     </div>

@@ -5,6 +5,8 @@ import QueryProviders from "@/lib/providers/QueryProvider";
 import { ThemeProvider } from "@/lib/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
+export const dynamic = "force-dynamic";
+
 const onestSans = Onest({
   variable: "--font-geist-sans",
   subsets: ["latin"],

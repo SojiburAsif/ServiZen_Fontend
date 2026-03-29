@@ -16,7 +16,7 @@ export default function AdminDashboardLoading() {
         <DashboardChartSkeleton bars={4} />
       </div>
       <DashboardTableSkeleton rows={5} columns={4} />
-      <DashboardCardListSkeleton cards={4} />
+      <DashboardCardListSkeleton count={4} />
     </section>
   );
 }
