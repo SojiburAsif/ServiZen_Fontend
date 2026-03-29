@@ -47,7 +47,7 @@ async function createBooking(endpoint: string, data: BookingRequest): Promise<Bo
   const sessionToken = cookieStore.get("better-auth.session_token")?.value;
 
   if (!accessToken && !sessionToken) {
-    throw new Error("Authentication required");
+    throw new Error("UNAUTHORIZED_ACCESS_REDIRECT_TO_LOGIN");
   }
 
   const { BASE_API_URL } = getServerEnv();
@@ -120,7 +120,11 @@ export async function handleBookNow(formData: FormData) {
     }
   } catch (error) {
     console.error("Book now error:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to book service" };
+    const errorMessage = error instanceof Error ? error.message : "Failed to book service";
+    if (errorMessage === "UNAUTHORIZED_ACCESS_REDIRECT_TO_LOGIN") {
+      redirect("/login");
+    }
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -158,6 +162,10 @@ export async function handleBookLater(formData: FormData) {
     }
   } catch (error) {
     console.error("Book later error:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to book service" };
+    const errorMessage = error instanceof Error ? error.message : "Failed to book service";
+    if (errorMessage === "UNAUTHORIZED_ACCESS_REDIRECT_TO_LOGIN") {
+      redirect("/login");
+    }
+    return { success: false, error: errorMessage };
   }
 }
