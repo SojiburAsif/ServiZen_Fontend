@@ -840,35 +840,47 @@ export async function getMeApiResponse() {
 }
 
 export async function logoutApiResponse() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+  const serverEnv = getServerEnv();
+
+  if (accessToken || sessionToken) {
+    try {
+      const headers: Record<string, string> = {};
+      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+      if (sessionToken) headers["x-session-token"] = sessionToken;
+      
+      const cookieParts: string[] = [];
+      if (accessToken) cookieParts.push(`accessToken=${accessToken}`);
+      if (sessionToken) cookieParts.push(`better-auth.session_token=${sessionToken}`);
+      if (cookieParts.length > 0) headers.Cookie = cookieParts.join("; ");
+
+      await fetch(`${serverEnv.BASE_API_URL}/auth/logout`, {
+        method: "POST",
+        headers,
+      });
+    } catch (e) {
+      console.error("Backend logout error:", e);
+    }
+  }
+
   const response = NextResponse.json(
     { success: true, message: "Logged out successfully" },
     { status: 200 },
   );
-  const isProduction = process.env.NODE_ENV === "production";
 
-  response.cookies.set("accessToken", "", {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 0,
-  });
-
-  response.cookies.set("refreshToken", "", {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 0,
-  });
-
-  response.cookies.set("better-auth.session_token", "", {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 0,
-  });
+  const cookieNames = [
+    "accessToken", 
+    "refreshToken", 
+    "better-auth.session_token", 
+    "better-auth.session_data"
+  ];
+  
+  for (const name of cookieNames) {
+    response.headers.append('Set-Cookie', `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax`);
+    response.headers.append('Set-Cookie', `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=None`);
+  }
 
   return response;
 }
