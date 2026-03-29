@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2, Save, Image as ImageIcon, Clock, Tag, DollarSign, Eye } from "lucide-react";
+import { Loader2, Save, Image as ImageIcon, Clock, Tag, DollarSign, Eye, Upload } from "lucide-react";
+import { uploadToImgbb } from "@/lib/imageUpload.utils";
 
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,7 @@ export const ServiceEditorSheet = ({
   specialtyOptions = [],
   onUpdated,
 }: ServiceEditorSheetProps) => {
+  const [isUploading, setIsUploading] = useState(false);
   const {
     control,
     register,
@@ -67,6 +69,23 @@ export const ServiceEditorSheet = ({
   });
 
   const imagePreview = watch("imageUrl") ?? "";
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const url = await uploadToImgbb(file);
+      setValue("imageUrl", url, { shouldValidate: true, shouldDirty: true });
+      toast.success("Image uploaded successfully");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to upload image");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   useEffect(() => {
     if (service) {
@@ -209,14 +228,33 @@ export const ServiceEditorSheet = ({
               <Label htmlFor="edit-image" className="text-xs uppercase font-bold tracking-widest text-zinc-400 flex items-center gap-2">
                 <ImageIcon size={12} /> Cover Image URL
               </Label>
-              <Input
-                id="edit-image"
-                type="url"
-                className="h-11 rounded-xl border-zinc-100 dark:border-zinc-800"
-                placeholder="https://example.com/image.jpg"
-                disabled={isSubmitting}
-                {...register("imageUrl")}
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="edit-image"
+                  type="url"
+                  className="h-11 flex-1 rounded-xl border-zinc-100 dark:border-zinc-800"
+                  placeholder="https://example.com/image.jpg"
+                  disabled={isSubmitting || isUploading}
+                  {...register("imageUrl")}
+                />
+                <div className="relative w-12 h-11 flex-shrink-0">
+                  <Input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    disabled={isSubmitting || isUploading}
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full h-full p-0 rounded-xl border-zinc-100 dark:border-zinc-800 pointer-events-none"
+                    disabled={isSubmitting || isUploading}
+                  >
+                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4 text-zinc-500" />}
+                  </Button>
+                </div>
+              </div>
               <div className="relative group">
                 {imagePreview ? (
                   <img src={imagePreview} alt="Preview" className="h-40 w-full rounded-2xl object-cover border border-zinc-100 dark:border-zinc-800 shadow-sm" />

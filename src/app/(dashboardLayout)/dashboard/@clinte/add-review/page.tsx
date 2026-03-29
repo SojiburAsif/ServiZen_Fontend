@@ -1,23 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getUserBookings } from "@/services/user-booking.service";
-import { createReview } from "@/services/review.service";
 import { getLoggedInUserProfile } from "@/services/user.service";
-import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
 import { AddReviewForm } from "@/components/features/AddReviewForm";
-import { Booking } from "@/types/booking.types";
-
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-
-import {
-  MessageSquarePlus,
-  Info,
-  Sparkles,
-  CheckCircle2,
-} from "lucide-react";
+import { Sparkles, MessageSquare } from "lucide-react";
 
 export default async function AddReviewPage() {
   const bookingsRes = await getUserBookings({ page: 1, limit: 100 });
@@ -36,58 +21,46 @@ export default async function AddReviewPage() {
   );
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#F5FFF3] via-white to-[#DFF9E2] px-4 py-6 text-slate-900 dark:from-[#010F08] dark:via-[#041F0E] dark:to-[#03200F] dark:text-white sm:px-6 sm:py-10">
-      <div className="mx-auto max-w-4xl">
-
-        {/* HEADER */}
-        <div className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/80 p-6 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-white/5 sm:p-8">
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-transparent to-teal-500/10" />
-
-          <div className="relative">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
-              <Sparkles className="size-4" />
-              Share your experience
-            </div>
-
-            <h1 className="text-3xl font-black sm:text-5xl">
-              Add Review
-            </h1>
-
-            <p className="mt-3 max-w-xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              Select a completed booking and share your experience to help others.
-            </p>
+    <main className="min-h-screen bg-black text-zinc-300 p-6 flex flex-col items-center justify-center">
+      {/* Container - Max width choto kora hoyeche (max-w-lg) */}
+      <div className="w-full max-w-lg">
+        
+        {/* Header - Simple & Clean */}
+        <div className="mb-8 text-center space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/5 border border-emerald-500/10 text-emerald-500/80 text-[11px] font-medium uppercase tracking-widest">
+            <Sparkles className="size-3" />
+            Feedback Portal
           </div>
+          <h1 className="text-3xl font-semibold tracking-tight text-white">
+            Write a <span className="text-emerald-500">Review</span>
+          </h1>
+          <p className="text-zinc-500 text-sm font-medium">
+            Share your experience with the service provider.
+          </p>
         </div>
 
-        {/* FORM CARD */}
-        <div className="mt-8 rounded-[2rem] border border-white/60 bg-white/90 p-6 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-white/5 sm:p-8">
-
+        {/* Content Area */}
+        <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-3xl p-6 sm:p-8 backdrop-blur-sm shadow-xl">
           {unreviewedBookings.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-500/20">
-                <Info className="size-10 text-slate-400" />
+            <div className="py-12 text-center space-y-4">
+              <div className="size-14 rounded-full bg-zinc-800/50 flex items-center justify-center mx-auto">
+                <MessageSquare className="size-6 text-zinc-600" />
               </div>
-
-              <h3 className="text-2xl font-bold">
-                No pending reviews
-              </h3>
-
-              <p className="mt-3 max-w-md text-sm text-slate-600 dark:text-slate-400">
-                You have no completed bookings that need a review right now.
+              <p className="text-sm font-medium text-zinc-500">
+                You have no pending reviews at this moment.
               </p>
-
-              <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                <CheckCircle2 className="size-4" />
-                All caught up
-              </div>
             </div>
           ) : (
+            /* Pass data to Client Component */
             <AddReviewForm unreviewedBookings={unreviewedBookings} />
           )}
         </div>
+
+        {/* Footer info */}
+        <p className="mt-8 text-center text-[10px] text-zinc-700 font-medium uppercase tracking-[0.3em]">
+          Verified Transactions Only
+        </p>
       </div>
     </main>
   );
 }
-
-
