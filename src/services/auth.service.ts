@@ -602,15 +602,26 @@ export const changePasswordAction = async (
   void confirmNewPassword;
 
   try {
+    const cookieStore = await cookies();
+    const allCookies = cookieStore.getAll();
+    const cookieHeader = createRawCookieHeader(allCookies);
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+    const authHeaders = createAuthHeaders(cookieHeader, accessToken, sessionToken);
+
     const response = await httpClient.post<unknown>(
       "/auth/change-password",
       changePasswordPayload,
+      {
+        headers: authHeaders,
+      }
     );
     return response;
   } catch (error: any) {
     return {
       success: false,
-      message: `Change password failed: ${error.message}`,
+      message: getHttpErrorMessage(error, "Change password failed"),
     };
   }
 };

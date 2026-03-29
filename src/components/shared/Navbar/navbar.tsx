@@ -22,6 +22,7 @@ import {
   BellRing,
   User,
   Settings,
+  Lock,
   Loader2
 } from "lucide-react";
 import Link from "next/link";
@@ -355,6 +356,13 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                      </button>
                    </DropdownMenuItem>
 
+                   <DropdownMenuItem asChild className="p-0">
+                     <Link href="/change-password" className="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full cursor-pointer">
+                       <Lock className="size-4 mr-3 text-gray-500 group-hover:text-orange-500" />
+                       Change Password
+                     </Link>
+                   </DropdownMenuItem>
+
                    <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800 my-2" />
 
                    <DropdownMenuItem asChild className="p-0">
@@ -427,6 +435,9 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                         </Link>
                         <Link href="/dashboard/my-profile" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                           <User className="size-5" /> My Profile
+                        </Link>
+                        <Link href="/change-password" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-orange-500 dark:hover:text-orange-400">
+                          <Lock className="size-5" /> Change Password
                         </Link>
                         <Link href="/notification" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                            <Bell className="size-5" /> Notifications

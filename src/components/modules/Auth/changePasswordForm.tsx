@@ -3,6 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { changePasswordAction } from "@/services/auth.service";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Lock,
+  ShieldCheck,
+  CheckCircle2,
+  Loader2,
+  ChevronLeft
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const ChangePasswordForm = () => {
   const router = useRouter();
@@ -12,9 +21,6 @@ export const ChangePasswordForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,135 +45,121 @@ export const ChangePasswordForm = () => {
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-
-        // Redirect after 2 seconds
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 2000);
+        setTimeout(() => router.push("/dashboard"), 2000);
       } else {
         setError(result.message || "Failed to change password");
       }
     } catch (err: Error | unknown) {
-      const errorMsg = err instanceof Error ? err.message : "An error occurred";
-      setError(errorMsg);
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
   };
 
+  const isFormValid = currentPassword && newPassword && confirmPassword && (newPassword === confirmPassword);
+
+  const variants = {
+    initial: { opacity: 0, x: 20 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -20 }
+  };
+
   return (
-    <div className="mx-auto w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Change Password</h1>
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-        Update your password to keep your account secure
-      </p>
+    <div className="relative mx-auto w-full max-w-md overflow-hidden rounded-3xl border border-emerald-100 bg-white/80 p-8 shadow-2xl backdrop-blur-xl dark:border-emerald-900/30 dark:bg-slate-950/80">
+      {/* Decorative Background Text */}
+      <div className="absolute -right-4 -top-8 select-none text-9xl font-black text-emerald-500/5 dark:text-emerald-400/5">
+        SZ
+      </div>
 
-      {success && (
-        <div className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
-          Password changed successfully! Redirecting...
-        </div>
-      )}
+      <div className="relative z-10">
+        <AnimatePresence mode="wait">
+          {success ? (
+            <motion.div key="success" {...variants} className="text-center py-8">
+              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                <CheckCircle2 className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Success!</h2>
+              <p className="mt-2 text-slate-600 dark:text-slate-400">Password changed successfully. Redirecting...</p>
+            </motion.div>
+          ) : (
+            <motion.div key="form" {...variants}>
+              <header className="mb-8">
+                <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                  Change Password
+                </h1>
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                  Update your old password to a strong new one.
+                </p>
+              </header>
 
-      {error && (
-        <div className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
-          {error}
-        </div>
-      )}
+              {error && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 rounded-xl bg-red-50 p-4 text-xs font-medium text-red-600 dark:bg-red-900/20 dark:text-red-400">
+                  {error}
+                </motion.div>
+              )}
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <div>
-          <label htmlFor="currentPassword" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Current Password
-          </label>
-          <div className="relative mt-1">
-            <input
-              id="currentPassword"
-              type={showCurrentPassword ? "text" : "password"}
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Enter your current password"
-              disabled={loading}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-400 dark:disabled:bg-slate-800"
-            />
-            <button
-              type="button"
-              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-            >
-              {showCurrentPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-        </div>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-4">
+                  <div className="group relative">
+                    <ShieldCheck className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="password"
+                      required
+                      placeholder="Current Password"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-4 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:focus:border-emerald-400"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="group relative">
+                    <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="password"
+                      required
+                      placeholder="New Password"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-4 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:focus:border-emerald-400"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                  </div>
 
-        <div>
-          <label htmlFor="newPassword" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            New Password
-          </label>
-          <div className="relative mt-1">
-            <input
-              id="newPassword"
-              type={showNewPassword ? "text" : "password"}
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Min 8 chars, uppercase, lowercase & number"
-              disabled={loading}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-400 dark:disabled:bg-slate-800"
-            />
-            <button
-              type="button"
-              onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-            >
-              {showNewPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Must contain uppercase, lowercase letters and a number
-          </p>
-        </div>
+                  <div className="group relative">
+                    <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="password"
+                      required
+                      placeholder="Confirm New Password"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-4 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:focus:border-emerald-400"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                  </div>
+                </div>
 
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Confirm Password
-          </label>
-          <div className="relative mt-1">
-            <input
-              id="confirmPassword"
-              type={showConfirmPassword ? "text" : "password"}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your new password"
-              disabled={loading}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-400 dark:disabled:bg-slate-800"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-            >
-              {showConfirmPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-3 pt-4">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            disabled={!currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword || loading}
-            className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed"
-          >
-            {loading ? "Changing..." : "Change Password"}
-          </button>
-        </div>
-      </form>
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.back()}
+                    className="flex items-center justify-center rounded-xl border border-slate-200 px-4 h-[48px] transition-all hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900 bg-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 w-auto"
+                  >
+                    <ChevronLeft className="h-5 w-5 " /> Cancel
+                  </Button>
+                  
+                  <button
+                    type="submit"
+                    disabled={!isFormValid || loading}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 font-bold text-white shadow-lg shadow-emerald-500/30 transition-all hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-70 dark:bg-emerald-500 dark:shadow-emerald-900/20 dark:hover:bg-emerald-600"
+                  >
+                    {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Update Password"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
