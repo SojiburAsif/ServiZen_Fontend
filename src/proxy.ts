@@ -61,7 +61,7 @@ const getUserInfoFromApi = async (
                 ...(sessionToken ? { "x-session-token": sessionToken } : {}),
             },
             cache: "no-store",
-            signal: AbortSignal.timeout(1200),
+            signal: AbortSignal.timeout(6000), // Increased from 1200 to prevent TimeoutErrors on slow backends
         });
 
         if (!response.ok) {

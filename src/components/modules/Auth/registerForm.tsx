@@ -248,10 +248,15 @@ const RegisterForm = () => {
 
   return (
     <div className="flex items-center justify-center p-4 sm:p-6">
-      <Card className="w-full max-w-4xl mx-auto overflow-hidden border border-green-200/80 dark:border-emerald-700/40 shadow-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl">
+      <Card className="w-full max-w-4xl mx-auto overflow-hidden border border-green-200/80 dark:border-zinc-800 shadow-2xl bg-white/80 dark:bg-black backdrop-blur-xl">
         <CardHeader className="text-center space-y-3 pt-8 sm:pt-10 px-6 sm:px-8">
-          <div className="mx-auto h-20 w-20 rounded-full bg-green-100 dark:bg-emerald-900/60 text-green-700 dark:text-emerald-200 flex items-center justify-center shadow-md overflow-hidden ring-4 ring-white/70 dark:ring-zinc-900/60">
-            <Image src="/favicon.ico" alt="Favicon" width={64} height={64} className="h-16 w-16" />
+          <div className="flex justify-center">
+            <Link href="/" className="group flex items-center text-center gap-2 transition-transform active:scale-95">
+              <img src="/favicon.ico" alt="ServZEN" className="h-10 w-10" />
+              <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                Serv<span className="font-serif italic text-gray-500 dark:text-gray-400">ZEN</span>
+              </span>
+            </Link>
           </div>
           <CardTitle className="text-3xl sm:text-4xl font-bold text-green-950 dark:text-emerald-200">
             Join ServZEN
@@ -490,7 +495,7 @@ const RegisterForm = () => {
                 <div className="w-full border-t border-emerald-200/80 dark:border-emerald-800/50" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-3 bg-white dark:bg-zinc-900 text-emerald-700/80 dark:text-emerald-300/70">
+                <span className="px-3 bg-white dark:bg-black text-emerald-700/80 dark:text-emerald-300/70">
                   Or continue with
                 </span>
               </div>
