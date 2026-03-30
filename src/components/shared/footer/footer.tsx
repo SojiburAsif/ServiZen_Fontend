@@ -141,9 +141,9 @@ export default function Footer() {
         <div>
           <h4 className="font-bold mb-6 text-green-600 dark:text-green-500 uppercase tracking-widest text-xs">Legal</h4>
           <ul className="space-y-4 text-sm font-medium text-zinc-600 dark:text-zinc-400">
-            {[{icon: Shield, label: "Privacy Policy"}, {icon: FileText, label: "Terms of Service"}, {icon: HelpCircle, label: "FAQ"}].map((link) => (
+            {[{icon: Shield, label: "Privacy Policy", href: "/privacy-policy"}, {icon: FileText, label: "Terms of Service", href: "/terms-of-service"}, {icon: HelpCircle, label: "FAQ", href: "/faq"}].map((link) => (
               <li key={link.label}>
-                <Link href="#" className="flex items-center gap-2 hover:text-green-500 transition-colors w-fit group">
+                <Link href={link.href} className="flex items-center gap-2 hover:text-green-500 transition-colors w-fit group">
                   <link.icon size={16} className="group-hover:scale-110 transition-transform" /> {link.label}
                 </Link>
               </li>
