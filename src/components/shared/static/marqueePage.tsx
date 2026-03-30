@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from 'react';
@@ -16,48 +17,44 @@ const marqueeItems = [
 
 export default function MarqueePage() {
   return (
-    <div className="w-full overflow-hidden py-12 bg-white dark:bg-black">
+    <div className="w-full overflow-hidden py-8 md:py-12 bg-white dark:bg-black transition-colors duration-500">
+      
+      {/* Container - Balanced Tilt & Size */}
       <section 
-        className="w-full py-4 md:py-8 bg-gradient-to-br from-[#FAFAFA] via-[#E2F7D8] to-[#80F279] text-gray-900 font-sans selection:bg-green-300 overflow-hidden relative shadow-lg transform -rotate-2 md:-rotate-3 scale-[1.02] md:scale-105 my-4 border-y-2 md:border-y-4 border-green-500/20"
+        className="relative w-full py-4 md:py-6 overflow-hidden transform -rotate-1 scale-[1.02] border-y border-emerald-500/10 dark:border-emerald-500/20 shadow-sm"
       >
-        
-        {/* Subtle background shadows for the marquee */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent z-10 pointer-events-none w-full h-full"></div>
+        {/* Background Layer with Subtler Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/50 via-white to-emerald-50/50 dark:from-zinc-950 dark:via-emerald-950/10 dark:to-zinc-950" />
         
         <Marquee 
-          speed={60} 
+          speed={50} 
           gradient={false} 
           pauseOnHover={true}
-          className="overflow-hidden"
+          className="relative z-10"
         >
           <div className="flex items-center">
-            {marqueeItems.map((item, idx) => (
+            {[...marqueeItems, ...marqueeItems].map((item, idx) => (
               <motion.div 
                 key={idx} 
-                className="flex items-center gap-2 md:gap-4 mx-4 md:mx-8 group cursor-pointer"
-                whileHover={{
-                  y: -5,
-                  scale: 1.02,
-                  textShadow: "0px 5px 15px rgba(34, 197, 94, 0.3)",
-                  transition: { 
-                    duration: 0.3, 
-                    ease: "easeOut"
-                  }
-                }}
+                className="flex items-center gap-3 md:gap-5 mx-6 md:mx-10 group cursor-default"
               >
-                <motion.div 
-                  className="p-1.5 md:p-3 rounded-full bg-white border border-green-200 text-green-600 group-hover:bg-green-500 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-green-500/50"
+                {/* Responsive Icon Box - Optimized Size */}
+                <div 
+                  className="flex items-center justify-center p-2 md:p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-500 group-hover:-rotate-6"
                 >
-                  <item.icon className="w-4 h-4 md:w-6 md:h-6" />
-                </motion.div>
-                <span className="text-sm sm:text-base md:text-2xl font-black text-gray-900 uppercase tracking-wide group-hover:text-green-700 transition-colors duration-300 whitespace-nowrap">
+                  <item.icon className="w-4 h-4 md:w-5 md:h-5" />
+                </div>
+
+                {/* Responsive Typography - Clean & Compact */}
+                <span className="text-sm md:text-lg lg:text-xl font-extrabold text-zinc-800 dark:text-zinc-200 uppercase tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 whitespace-nowrap">
                   {item.text}
                 </span>
                 
-                {/* Added a subtle divider between items */}
-                <span className="mx-2 md:mx-6 text-green-700/50 text-xs md:text-base">
-                  ✦
-                </span>
+                {/* Geometric Divider - Responsive Scale */}
+                <div className="ml-6 md:ml-10 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rotate-45 bg-emerald-500/40 group-hover:bg-emerald-500 transition-all duration-500" />
+                  <div className="w-8 md:w-16 h-[1px] bg-gradient-to-r from-emerald-500/30 to-transparent" />
+                </div>
               </motion.div>
             ))}
           </div>

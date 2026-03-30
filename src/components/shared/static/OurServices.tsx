@@ -84,7 +84,7 @@ export default function ProfessionalPestControl() {
           >
             <div className="rounded-3xl overflow-hidden shadow-2xl ring-1 ring-zinc-200 dark:ring-white/10 aspect-[4/3] md:aspect-auto">
               <img 
-                src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=2070&auto=format&fit=crop" 
+                src="https://i.ibb.co.com/1GPv1V9N/team-diverse-professional-hardworking-mixed-race-cleaners-cleaning-service-working-together-modern-l.webp" 
                 alt="Professional Worker" 
                 className="w-full h-full object-cover scale-105 hover:scale-100 transition-transform duration-700 ease-in-out"
               />

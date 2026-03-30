@@ -13,8 +13,7 @@ import {
 export default function MarketPolicy() {
   return (
     <section className="relative min-h-screen w-full bg-[#FAFAFA] dark:bg-black text-zinc-900 dark:text-white py-24 px-6 lg:px-12 overflow-hidden transition-colors duration-500">
-      
-      {/* ব্যাকগ্রাউন্ড ডেকোরেশন - হালকা গ্রিন সার্কেল */}
+
       <div className="absolute top-20 right-[10%] w-64 h-64 bg-green-500/10 blur-[100px] pointer-events-none" />
       <div className="absolute bottom-20 left-[5%] w-72 h-72 bg-green-500/5 blur-[120px] pointer-events-none" />
 
@@ -126,7 +125,7 @@ export default function MarketPolicy() {
             }}
           >
             <img 
-              src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2070&auto=format&fit=crop" 
+              src="https://i.ibb.co.com/rGjGCTxC/pngtree-comprehensive-collection-of-construction-tools-for-home-repair-and-building-services-image-1.png" 
               alt="Professional Service"
               className="w-full h-full object-cover scale-110 hover:scale-100 transition-transform duration-700 ease-in-out"
             />

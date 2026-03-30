@@ -7,29 +7,30 @@ import { FaFacebook as Facebook, FaTwitter as Twitter, FaLinkedin as Linkedin, F
 
 const teamMembers = [
   {
-    name: "William Thompson",
+    name: "Sojibur Rahman Asif",
     role: "Founder & CEO",
-    exp: "12+ Yrs Exp",
-    desc: "Visionary leader driving the company's global expansion.",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&h=500&auto=format&fit=crop", 
+    exp: "1 Yrs Exp",
+    desc: "ServZen Founder And CEO, Sojibur Rahman Asif, ",
+    image: "https://i.ibb.co.com/Jw6ktQGL/541f13fb899c.jpg", 
     socials: { fb: "#", tw: "#", li: "#" }
   },
   {
-    name: "Amuana Joey",
-    role: "Marketing Leader",
-    exp: "8+ Yrs Exp",
+    name: "Atiqurzaman Atiq",
+    role: "COO ServZen Ltd.",
+    exp: "1+ Yrs Exp",
     desc: "Expert in digital strategy and global brand positioning.",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&h=500&auto=format&fit=crop",
+    image: "https://i.ibb.co.com/VWKRZmwL/616774751-1445984900293387-6760850805866168753-n.jpg",
     socials: { fb: "#", ig: "#", li: "#" }
   },
   {
-    name: "Albert Henry",
-    role: "Co-Ordinator",
-    exp: "5+ Yrs Exp",
-    desc: "Master of internal operations and team efficiency.",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400&h=500&auto=format&fit=crop",
-    socials: { tw: "#", li: "#", ig: "#" }
+    name: "Ajmain litimas Lazeed",
+    role: "CTO ServZen Ltd.",
+    exp: "1+ Yrs Exp",
+    desc: "Services And Provider Head Of ServZen Ltd. Ajmain Litimas Lazeed, ",
+    image: "https://i.ibb.co.com/6c9qXwgv/456779244-3489971171294273-1073819102219311731-n.jpg",
+    socials: { fb: "#", ig: "#", li: "#" }
   },
+  
 ];
 
 // Animation Variants
@@ -71,7 +72,7 @@ export default function OurTeam() {
           <div className="max-w-xl flex flex-col gap-4">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-green-500/20 bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold tracking-widest uppercase shadow-sm w-fit">
               <Users size={14} />
-              /003 Our Team
+              Our Team
             </div>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-zinc-900 dark:text-white leading-[1.1] mt-2">
               Meet our <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-400">expert team.</span>

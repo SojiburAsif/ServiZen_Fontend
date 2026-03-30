@@ -4,7 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { 
   ShieldCheck, Zap, Leaf, Lock, Headphones, 
-  Star, DollarSign, CheckCircle, Wrench, 
+  Star, CheckCircle, Wrench, 
   Droplets, Lightbulb, Hammer 
 } from "lucide-react";
 
@@ -73,7 +73,7 @@ export default function Features() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: false, amount: 0.2 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-8xl font-bold tracking-tighter leading-none"
+            className="text-5xl md:text-5xl font-bold tracking-tighter leading-none"
           >
             Why <span className="text-emerald-500">Choose</span> Us?
           </motion.h2>
@@ -114,37 +114,33 @@ export default function Features() {
                 }
               }}
               whileHover={{ 
-                scale: 1.15,
-                y: -30,
-                backgroundColor: "#10b981", 
-                borderColor: "#34d399",
-                boxShadow: "0 25px 50px -12px rgba(16, 185, 129, 0.5)",
-                transition: { type: "spring", stiffness: 300, damping: 15 }
+                scale: 1.1,
+                y: -25,
+                boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.1)",
+                transition: { type: "spring", stiffness: 400, damping: 20 }
               }}
               className={`
                 ${feature.size} 
                 flex flex-col items-center justify-center rounded-full 
-                bg-white dark:bg-[#0f0f0f] border border-zinc-200 dark:border-white/10 shadow-xl
-                cursor-pointer p-6 text-center transition-colors duration-300 group
-                ${feature.primary ? "mb-20 border-emerald-500/50" : "mb-6"}
+                bg-white dark:bg-[#0f0f0f] border border-zinc-200 dark:border-white/10 shadow-lg
+                cursor-pointer p-6 text-center group
+                ${feature.primary ? "mb-20 border-emerald-500/40" : "mb-6"}
               `}
             >
-              {/* Icon Animation on Hover */}
+              {/* Icon Section - Smooth Scale */}
               <motion.div
-                whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                whileHover={{ scale: 1.1 }}
                 className="flex items-center justify-center"
               >
                 <feature.icon 
-                  className={`size-6 md:size-9 mb-2 transition-all duration-300 
-                  ${feature.primary ? 'text-emerald-500' : 'text-emerald-600/70 dark:text-emerald-500/60'} 
-                  group-hover:text-white group-hover:drop-shadow-lg`} 
+                  className={`size-6 md:size-9 mb-2 transition-transform duration-300 
+                  ${feature.primary ? 'text-emerald-500' : 'text-emerald-600/70 dark:text-emerald-500/60'}`} 
                 />
               </motion.div>
 
               <span className={`
                 text-[8px] md:text-[11px] font-black uppercase tracking-widest leading-none
                 ${feature.primary ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500 dark:text-gray-400"}
-                group-hover:text-white transition-colors duration-300
               `}>
                 {feature.label}
               </span>
@@ -153,8 +149,8 @@ export default function Features() {
         </div>
       </div>
 
-      {/* --- Glow Effects --- */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-emerald-500/5 dark:bg-emerald-600/10 blur-[120px] pointer-events-none -z-10"></div>
+      {/* --- Subtle Glow Effect --- */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-emerald-500/5 dark:bg-emerald-600/5 blur-[120px] pointer-events-none -z-10"></div>
     </section>
   );
 }

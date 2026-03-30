@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, CheckCircle, Users, Star, ArrowRight, Activity, Calendar } from 'lucide-react';
+import Link from 'next/link';
 
 const stats = [
   { value: "20+", title: "Years Experience", desc: "Decades of hands-on expertise delivering quality.", icon: Calendar },
@@ -14,15 +15,15 @@ const stats = [
 export default function OurSuccessful() {
   return (
     <section className="relative w-full py-24 px-6 lg:px-12 bg-white dark:bg-black transition-colors duration-500 overflow-hidden">
-      
+
       {/* Background Decorators */}
       <div className="absolute top-20 left-[20%] w-96 h-96 bg-green-500/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-10 right-[10%] w-80 h-80 bg-green-500/10 blur-[100px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        
+
         {/* Top Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.2 }}
@@ -43,7 +44,7 @@ export default function OurSuccessful() {
         {/* Statistics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-0 lg:divide-x divide-zinc-200 dark:divide-zinc-800 pt-8 mb-24 border-t border-zinc-200 dark:border-zinc-800">
           {stats.map((stat, index) => (
-            <motion.div 
+            <motion.div
               key={index}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -66,7 +67,7 @@ export default function OurSuccessful() {
         </div>
 
         {/* Bottom Banner Image Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.2 }}
@@ -74,37 +75,39 @@ export default function OurSuccessful() {
           className="relative w-full aspect-[4/3] md:aspect-[21/9] min-h-[400px] rounded-[2.5rem] overflow-hidden group shadow-2xl ring-1 ring-zinc-200 dark:ring-white/10"
         >
           {/* Background Image */}
-          <img 
-            src="https://images.unsplash.com/photo-1542013936693-884638332954?q=80&w=2070&auto=format&fit=crop" 
+          <img
+            src="https://images.unsplash.com/photo-1542013936693-884638332954?q=80&w=2070&auto=format&fit=crop"
             alt="Professional Service Team"
             className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000 ease-in-out"
           />
-          
+
           {/* Dark Overlay Gradient (Better contrast for text) */}
           <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
 
           {/* Banner Content */}
           <div className="absolute inset-0 flex flex-col justify-end md:justify-center px-8 md:px-16 lg:px-24 pb-12 md:pb-0">
             <div className="max-w-xl flex flex-col items-start">
-              
+
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold tracking-widest uppercase mb-6">
                 <Activity size={14} className="text-green-400" />
-                Need an appointment?
+                Need an services?
               </div>
-              
+
               <h3 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-8 leading-[1.1] tracking-tight">
                 Get our service by making an <br />
-                <span className="text-green-400">online appointment.</span>
+                <span className="text-green-400">online Booking.</span>
               </h3>
-              
-              <motion.button 
-                whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(34, 197, 94, 0.4)" }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 bg-green-500 text-white rounded-full font-bold flex items-center justify-center gap-2 hover:bg-green-400 transition-all duration-300 shadow-xl"
-              >
-                Make an Appointment
-                <ArrowRight size={18} />
-              </motion.button>
+
+              <Link href="/services">
+                <motion.button
+                  whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(34, 197, 94, 0.4)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-4 bg-green-500 text-white rounded-full font-bold flex items-center justify-center gap-2 hover:bg-green-400 transition-all duration-300 shadow-xl"
+                >
+                  Make an booking Services!!
+                  <ArrowRight size={18} />
+                </motion.button>
+              </Link>
             </div>
           </div>
         </motion.div>
