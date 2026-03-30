@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { createProviderAction } from "@/services/auth.service";
+import { createProviderServerAction } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { AuthValidation } from "@/zod/auth.validation";
 import { uploadToImgbb } from "@/lib/imageUpload.utils";
@@ -81,57 +81,47 @@ export const CreateProviderForm = ({ specialties = [] }: { specialties: any[] })
     setValue("specialties", next, { shouldValidate: true });
   };
 
-  const onSubmit = async (values: TProviderValues) => {
+  const onFormSubmit = async (data: TProviderValues) => {
     setLoading(true);
     const toastId = toast.loading("Creating provider account...");
-    
+
     try {
-      const res = await createProviderAction(values as Record<string, any>);
-      
-      if (res?.success) {
+      const result = await createProviderServerAction(data);
+
+      if (result?.success) {
         toast.success("✅ Provider account created successfully!", { id: toastId });
         reset();
       } else {
-        // Check for specific error messages
-        let errorMessage = res?.message || "Failed to create provider account.";
+        let errorMessage = result?.message || "Failed to create provider account.";
         
-        // Handle "Provider creation failed: Request failed with status code 500"
-        if (errorMessage.includes("Provider creation failed: Request failed with status code 500")) {
+        // Handle email already exists error
+        if (errorMessage.toLowerCase().includes("email already exists") || 
+            errorMessage.toLowerCase().includes("user email already exists")) {
           errorMessage = "Email already exists! Please use a different email address.";
+        }
+        
+        // Make error message more user-friendly
+        if (errorMessage.includes("Invalid input: expected array, received undefined")) {
+          errorMessage = "Please select at least one specialty.";
+        } else if (errorMessage.includes("specialties")) {
+          errorMessage = "Please select at least one specialty to continue.";
+        } else if (errorMessage.includes("Unable to connect to the server")) {
+          errorMessage = "Server connection failed. Please check your internet and try again.";
+        } else if (errorMessage.includes("Network error")) {
+          errorMessage = "Network issue detected. Please try again.";
         }
         
         toast.error(errorMessage, { id: toastId });
       }
-    } catch (err: any) {
-      // 500 error holeo jodi backend specific message pathay (e.g. Email already exists)
-      const backendError = err?.response?.data?.message || err?.response?.data?.error;
-      const backendErrorMessage = err?.response?.data?.errorSources?.[0]?.message;
-      
+    } catch (error: any) {
       let finalErrorMessage = "Something went wrong on the server.";
-
-      // Check for email already exists in various backend response formats
-      const hasEmailExistsError = 
-        (backendError && (backendError.toLowerCase().includes("email already exists") || 
-                         backendError.toLowerCase().includes("user email already exists"))) ||
-        (backendErrorMessage && (backendErrorMessage.toLowerCase().includes("email already exists") || 
-                                backendErrorMessage.toLowerCase().includes("user email already exists")));
-
-      if (hasEmailExistsError) {
-        finalErrorMessage = "Email already exists! Please use a different email address.";
-      } else if (backendError) {
-        finalErrorMessage = backendError;
-      } else if (err.message && err.message.includes("Request failed with status code 500")) {
-        // If it's a generic 500 error, assume it might be email exists
-        finalErrorMessage = "Email already exists! Please use a different email address.";
-      } else if (err.message.includes("500")) {
-        // Jodi specific message na thake kintu status 500 hoy
-        finalErrorMessage = "Internal Server Error (500). Please check if the email already exists.";
-      } else {
-        finalErrorMessage = err.message;
+      
+      if (error?.message) {
+        finalErrorMessage = error.message;
       }
-
+      
       toast.error(`❌ ${finalErrorMessage}`, { id: toastId });
-      console.error("Submission Error:", err);
+      console.error("Submission Error:", error);
     } finally {
       setLoading(false);
     }
@@ -144,7 +134,7 @@ export const CreateProviderForm = ({ specialties = [] }: { specialties: any[] })
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onFormSubmit)}
       className="overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-2xl shadow-emerald-900/10 backdrop-blur-xl dark:border-emerald-500/10 dark:bg-slate-900/80 dark:shadow-black/50"
     >
       <div className="p-6 md:p-8 space-y-10">
@@ -293,6 +283,11 @@ export const CreateProviderForm = ({ specialties = [] }: { specialties: any[] })
             )}
           </div>
           {errors.specialties && <p className={errorClass}>{errors.specialties.message as string}</p>}
+          
+          {/* Hidden inputs for selected specialties */}
+          {selectedSpecialties.map((specialtyId) => (
+            <input key={specialtyId} type="hidden" name="specialties" value={specialtyId} />
+          ))}
         </div>
 
         {/* Action Button */}

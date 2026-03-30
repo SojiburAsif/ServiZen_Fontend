@@ -2,7 +2,7 @@
 "use server";
 
 import { httpClient } from "@/lib/axios/httpClient";
-import { getServerEnv } from "@/lib/env";
+import { getServerEnv, publicEnv } from "@/lib/env";
 import { setTokenInCookies } from "@/lib/tokenUtils";
 import { jwtUtils } from "@/lib/jwtUtils";
 
@@ -702,7 +702,7 @@ export const resetPasswordAction = async (
   }
 };
 
-export const createProviderAction = async (
+export const createProviderServerAction = async (
   payload: Record<string, any>,
 ): Promise<ApiResponse<unknown> | ApiErrorResponse> => {
   const parsedPayload =
@@ -721,12 +721,112 @@ export const createProviderAction = async (
     const { confirmPassword, ...providerPayload } = parsedPayload.data as any;
     void confirmPassword;
 
-    const response = await httpClient.post<unknown>(
-      "/users/create-provider",
-      providerPayload,
-    );
-    return response;
+    // Use fetch directly instead of httpClient
+    const API_BASE_URL = getServerEnv().BASE_API_URL;
+    console.log('Using server API_BASE_URL:', API_BASE_URL);
+    
+    const response = await fetch(`${API_BASE_URL}/users/create-provider`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(providerPayload),
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        if (errorData?.message) {
+          errorMessage = errorData.message;
+        } else if (errorData?.error) {
+          errorMessage = errorData.error;
+        }
+
+        // Handle Zod validation errors with detailed field information
+        if (errorData?.errorSources && Array.isArray(errorData.errorSources)) {
+          const fieldErrors = errorData.errorSources
+            .map((source: any) => source.message || source.field)
+            .filter(Boolean)
+            .join(', ');
+          if (fieldErrors) {
+            errorMessage = fieldErrors;
+          }
+        }
+
+        // Handle nested error structures
+        if (errorData?.issues && Array.isArray(errorData.issues)) {
+          const validationErrors = errorData.issues
+            .map((issue: any) => {
+              const field = issue.path?.join('.') || 'field';
+              let message = issue.message;
+              
+              // Make error messages more user-friendly
+              if (message.includes('expected array, received undefined') && field.includes('specialties')) {
+                message = 'Please select at least one specialty';
+              } else if (message.includes('expected array') && field.includes('specialties')) {
+                message = 'Specialties must be selected';
+              } else if (field.includes('email') && message.includes('already exists')) {
+                message = 'Email address is already registered';
+              }
+              
+              return `${field}: ${message}`;
+            })
+            .join('; ');
+          if (validationErrors) {
+            errorMessage = validationErrors;
+          }
+        }
+
+        // Handle errors array
+        if (errorData?.errors && Array.isArray(errorData.errors)) {
+          const errorMessages = errorData.errors
+            .map((err: any) => {
+              let message = err.message || err;
+              
+              // Make common errors more user-friendly
+              if (message.includes('expected array, received undefined')) {
+                message = 'Please select at least one specialty';
+              } else if (message.includes('email already exists')) {
+                message = 'Email address is already registered';
+              }
+              
+              return message;
+            })
+            .filter(Boolean)
+            .join(', ');
+          if (errorMessages) {
+            errorMessage = errorMessages;
+          }
+        }
+      } catch {
+        // If we can't parse the error response, use the default message
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data: ApiResponse<unknown> = await response.json();
+    return data;
   } catch (error: any) {
+    console.error('Create provider error:', error);
+    console.error('Error message:', error?.message);
+    console.error('Error name:', error?.name);
+    
+    // Provide more specific error messages
+    if (error?.message?.includes('Failed to fetch')) {
+      return {
+        success: false,
+        message: `Unable to connect to the backend server at ${getServerEnv().BASE_API_URL}. Please check your internet connection and try again.`,
+      };
+    }
+    
+    if (error?.message?.includes('NetworkError') || error?.message?.includes('CORS')) {
+      return {
+        success: false,
+        message: "Network error. Please check your backend server configuration.",
+      };
+    }
+    
     return {
       success: false,
       message: `Provider creation failed: ${error.message}`,

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { ProviderProfileForm } from "@/components/modules/Provider/providerProfileForm";
 import { Badge } from "@/components/ui/badge";
-import { getProviderSelfProfile } from "@/services/provider.service";
+import { getProviderSelfProfileServerAction } from "@/services/provider.client";
 import {
   Award,
   Briefcase,
@@ -39,7 +39,8 @@ const resolveAvatarProps = (url?: string | null) => {
 };
 
 export default async function ProviderProfilePage() {
-  const provider = await getProviderSelfProfile();
+  const profileResponse = await getProviderSelfProfileServerAction();
+  const provider = profileResponse.success ? profileResponse.data : null;
 
   if (!provider) {
     return (

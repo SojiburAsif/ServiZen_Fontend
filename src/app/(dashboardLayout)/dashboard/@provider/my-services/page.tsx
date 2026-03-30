@@ -6,21 +6,23 @@ import type { SpecialtyOption } from "@/components/modules/services/services-man
 import { ProviderProfileRequired } from "@/components/modules/services/provider-profile-required";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getProviderSelfProfile } from "@/services/provider.service";
+import { getProviderSelfProfileServerAction } from "@/services/provider.client";
 
 const formatCurrency = (value?: number | null) =>
   Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT", maximumFractionDigits: 0 }).format(value ?? 0);
 
 export default async function ProviderMyServicesPage() {
-  const providerProfile = await getProviderSelfProfile();
+  const profileResponse = await getProviderSelfProfileServerAction();
 
-  if (!providerProfile) {
+  if (!profileResponse.success || !profileResponse.data) {
     return (
       <div className="p-6">
         <ProviderProfileRequired />
       </div>
     );
   }
+
+  const providerProfile = profileResponse.data;
 
   const specialtyOptions: SpecialtyOption[] = (providerProfile.specialties ?? [])
     .map((item) => item.specialty)

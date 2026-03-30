@@ -1,4 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use server";
+
 import { httpClient } from '@/lib/axios/httpClient';
+import { publicEnv } from "@/lib/env";
+import { cookies } from "next/headers";
 import { ApiResponse, type PaginationMeta } from '@/types/api.types';
 
 const SERVICES_BASE = '/services';
@@ -229,4 +234,356 @@ export const deleteService = async (
   return httpClient.delete<null>(`${SERVICES_BASE}/${serviceId}`, {
     headers: withAuth(token),
   });
+};
+
+// Server Actions for Services
+
+// Create Service (Provider)
+export const createServiceServerAction = async (
+  payload: CreateServicePayload
+): Promise<ApiResponse<ServiceRecord> | { success: false; message: string }> => {
+  try {
+    const API_BASE_URL = publicEnv.NEXT_PUBLIC_API_BASE_URL;
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.toString();
+
+    const response = await fetch(`${API_BASE_URL}/services/create-service`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': cookieHeader,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        if (errorData?.message) {
+          errorMessage = errorData.message;
+        } else if (errorData?.error) {
+          errorMessage = errorData.error;
+        }
+
+        // Handle Zod validation errors with detailed field information
+        if (errorData?.errorSources && Array.isArray(errorData.errorSources)) {
+          const fieldErrors = errorData.errorSources
+            .map((source: any) => source.message || source.field)
+            .filter(Boolean)
+            .join(', ');
+          if (fieldErrors) {
+            errorMessage = fieldErrors;
+          }
+        }
+
+        // Handle nested error structures
+        if (errorData?.issues && Array.isArray(errorData.issues)) {
+          const validationErrors = errorData.issues
+            .map((issue: any) => `${issue.path?.join('.') || 'field'}: ${issue.message}`)
+            .join('; ');
+          if (validationErrors) {
+            errorMessage = validationErrors;
+          }
+        }
+
+        // Handle errors array
+        if (errorData?.errors && Array.isArray(errorData.errors)) {
+          const errorMessages = errorData.errors
+            .map((err: any) => err.message || err)
+            .filter(Boolean)
+            .join(', ');
+          if (errorMessages) {
+            errorMessage = errorMessages;
+          }
+        }
+      } catch {
+        // If we can't parse the error response, use the default message
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data: ApiResponse<ServiceRecord> = await response.json();
+    return data;
+  } catch (error: any) {
+    return {
+      success: false,
+      message: `Service creation failed: ${error.message}`,
+    };
+  }
+};
+
+// Get All Services (Public)
+export const getAllServicesServerAction = async (
+  query?: ServiceListQuery
+): Promise<ApiResponse<ServiceRecord[]> | { success: false; message: string }> => {
+  try {
+    const API_BASE_URL = publicEnv.NEXT_PUBLIC_API_BASE_URL;
+    const sanitizedQuery = sanitizeQueryParams(query);
+    const queryString = sanitizedQuery ? `?${new URLSearchParams(sanitizedQuery as Record<string, string>)}` : '';
+
+    const response = await fetch(`${API_BASE_URL}/services/all-services${queryString}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        if (errorData?.message) {
+          errorMessage = errorData.message;
+        } else if (errorData?.error) {
+          errorMessage = errorData.error;
+        }
+      } catch {
+        // If we can't parse the error response, use the default message
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data: ApiResponse<ServiceRecord[] | ServiceListEnvelope> = await response.json();
+
+    // Normalize the response to ensure data is always an array
+    const payload = data.data;
+    const list = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : [];
+
+    const nestedMeta = data.meta ?? (!Array.isArray(payload) ? payload?.meta : undefined);
+    const normalizedMeta = buildPaginationMeta(nestedMeta, query, list.length);
+
+    return {
+      ...data,
+      data: list,
+      meta: normalizedMeta,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: `Failed to fetch services: ${error.message}`,
+    };
+  }
+};
+
+// Get Services by Provider (Provider/Admin)
+export const getServicesByProviderServerAction = async (
+  providerId: string,
+  query?: ServiceListQuery
+): Promise<ApiResponse<ServiceRecord[]> | { success: false; message: string }> => {
+  try {
+    const API_BASE_URL = publicEnv.NEXT_PUBLIC_API_BASE_URL;
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.toString();
+    const sanitizedQuery = sanitizeQueryParams({ ...query, providerId });
+    const queryString = sanitizedQuery ? `?${new URLSearchParams(sanitizedQuery as Record<string, string>)}` : '';
+
+    const response = await fetch(`${API_BASE_URL}/services/all-services${queryString}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': cookieHeader,
+      },
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        if (errorData?.message) {
+          errorMessage = errorData.message;
+        } else if (errorData?.error) {
+          errorMessage = errorData.error;
+        }
+      } catch {
+        // If we can't parse the error response, use the default message
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data: ApiResponse<ServiceRecord[] | ServiceListEnvelope> = await response.json();
+
+    // Normalize the response to ensure data is always an array
+    const payload = data.data;
+    const list = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : [];
+
+    const nestedMeta = data.meta ?? (!Array.isArray(payload) ? payload?.meta : undefined);
+    const normalizedMeta = buildPaginationMeta(nestedMeta, { ...query, providerId }, list.length);
+
+    return {
+      ...data,
+      data: list,
+      meta: normalizedMeta,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: `Failed to fetch provider services: ${error.message}`,
+    };
+  }
+};
+
+// Get Service by ID (Public)
+export const getServiceByIdServerAction = async (
+  serviceId: string
+): Promise<ApiResponse<ServiceRecord> | { success: false; message: string }> => {
+  try {
+    const API_BASE_URL = publicEnv.NEXT_PUBLIC_API_BASE_URL;
+
+    const response = await fetch(`${API_BASE_URL}/services/${serviceId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        if (errorData?.message) {
+          errorMessage = errorData.message;
+        } else if (errorData?.error) {
+          errorMessage = errorData.error;
+        }
+      } catch {
+        // If we can't parse the error response, use the default message
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data: ApiResponse<ServiceRecord> = await response.json();
+    return data;
+  } catch (error: any) {
+    return {
+      success: false,
+      message: `Failed to fetch service: ${error.message}`,
+    };
+  }
+};
+
+// Update Service (Provider)
+export const updateServiceServerAction = async (
+  serviceId: string,
+  payload: UpdateServicePayload
+): Promise<ApiResponse<ServiceRecord> | { success: false; message: string }> => {
+  try {
+    const API_BASE_URL = publicEnv.NEXT_PUBLIC_API_BASE_URL;
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.toString();
+
+    const response = await fetch(`${API_BASE_URL}/services/${serviceId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': cookieHeader,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        if (errorData?.message) {
+          errorMessage = errorData.message;
+        } else if (errorData?.error) {
+          errorMessage = errorData.error;
+        }
+
+        // Handle Zod validation errors with detailed field information
+        if (errorData?.errorSources && Array.isArray(errorData.errorSources)) {
+          const fieldErrors = errorData.errorSources
+            .map((source: any) => source.message || source.field)
+            .filter(Boolean)
+            .join(', ');
+          if (fieldErrors) {
+            errorMessage = fieldErrors;
+          }
+        }
+
+        // Handle nested error structures
+        if (errorData?.issues && Array.isArray(errorData.issues)) {
+          const validationErrors = errorData.issues
+            .map((issue: any) => `${issue.path?.join('.') || 'field'}: ${issue.message}`)
+            .join('; ');
+          if (validationErrors) {
+            errorMessage = validationErrors;
+          }
+        }
+
+        // Handle errors array
+        if (errorData?.errors && Array.isArray(errorData.errors)) {
+          const errorMessages = errorData.errors
+            .map((err: any) => err.message || err)
+            .filter(Boolean)
+            .join(', ');
+          if (errorMessages) {
+            errorMessage = errorMessages;
+          }
+        }
+      } catch {
+        // If we can't parse the error response, use the default message
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data: ApiResponse<ServiceRecord> = await response.json();
+    return data;
+  } catch (error: any) {
+    return {
+      success: false,
+      message: `Service update failed: ${error.message}`,
+    };
+  }
+};
+
+// Delete Service (Provider)
+export const deleteServiceServerAction = async (
+  serviceId: string
+): Promise<ApiResponse<null> | { success: false; message: string }> => {
+  try {
+    const API_BASE_URL = publicEnv.NEXT_PUBLIC_API_BASE_URL;
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.toString();
+
+    const response = await fetch(`${API_BASE_URL}/services/${serviceId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': cookieHeader,
+      },
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        if (errorData?.message) {
+          errorMessage = errorData.message;
+        } else if (errorData?.error) {
+          errorMessage = errorData.error;
+        }
+      } catch {
+        // If we can't parse the error response, use the default message
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data: ApiResponse<null> = await response.json();
+    return data;
+  } catch (error: any) {
+    return {
+      success: false,
+      message: `Service deletion failed: ${error.message}`,
+    };
+  }
 };

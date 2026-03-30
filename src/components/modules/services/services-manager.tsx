@@ -13,7 +13,12 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { deleteService, getAllServices, updateService, type ServiceRecord } from "@/services/services.service";
+import {
+  deleteServiceServerAction,
+  getAllServicesServerAction,
+  updateServiceServerAction,
+  type ServiceRecord
+} from "@/services/services.service";
 import { ServiceEditorSheet } from "@/components/modules/services/service-editor-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,8 +41,8 @@ export const ServicesManager = ({ providerId, specialtyOptions = [] }: { context
   const fetchServices = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await getAllServices({ providerId, limit: 50 });
-      setServices(response.data || []);
+      const response = await getAllServicesServerAction({ providerId, limit: 50 });
+      setServices(response.success ? response.data || [] : []);
     } catch (err) {
       toast.error("Could not load services");
     } finally {
@@ -57,18 +62,26 @@ export const ServicesManager = ({ providerId, specialtyOptions = [] }: { context
 
   const handleToggleStatus = async (service: ServiceRecord) => {
     try {
-      const res = await updateService(service.id, { isActive: !service.isActive });
-      setServices(prev => prev.map(item => item.id === service.id ? res.data : item));
-      toast.success(res.data.isActive ? "Service is now live" : "Service hidden");
+      const response = await updateServiceServerAction(service.id, { isActive: !service.isActive });
+      if (response.success && response.data) {
+        setServices(prev => prev.map(item => item.id === service.id ? response.data : item));
+        toast.success(response.data.isActive ? "Service is now live" : "Service hidden");
+      } else {
+        toast.error(response.message || "Update failed");
+      }
     } catch { toast.error("Update failed"); }
   };
 
   const handleDelete = async () => {
     if (!serviceToDelete) return;
     try {
-      await deleteService(serviceToDelete.id);
-      setServices(prev => prev.filter(s => s.id !== serviceToDelete.id));
-      toast.success("Service deleted");
+      const response = await deleteServiceServerAction(serviceToDelete.id);
+      if (response.success) {
+        setServices(prev => prev.filter(s => s.id !== serviceToDelete.id));
+        toast.success("Service deleted");
+      } else {
+        toast.error(response.message || "Failed to delete service");
+      }
     } finally { setServiceToDelete(null); }
   };
 

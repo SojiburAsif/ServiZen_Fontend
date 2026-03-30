@@ -25,7 +25,7 @@ import {
   ServicesValidation,
   type UpdateServiceFormInput,
 } from "@/zod/services.validation";
-import { updateService, type ServiceRecord } from "@/services/services.service";
+import { updateServiceServerAction, type ServiceRecord } from "@/services/services.service";
 
 const sanitize = (value?: string | null) => value?.trim() || undefined;
 
@@ -114,10 +114,14 @@ export const ServiceEditorSheet = ({
         imageUrl: sanitize(parsed.imageUrl),
       };
 
-      const response = await updateService(service.id, payload);
-      onUpdated(response.data);
-      toast.success("Service updated successfully");
-      onOpenChange(false);
+      const response = await updateServiceServerAction(service.id, payload);
+      if (response.success && response.data) {
+        onUpdated(response.data);
+        toast.success("Service updated successfully");
+        onOpenChange(false);
+      } else {
+        toast.error(response.message || "Failed to update service");
+      }
     } catch (error) {
       toast.error(extractApiErrorMessage(error, "Failed to update service"));
     }

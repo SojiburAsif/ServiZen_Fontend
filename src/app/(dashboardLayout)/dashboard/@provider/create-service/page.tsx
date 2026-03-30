@@ -2,7 +2,7 @@ import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 import { CreateServiceForm } from "@/components/modules/services/create-service-form";
-import { getProviderSelfProfile } from "@/services/provider.service";
+import { getProviderSelfProfileServerAction } from "@/services/provider.client";
 
 const EmptyProviderState = () => (
   <div className="mx-auto max-w-3xl rounded-3xl border border-dashed border-amber-200 bg-amber-50/80 p-10 text-center shadow-sm dark:border-amber-500/30 dark:bg-amber-950/40">
@@ -21,7 +21,8 @@ const EmptyProviderState = () => (
 );
 
 export default async function CreateServicespage() {
-  const providerProfile = await getProviderSelfProfile();
+  const profileResponse = await getProviderSelfProfileServerAction();
+  const providerProfile = profileResponse.success ? profileResponse.data : null;
 
   if (!providerProfile) {
     return (

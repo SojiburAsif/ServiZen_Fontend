@@ -3,9 +3,9 @@
 
 import React, { useEffect, useState } from "react";
 import { 
-  getAllSpecialties, 
-  createSpecialty, 
-  deleteSpecialty, 
+  getAllSpecialtiesServerAction, 
+  createSpecialtyServerAction, 
+  deleteSpecialtyServerAction, 
   Specialty 
 } from "@/services/specialties.service";
 import { 
@@ -86,8 +86,9 @@ export default function AdminSpecialtiesPage() {
   const fetchSpecialties = async () => {
     setLoading(true);
     try {
-      const res = await getAllSpecialties();
-      setSpecialties(res.data?.filter((s) => !s.isDeleted) || []);
+      const res = await getAllSpecialtiesServerAction();
+      const data = res.success ? res.data : [];
+      setSpecialties(data?.filter((s) => !s.isDeleted) || []);
     } catch (e) {
       toast.error("Failed to load specialties");
     } finally {
@@ -124,14 +125,18 @@ export default function AdminSpecialtiesPage() {
     e.preventDefault();
     setCreating(true);
     try {
-      await createSpecialty(form, adminToken);
-      toast.success("Specialty created successfully!", {
-        description: `${form.title} has been added to the categories.`,
-      });
-      setForm({ title: "", description: "", icon: "" });
-      fetchSpecialties();
+      const result = await createSpecialtyServerAction(form);
+      if (result.success) {
+        toast.success("Specialty created successfully!", {
+          description: `${form.title} has been added to the categories.`,
+        });
+        setForm({ title: "", description: "", icon: "" });
+        fetchSpecialties();
+      } else {
+        toast.error(result.message || "Failed to create specialty");
+      }
     } catch (e: any) {
-      toast.error(e?.response?.data?.message || "Failed to create specialty");
+      toast.error("Failed to create specialty");
     } finally {
       setCreating(false);
     }
@@ -139,11 +144,15 @@ export default function AdminSpecialtiesPage() {
 
   const handleDelete = async (id: string, title: string) => {
     try {
-      await deleteSpecialty(id, adminToken);
-      toast.success("Specialty deleted", {
-        description: `${title} was removed successfully.`,
-      });
-      fetchSpecialties();
+      const result = await deleteSpecialtyServerAction(id);
+      if (result.success) {
+        toast.success("Specialty deleted", {
+          description: `${title} was removed successfully.`,
+        });
+        fetchSpecialties();
+      } else {
+        toast.error(result.message || "Failed to delete specialty");
+      }
     } catch (e: any) {
       toast.error("Failed to delete specialty");
     }

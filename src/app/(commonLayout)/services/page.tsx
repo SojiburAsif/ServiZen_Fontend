@@ -1,25 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PublicServicesGrid } from "@/components/modules/services/public-services-grid";
-import { getAllServices } from "@/services/services.service";
-import { getAllSpecialties } from "@/services/specialties.service";
+import { getAllServicesServerAction } from "@/services/services.service";
+import { getAllSpecialtiesServerAction } from "@/services/specialties.service";
 
 export default async function ServicesPage() {
   const [servicesResponse, specialtiesResponse] = await Promise.allSettled([
-    getAllServices({ page: 1, limit: 12 }),
-    getAllSpecialties(),
+    getAllServicesServerAction({ page: 1, limit: 12 }),
+    getAllSpecialtiesServerAction(),
   ]);
 
   const initialServices =
-    servicesResponse.status === "fulfilled" && Array.isArray(servicesResponse.value?.data)
+    servicesResponse.status === "fulfilled" && servicesResponse.value.success && Array.isArray(servicesResponse.value.data)
       ? servicesResponse.value.data
       : [];
 
   const initialMeta =
-    servicesResponse.status === "fulfilled" ? servicesResponse.value?.meta : null;
+    servicesResponse.status === "fulfilled" && servicesResponse.value.success
+      ? servicesResponse.value.meta
+      : { page: 1, limit: 12, total: 0, totalPages: 0 };
 
   const specialties =
-    specialtiesResponse.status === "fulfilled"
-      ? (specialtiesResponse.value?.data ?? []).map((specialty: any) => ({
+    specialtiesResponse.status === "fulfilled" && specialtiesResponse.value.success
+      ? (specialtiesResponse.value.data ?? []).map((specialty: any) => ({
           id: specialty.id,
           title: specialty.title ?? "Untitled specialty",
         }))

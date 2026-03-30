@@ -4,10 +4,10 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Image from "next/image";
 import {
-  getAllSpecialties,
-  getMySpecialties,
-  addMySpecialties,
-  removeMySpecialty,
+  getAllSpecialtiesServerAction,
+  getMySpecialtiesServerAction,
+  addMySpecialtiesServerAction,
+  removeMySpecialtyServerAction,
   Specialty,
 } from "@/services/specialties.service";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
@@ -98,9 +98,11 @@ export default function ProviderSpecialtiesPage() {
   const fetchSpecialties = useCallback(async () => {
     setLoading(true);
     try {
-      const [all, mine] = await Promise.all([getAllSpecialties(), getMySpecialties()]);
-      setAllSpecialties(normalizeSpecialtyList(all?.data).filter((s) => !s.isDeleted));
-      setMySpecialties(normalizeSpecialtyList(mine?.data));
+      const [all, mine] = await Promise.all([getAllSpecialtiesServerAction(), getMySpecialtiesServerAction()]);
+      const allData = all.success ? all.data : [];
+      const mineData = mine.success ? mine.data : null;
+      setAllSpecialties(normalizeSpecialtyList(allData).filter((s) => !s.isDeleted));
+      setMySpecialties(normalizeSpecialtyList(mineData));
       setSelected([]);
       setSingleSelect("");
     } catch {
@@ -120,11 +122,15 @@ export default function ProviderSpecialtiesPage() {
     if (selected.length === 0) return;
     setAdding(true);
     try {
-      await addMySpecialties(selected);
-      toast.success("Specialties published!");
-      fetchSpecialties();
+      const result = await addMySpecialtiesServerAction(selected);
+      if (result.success) {
+        toast.success("Specialties published!");
+        fetchSpecialties();
+      } else {
+        toast.error(result.message || "Failed to add");
+      }
     } catch (e: any) {
-      toast.error(e?.response?.data?.message || "Failed to add");
+      toast.error("Failed to add");
     } finally {
       setAdding(false);
     }
@@ -135,10 +141,14 @@ export default function ProviderSpecialtiesPage() {
     if (!singleSelect) return;
     setAdding(true);
     try {
-      await addMySpecialties([singleSelect]);
-      toast.success("Specialty added");
-      fetchSpecialties();
-    } catch {
+      const result = await addMySpecialtiesServerAction([singleSelect]);
+      if (result.success) {
+        toast.success("Specialty added");
+        fetchSpecialties();
+      } else {
+        toast.error(result.message || "Failed to add");
+      }
+    } catch (e: any) {
       toast.error("Failed to add");
     } finally {
       setAdding(false);
@@ -148,9 +158,13 @@ export default function ProviderSpecialtiesPage() {
   const handleRemove = async (id: string) => {
     setRemovingId(id);
     try {
-      await removeMySpecialty(id);
-      toast.success("Removed");
-      fetchSpecialties();
+      const result = await removeMySpecialtyServerAction(id);
+      if (result.success) {
+        toast.success("Removed");
+        fetchSpecialties();
+      } else {
+        toast.error(result.message || "Failed to remove");
+      }
     } catch {
       toast.error("Failed to remove");
     } finally {

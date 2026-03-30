@@ -1,10 +1,11 @@
 import { ServicesManager } from "@/components/modules/services/services-manager";
 import type { SpecialtyOption } from "@/components/modules/services/services-manager";
 import { ProviderProfileRequired } from "@/components/modules/services/provider-profile-required";
-import { getProviderSelfProfile } from "@/services/provider.service";
+import { getProviderSelfProfileServerAction } from "@/services/provider.client";
 
 export default async function ManageServicesPage() {
-  const providerProfile = await getProviderSelfProfile();
+  const profileResponse = await getProviderSelfProfileServerAction();
+  const providerProfile = profileResponse.success ? profileResponse.data : null;
 
   if (!providerProfile) {
     return (

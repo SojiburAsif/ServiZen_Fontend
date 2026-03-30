@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { ProviderSelfProfile } from "@/services/provider.service";
-import { updateProviderProfile, type UpdateProviderProfilePayload } from "@/services/provider.client";
+import { updateProviderProfileServerAction, type UpdateProviderProfilePayload } from "@/services/provider.client";
 import { uploadToImgbb } from "@/lib/imageUpload.utils";
 
 const optionalText = (max: number, message: string) =>
@@ -128,20 +128,28 @@ export const ProviderProfileForm = ({ initialData }: { initialData: ProviderSelf
       profilePhoto: toNullable(values.profilePhoto),
     };
 
+    // Remove null/undefined values to avoid sending them to backend
+    Object.keys(payload).forEach(key => {
+      if (payload[key as keyof UpdateProviderProfilePayload] === null || 
+          payload[key as keyof UpdateProviderProfilePayload] === undefined) {
+        delete payload[key as keyof UpdateProviderProfilePayload];
+      }
+    });
+
     const toastId = toast.loading("Saving profile...");
 
     try {
-      const response = await updateProviderProfile(payload);
+      const response = await updateProviderProfileServerAction(payload);
+
       if (!response?.success) {
-        throw new Error(response?.message || "Failed to update profile");
+        throw new Error((response as { message: string }).message || "Failed to update profile");
       }
       toast.success("Profile updated successfully", { id: toastId });
       reset({ ...values, name: values.name.trim() });
       router.refresh();
     } catch (error: unknown) {
       const fallbackMessage = error instanceof Error ? error.message : "Failed to update profile";
-      const apiMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      toast.error(apiMessage || fallbackMessage, { id: toastId });
+      toast.error(fallbackMessage, { id: toastId });
     } finally {
       setIsSubmitting(false);
     }

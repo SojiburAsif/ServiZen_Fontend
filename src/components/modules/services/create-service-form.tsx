@@ -15,7 +15,7 @@ import {
   Tag 
 } from "lucide-react";
 
-import { createService } from "@/services/services.service";
+import { createServiceServerAction } from "@/services/services.service";
 import type { ProviderSpecialtyItem } from "@/services/provider.service";
 import {
   ServicesValidation,
@@ -98,12 +98,16 @@ export const CreateServiceForm = ({ specialties }: CreateServiceFormProps) => {
         imageUrl: sanitizeText(parsed.imageUrl),
       };
 
-      const response = await createService(payload);
-      toast.success(response?.message || "Service published!");
-      reset();
-      router.refresh();
+      const response = await createServiceServerAction(payload);
+      if (response.success && response.data) {
+        toast.success(response.message || "Service published!");
+        reset();
+        router.refresh();
+      } else {
+        toast.error(response.message || "Failed to create service");
+      }
     } catch (error) {
-      toast.error(extractApiErrorMessage(error, "Failed to create service"));
+      toast.error("Failed to create service");
     } finally {
       setIsSubmitting(false);
     }
