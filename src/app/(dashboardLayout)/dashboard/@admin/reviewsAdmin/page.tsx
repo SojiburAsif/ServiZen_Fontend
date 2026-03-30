@@ -1,33 +1,25 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
+﻿"use client";
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { toast } from "sonner";
 import {
-  getAllReviews,
-  deleteReview,
-  ReviewRecord,
-  ReviewListQuery,
-} from "@/app/actions/review-actions";
-import { Badge } from "@/components/ui/badge";
+  Eye,
+  Trash2,
+  Star,
+  MessageSquare,
+  TrendingUp,
+  TrendingDown,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -35,6 +27,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,24 +44,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Star,
-  Eye,
-  Trash2,
-  Search,
-  Filter,
-  User,
-  Wrench,
-  Calendar,
-  MessageSquare,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
-import { toast } from "sonner";
 
-const ratingColors: Record<number, string> = {
+import { getAllReviews, deleteReview } from "@/app/actions/review-actions";
+import type { ReviewRecord, ReviewListQuery } from "@/app/actions/review-actions";
+
+const ratingColors = {
   1: "text-red-500",
   2: "text-orange-500",
   3: "text-yellow-500",
@@ -109,7 +95,7 @@ export default function AdminReviewsPage() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Filters
-  const [ratingFilter, setRatingFilter] = useState<string>("");
+  const [ratingFilter, setRatingFilter] = useState<string>("all");
 
   const fetchReviews = useCallback(async (page: number = 1) => {
     try {
@@ -117,7 +103,7 @@ export default function AdminReviewsPage() {
       const filters: ReviewListQuery = {
         page,
         limit: 10,
-        ...(ratingFilter && { rating: parseInt(ratingFilter) }),
+        ...(ratingFilter !== "all" && { rating: parseInt(ratingFilter) }),
       };
 
       const response = await getAllReviews(filters);
@@ -130,11 +116,10 @@ export default function AdminReviewsPage() {
           total: response.meta?.total || 0,
         });
       } else {
-        setReviews([]); // Ensure reviews is always an array
+        setReviews([]);
         toast.error(response.message || "Failed to fetch reviews");
       }
     } catch (error) {
-      console.error("fetchReviews error:", error);
       toast.error("Failed to fetch reviews");
     } finally {
       setLoading(false);
@@ -145,34 +130,21 @@ export default function AdminReviewsPage() {
     fetchReviews();
   }, [fetchReviews]);
 
-  const filteredReviews = useMemo(() => {
-    // Ensure reviews is always an array
-    const reviewsArray = Array.isArray(reviews) ? reviews : [];
-    const q = searchTerm.trim().toLowerCase();
+  const filteredReviews = reviews.filter((review) => {
+    const matchesSearch =
+      review.client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (review.comment && review.comment.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    if (!q) return reviewsArray;
-
-    return reviewsArray.filter((review) =>
-      review.comment.toLowerCase().includes(q) ||
-      review.id.toLowerCase().includes(q) ||
-      review.client.name.toLowerCase().includes(q) ||
-      review.provider.name.toLowerCase().includes(q) ||
-      review.service.name.toLowerCase().includes(q) ||
-      review.bookingId.toLowerCase().includes(q)
-    );
-  }, [reviews, searchTerm]);
+    return matchesSearch;
+  });
 
   const handleViewReview = (review: ReviewRecord) => {
     setSelectedReview(review);
     setIsViewDialogOpen(true);
   };
 
-  const handleDeleteReview = (review: ReviewRecord) => {
-    setSelectedReview(review);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = async () => {
+  const handleDeleteReview = async () => {
     if (!selectedReview) return;
 
     try {
@@ -187,7 +159,6 @@ export default function AdminReviewsPage() {
         toast.error(response.message || "Failed to delete review");
       }
     } catch (error) {
-      console.error("Delete review error:", error);
       toast.error("Failed to delete review");
     } finally {
       setIsProcessing(false);
@@ -202,7 +173,7 @@ export default function AdminReviewsPage() {
   };
 
   const clearFilters = () => {
-    setRatingFilter("");
+    setRatingFilter("all");
     setSearchTerm("");
   };
 
@@ -233,300 +204,246 @@ export default function AdminReviewsPage() {
         </div>
       </div>
 
-      <Card className="border-muted/30 shadow-sm">
+      {/* Statistics Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Reviews</CardTitle>
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{meta.total}</div>
+            <p className="text-xs text-muted-foreground">
+              All reviews in the system
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
+            <Star className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {reviews.length > 0
+                ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+                : "0.0"}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Out of 5 stars
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">5-Star Reviews</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {reviews.filter(r => r.rating === 5).length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Perfect ratings
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Low Ratings</CardTitle>
+            <TrendingDown className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {reviews.filter(r => r.rating <= 2).length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              1-2 star reviews
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card>
         <CardHeader>
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <CardTitle className="text-xl">All Reviews</CardTitle>
-
-            {/* Filters */}
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search reviews..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 w-[200px]"
-                />
-              </div>
-
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-4 md:flex-row md:items-end">
+            <div className="flex-1">
+              <Label htmlFor="search">Search Reviews</Label>
+              <Input
+                id="search"
+                placeholder="Search by client name, service name, or comment..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div className="w-full md:w-48">
+              <Label htmlFor="rating">Rating Filter</Label>
               <Select value={ratingFilter} onValueChange={setRatingFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="All Ratings" />
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="All ratings" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">1 Star</SelectItem>
-                  <SelectItem value="2">2 Stars</SelectItem>
-                  <SelectItem value="3">3 Stars</SelectItem>
-                  <SelectItem value="4">4 Stars</SelectItem>
-                  <SelectItem value="5">5 Stars</SelectItem>
+                  <SelectItem value="all">All ratings</SelectItem>
+                  <SelectItem value="5">5 stars</SelectItem>
+                  <SelectItem value="4">4 stars</SelectItem>
+                  <SelectItem value="3">3 stars</SelectItem>
+                  <SelectItem value="2">2 stars</SelectItem>
+                  <SelectItem value="1">1 star</SelectItem>
                 </SelectContent>
               </Select>
-
-              {(ratingFilter || searchTerm) && (
-                <Button variant="outline" size="sm" onClick={clearFilters}>
-                  <Filter className="mr-1 h-4 w-4" />
-                  Clear
-                </Button>
-              )}
             </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Review ID</TableHead>
-                  <TableHead>Rating</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Provider</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Comment</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="w-[120px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredReviews.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="h-24 text-center">
-                      {loading ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Loading...
-                        </div>
-                      ) : (
-                        "No reviews found"
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredReviews.map((review) => (
-                    <TableRow key={review.id}>
-                      <TableCell className="font-mono text-xs">
-                        {review.id.slice(-8)}
-                      </TableCell>
-                      <TableCell>
-                        {renderStars(review.rating)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="font-medium">{review.client.name}</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Wrench className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="font-medium">{review.provider.name}</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{review.service.name}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-[200px] truncate">
-                          <p className="text-sm">{review.comment}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 text-sm">
-                          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                          {formatDate(review.createdAt)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="hover:text-primary"
-                            onClick={() => handleViewReview(review)}
-                            aria-label="View review details"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="hover:text-destructive"
-                            onClick={() => handleDeleteReview(review)}
-                            aria-label="Delete review"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="flex flex-col gap-3 border-t bg-muted/10 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
-              Showing page <span className="font-medium text-foreground">{meta.page}</span> of{" "}
-              <span className="font-medium text-foreground">{meta.totalPages}</span> (
-              <span className="font-medium text-foreground">{meta.total}</span> total reviews)
-            </p>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={meta.page <= 1 || loading}
-                onClick={() => fetchReviews(meta.page - 1)}
-              >
-                <ChevronLeft className="mr-1 h-4 w-4" />
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={meta.page >= meta.totalPages || loading}
-                onClick={() => fetchReviews(meta.page + 1)}
-              >
-                Next
-                <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
-            </div>
+            <Button variant="outline" onClick={clearFilters}>
+              Clear Filters
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* View Review Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={closeViewDialog}>
-        <DialogContent className="max-h-[90vh] w-[95vw] max-w-4xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">Review Details</DialogTitle>
-            <DialogDescription>
-              Complete review information and related details.
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedReview ? (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5 text-blue-600" />
-                    Review Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    <DetailItem label="Review ID" value={selectedReview.id} />
-                    <DetailItem label="Rating" value={renderStars(selectedReview.rating)} />
-                    <DetailItem
-                      label="Created At"
-                      value={new Date(selectedReview.createdAt).toLocaleString()}
-                    />
-                  </div>
-                  <div className="mt-4">
-                    <p className="text-sm font-medium text-muted-foreground mb-2">Comment</p>
-                    <div className="bg-muted/50 rounded-lg p-4">
-                      <p className="text-sm">{selectedReview.comment}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="grid gap-6 md:grid-cols-3">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <User className="h-5 w-5 text-blue-600" />
-                      Client Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div>
-                        <p className="font-medium">{selectedReview.client.name}</p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <User className="h-3.5 w-3.5" />
-                          ID: {selectedReview.clientId.slice(-8)}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Wrench className="h-5 w-5 text-green-600" />
-                      Provider Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div>
-                        <p className="font-medium">{selectedReview.provider.name}</p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <User className="h-3.5 w-3.5" />
-                          ID: {selectedReview.providerId.slice(-8)}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Star className="h-5 w-5 text-yellow-600" />
-                      Service Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div>
-                        <p className="font-medium">{selectedReview.service.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          ID: {selectedReview.serviceId.slice(-8)}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+      {/* Reviews Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Reviews</CardTitle>
+          <div className="text-sm text-muted-foreground">
+            Showing <span className="font-semibold text-gray-900 dark:text-white">{filteredReviews.length}</span> of{" "}
+            <span className="font-semibold text-gray-900 dark:text-white">{reviews.length}</span> reviews
+            {meta.totalPages > 1 && (
+              <> • Page <span className="font-semibold text-gray-900 dark:text-white">{meta.page}</span> of{" "}
+              <span className="font-semibold text-gray-900 dark:text-white">{meta.totalPages}</span></>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {reviews.length === 0 ? (
+            <div className="flex h-32 items-center justify-center text-center">
+              <div>
+                <MessageSquare className="mx-auto h-8 w-8 text-muted-foreground" />
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {searchTerm || ratingFilter !== "all" ? "No reviews match your filters" : "No reviews found"}
+                </p>
               </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Booking Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <DetailItem label="Booking ID" value={selectedReview.bookingId} />
-                    <DetailItem label="Booking Status" value={
-                      <Badge variant="outline">
-                        {selectedReview.booking.status}
-                      </Badge>
-                    } />
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           ) : (
-            <div className="py-10 text-center text-muted-foreground">
-              Loading details...
+            <div className="space-y-4">
+              {filteredReviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="flex items-start justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>
+                          {review.client.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{review.client.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatDate(review.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {renderStars(review.rating)}
+                      <Badge variant="outline">{review.service.name}</Badge>
+                    </div>
+                    {review.comment && (
+                      <p className="text-sm text-muted-foreground">{review.comment}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewReview(review)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedReview(review);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Pagination */}
+              {meta.totalPages > 1 && (
+                <div className="flex items-center justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => fetchReviews(meta.page - 1)}
+                    disabled={meta.page <= 1 || loading}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    Page {meta.page} of {meta.totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    onClick={() => fetchReviews(meta.page + 1)}
+                    disabled={meta.page >= meta.totalPages || loading}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           )}
+        </CardContent>
+      </Card>
 
+      {/* View Review Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Review Details</DialogTitle>
+          </DialogHeader>
+          {selectedReview && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-12 w-12">
+                  <AvatarFallback>
+                    {selectedReview.client.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-semibold">{selectedReview.client.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDate(selectedReview.createdAt)}
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  {renderStars(selectedReview.rating)}
+                  <Badge variant="outline">{selectedReview.service.name}</Badge>
+                </div>
+                {selectedReview.comment && (
+                  <div className="rounded-lg bg-muted p-3">
+                    <p className="text-sm">{selectedReview.comment}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           <DialogFooter>
-            <Button variant="outline" onClick={closeViewDialog}>
-              Close
-            </Button>
+            <Button onClick={closeViewDialog}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -537,37 +454,28 @@ export default function AdminReviewsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Review</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this review? This action cannot be undone and will also update the provider s average rating.
+              Are you sure you want to delete this review? This action cannot be undone.
+              <br />
+              <br />
+              <strong>Review by:</strong> {selectedReview?.client.name}
+              <br />
+              <strong>Rating:</strong> {selectedReview?.rating} stars
+              <br />
+              <strong>Service:</strong> {selectedReview?.service.name}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmDelete}
+              onClick={handleDeleteReview}
               disabled={isProcessing}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-red-600 hover:bg-red-700"
             >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete Review"
-              )}
+              {isProcessing ? "Deleting..." : "Delete Review"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
-}
-
-function DetailItem({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div>
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <div className="mt-1">{value}</div>
     </div>
   );
 }

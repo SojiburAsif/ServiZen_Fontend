@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getProviderReviews, type ReviewRecord } from "@/app/actions/review-actions";
+import { getMyProviderReviews, type ReviewRecord } from "@/app/actions/review-actions";
 
 export default function ProviderReviewsPage() {
   const [reviews, setReviews] = useState<ReviewRecord[]>([]);
@@ -45,7 +45,7 @@ export default function ProviderReviewsPage() {
     const fetchReviews = async () => {
       try {
         setLoading(true);
-        const response = await getProviderReviews({
+        const response = await getMyProviderReviews({
           page: 1,
           limit: 20,
         });

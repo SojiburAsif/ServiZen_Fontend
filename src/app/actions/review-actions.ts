@@ -54,13 +54,6 @@ const getAuthHeaders = async (includeContentType = true) => {
   const sessionToken = cookieStore.get("better-auth.session_token")?.value;
   const sessionData = cookieStore.get("better-auth.session_data")?.value;
 
-  console.log('Available cookies:', {
-    accessToken: accessToken ? 'present' : 'missing',
-    sessionToken: sessionToken ? 'present' : 'missing',
-    sessionData: sessionData ? 'present' : 'missing',
-    allCookies: cookieStore.getAll().map(c => ({ name: c.name, value: c.value?.substring(0, 20) + '...' }))
-  });
-
   const headers: Record<string, string> = {};
 
   if (includeContentType) {
@@ -82,9 +75,6 @@ const getAuthHeaders = async (includeContentType = true) => {
 
   if (cookieArray.length > 0) {
     headers.Cookie = cookieArray.join('; ');
-    console.log('Sending cookies for auth:', headers.Cookie);
-  } else {
-    console.log('No auth cookies found!');
   }
 
   return headers;
@@ -256,9 +246,6 @@ export const deleteReview = async (
 
     if (cookieArray.length > 0) {
       headers.Cookie = cookieArray.join('; ');
-      console.log('Sending cookies:', headers.Cookie);
-    } else {
-      console.log('No auth tokens found!');
     }
 
     const baseUrl = getApiUrl();
@@ -418,8 +405,8 @@ export const updateReview = async (
   }
 };
 
-// Get Provider Reviews (Provider - their own reviews)
-export const getProviderReviews = async (
+// Get My Reviews (Provider - their own reviews)
+export const getMyProviderReviews = async (
   query?: ReviewListQuery,
 ): Promise<ApiResponse<ReviewRecord[]>> => {
   try {
@@ -427,7 +414,7 @@ export const getProviderReviews = async (
     const baseUrl = getApiUrl();
 
     const params = sanitizeQueryParams(query);
-    const url = new URL(`${baseUrl}${REVIEWS_BASE}`);
+    const url = new URL(`${baseUrl}${REVIEWS_BASE}/my`);
 
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -450,7 +437,7 @@ export const getProviderReviews = async (
 
     return normalizeReviewListResponse(data, query);
   } catch (error) {
-    console.error('getProviderReviews error:', error);
+    console.error('getMyProviderReviews error:', error);
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to fetch provider reviews',
