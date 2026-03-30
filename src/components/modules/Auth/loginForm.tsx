@@ -246,6 +246,34 @@ const LoginForm = () => {
             )}
             Google
           </Button>
+
+          {/* Legal Links */}
+          <div className="mt-8 pt-6 border-t border-emerald-200/80 dark:border-emerald-800/50">
+            <p className="text-xs text-center text-slate-600 dark:text-slate-400 leading-relaxed">
+              View our{" "}
+              <Link
+                href="/terms-of-service"
+                className="text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 font-semibold underline-offset-2 hover:underline"
+              >
+                Terms of Service
+              </Link>
+              ,{" "}
+              <Link
+                href="/privacy-policy"
+                className="text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 font-semibold underline-offset-2 hover:underline"
+              >
+                Privacy Policy
+              </Link>
+              , or{" "}
+              <Link
+                href="/faq"
+                className="text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 font-semibold underline-offset-2 hover:underline"
+              >
+                FAQ
+              </Link>
+              .
+            </p>
+          </div>
         </CardContent>
 
         <CardFooter className="pb-10 pt-6 justify-center">

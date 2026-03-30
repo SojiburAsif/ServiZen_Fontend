@@ -547,6 +547,34 @@ const RegisterForm = () => {
               </svg>
               {isGooglePending ? "Redirecting to Google..." : "Continue with Google"}
             </Button>
+
+            {/* Legal Links */}
+            <div className="mt-8 pt-6 border-t border-emerald-200/80 dark:border-emerald-800/50">
+              <p className="text-xs text-center text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                By registering, you agree to our{" "}
+                <Link
+                  href="/terms-of-service"
+                  className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-semibold underline-offset-2 hover:underline"
+                >
+                  Terms of Service
+                </Link>
+                {" "}and{" "}
+                <Link
+                  href="/privacy-policy"
+                  className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-semibold underline-offset-2 hover:underline"
+                >
+                  Privacy Policy
+                </Link>
+                . Check our{" "}
+                <Link
+                  href="/faq"
+                  className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-semibold underline-offset-2 hover:underline"
+                >
+                  FAQ
+                </Link>
+                {" "}for more information.
+              </p>
+            </div>
           </form>
         </CardContent>
 
