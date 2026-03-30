@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { MessageSquare, Loader2 } from "lucide-react";
-import { env } from "@/lib/env";
 import { Booking } from "@/types/booking.types";
 import { toast } from "sonner";
+import { createReview } from "@/app/actions/review-actions";
 
 interface ReviewFormProps {
   booking: Booking;
@@ -36,22 +36,14 @@ export function ReviewForm({ booking, onSuccess }: ReviewFormProps) {
     }
 
     try {
-      const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/reviews`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // This sends cookies
-        body: JSON.stringify({
-          bookingId: booking.id,
-          rating: parseInt(rating),
-          comment,
-        }),
+      const result = await createReview({
+        bookingId: booking.id,
+        rating: parseInt(rating),
+        comment: comment.trim() || undefined, // Make comment optional
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      if (!result.success) {
+        throw new Error(result.message || "Failed to submit review");
       }
 
       // Success, refresh page data and close dialog

@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getProviderReviews, type ReviewRecord } from "@/services/review.service";
+import { getProviderReviews, type ReviewRecord } from "@/app/actions/review-actions";
 
 export default function ProviderReviewsPage() {
   const [reviews, setReviews] = useState<ReviewRecord[]>([]);

@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { MessageSquarePlus, Info, Sparkles, CheckCircle2, Loader2 } from "lucide-react";
-import { env } from "@/lib/env";
 import { Booking } from "@/types/booking.types";
 import { toast } from "sonner";
+import { createReview } from "@/app/actions/review-actions";
 
 interface AddReviewFormProps {
   unreviewedBookings: Booking[];
@@ -38,22 +38,14 @@ export function AddReviewForm({ unreviewedBookings }: AddReviewFormProps) {
     }
 
     try {
-      const response = await fetch(`${env.NEXT_PUBLIC_API_BASE_URL}/reviews`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          bookingId: bookingSelection.split("|")[0],
-          rating,
-          comment: comment.trim(),
-        }),
+      const result = await createReview({
+        bookingId: bookingSelection.split("|")[0],
+        rating,
+        comment: comment.trim() || undefined, // Make comment optional
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to submit review: ${response.status} ${errorText}`);
+      if (!result.success) {
+        throw new Error(result.message || "Failed to submit review");
       }
 
       setSuccess(true);

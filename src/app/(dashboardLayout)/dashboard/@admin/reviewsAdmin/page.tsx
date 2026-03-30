@@ -7,7 +7,7 @@ import {
   deleteReview,
   ReviewRecord,
   ReviewListQuery,
-} from "@/services/review.service";
+} from "@/app/actions/review-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -122,15 +122,19 @@ export default function AdminReviewsPage() {
 
       const response = await getAllReviews(filters);
 
-      if (response.success) {
+      if (response.success && Array.isArray(response.data)) {
         setReviews(response.data);
         setMeta({
           page: response.meta?.page || 1,
           totalPages: Math.max(1, Math.ceil((response.meta?.total || 0) / (response.meta?.limit || 10))),
           total: response.meta?.total || 0,
         });
+      } else {
+        setReviews([]); // Ensure reviews is always an array
+        toast.error(response.message || "Failed to fetch reviews");
       }
     } catch (error) {
+      console.error("fetchReviews error:", error);
       toast.error("Failed to fetch reviews");
     } finally {
       setLoading(false);
@@ -142,11 +146,13 @@ export default function AdminReviewsPage() {
   }, [fetchReviews]);
 
   const filteredReviews = useMemo(() => {
+    // Ensure reviews is always an array
+    const reviewsArray = Array.isArray(reviews) ? reviews : [];
     const q = searchTerm.trim().toLowerCase();
 
-    if (!q) return reviews;
+    if (!q) return reviewsArray;
 
-    return reviews.filter((review) =>
+    return reviewsArray.filter((review) =>
       review.comment.toLowerCase().includes(q) ||
       review.id.toLowerCase().includes(q) ||
       review.client.name.toLowerCase().includes(q) ||
@@ -177,8 +183,11 @@ export default function AdminReviewsPage() {
         toast.success("Review deleted successfully");
         setReviews(reviews.filter(r => r.id !== selectedReview.id));
         setMeta(prev => ({ ...prev, total: prev.total - 1 }));
+      } else {
+        toast.error(response.message || "Failed to delete review");
       }
     } catch (error) {
+      console.error("Delete review error:", error);
       toast.error("Failed to delete review");
     } finally {
       setIsProcessing(false);

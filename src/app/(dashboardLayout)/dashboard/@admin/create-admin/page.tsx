@@ -77,7 +77,7 @@ export default function CreateAdminFormPage() {
       await createAdmin(payload);
       toast.success("New administrator onboarded successfully!");
       form.reset();
-      router.push('/dashboard/admin/all-admins'); // Redirecting to list
+      router.push('/dashboard/AllAdmin'); // Redirecting to list
     } catch (error: any) {
       toast.error(error.message || "Failed to create admin");
     }
