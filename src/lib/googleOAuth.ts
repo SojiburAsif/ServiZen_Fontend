@@ -46,13 +46,15 @@ export const startGoogleOAuth = ({
   }
 
   const normalizedBaseUrl = apiBaseUrl.replace(/\/+$/, "");
+  const parsedUrl = new URL(normalizedBaseUrl);
+  const backendOrigin = parsedUrl.origin;
   const stableOrigin = (appOrigin || window.location.origin).replace(/\/+$/, "");
   const normalizedPath = callbackPath.startsWith("/") ? callbackPath : `/${callbackPath}`;
   const callbackURL = new URL(normalizedPath, stableOrigin).toString();
 
   window.sessionStorage.setItem(GOOGLE_OAUTH_LOCK_KEY, String(Date.now()));
   window.location.assign(
-    `${normalizedBaseUrl}/auth/login/google?callbackURL=${encodeURIComponent(callbackURL)}`
+    `${backendOrigin}/api/v1/auth/login/google?callbackURL=${encodeURIComponent(callbackURL)}`
   );
 
   return { started: true };
