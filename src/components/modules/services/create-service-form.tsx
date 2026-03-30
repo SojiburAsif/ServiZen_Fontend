@@ -198,7 +198,7 @@ export const CreateServiceForm = ({ specialties }: CreateServiceFormProps) => {
               <Label htmlFor="name" className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Service Title</Label>
               <Input 
                 id="name"
-                placeholder="e.g. Master AC Deep Cleaning & Gas Refill" 
+                placeholder="Enter Your Service Title" 
                 className="h-14 rounded-2xl bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md border-none shadow-inner focus-visible:ring-2 focus-visible:ring-green-500 text-lg font-bold"
                 disabled={isSubmitting || requiresSpecialty} 
                 {...register("name")} 
@@ -210,7 +210,7 @@ export const CreateServiceForm = ({ specialties }: CreateServiceFormProps) => {
               <Label htmlFor="description" className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Detailed Description</Label>
               <Textarea 
                 id="description"
-                placeholder="Describe exactly what your clients will get. More detail means more bookings!" 
+                placeholder="Describe your service in detail, including what customers can expect and any special features." 
                 rows={5}
                 className="rounded-2xl bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md border-none shadow-inner focus-visible:ring-2 focus-visible:ring-green-500 resize-none py-4 text-md font-medium"
                 disabled={isSubmitting || requiresSpecialty} 
@@ -240,7 +240,7 @@ export const CreateServiceForm = ({ specialties }: CreateServiceFormProps) => {
                 <Clock size={16} className="text-green-600" /> Duration
               </Label>
               <Input 
-                placeholder="e.g. 2 Hours" 
+                placeholder="e.g. 30 mins, 1 hour" 
                 className="h-14 rounded-2xl bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md border-none shadow-inner focus-visible:ring-2 focus-visible:ring-green-500 font-bold"
                 disabled={isSubmitting || requiresSpecialty} 
                 {...register("duration")} 

@@ -156,7 +156,7 @@ export default function CreateAdminFormPage() {
                       <FormLabel className="font-bold uppercase text-[11px] tracking-widest text-gray-400 ml-1">Email Address</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Input type="email" placeholder="admin@servzen.com" {...field} className="pl-11 h-12 rounded-xl bg-gray-50 dark:bg-white/5 border-none focus:ring-2 ring-green-500/20" />
+                          <Input type="email" placeholder="Enter email address" {...field} className="pl-11 h-12 rounded-xl bg-gray-50 dark:bg-white/5 border-none focus:ring-2 ring-green-500/20" />
                           <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
                         </div>
                       </FormControl>

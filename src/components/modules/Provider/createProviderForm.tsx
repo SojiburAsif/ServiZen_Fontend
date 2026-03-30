@@ -184,7 +184,7 @@ export const CreateProviderForm = ({ specialties = [] }: { specialties: any[] })
               <label className={labelClass}>Full Name</label>
               <div className="relative">
                 <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("name")} className={`${inputClass} pl-11`} placeholder="Sojibur Rahman Asif" />
+                <input {...register("name")} className={`${inputClass} pl-11`} placeholder="Enter full name" />
               </div>
               {errors.name && <p className={errorClass}>{errors.name.message}</p>}
             </div>
@@ -193,7 +193,7 @@ export const CreateProviderForm = ({ specialties = [] }: { specialties: any[] })
               <label className={labelClass}>Email Address</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("email")} type="email" className={`${inputClass} pl-11`} placeholder="asif@servzen.com" />
+                <input {...register("email")} type="email" className={`${inputClass} pl-11`} placeholder="Enter email address" />
               </div>
               {errors.email && <p className={errorClass}>{errors.email.message}</p>}
             </div>
@@ -246,7 +246,7 @@ export const CreateProviderForm = ({ specialties = [] }: { specialties: any[] })
               <label className={labelClass}>Years Experience</label>
               <div className="relative">
                 <Star size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("experience")} type="number" className={`${inputClass} pl-11`} placeholder="5" />
+                <input {...register("experience")} type="number" className={`${inputClass} pl-11`} placeholder="Enter years of experience" />
               </div>
             </div>
 
@@ -254,7 +254,7 @@ export const CreateProviderForm = ({ specialties = [] }: { specialties: any[] })
               <label className={labelClass}>Phone Number</label>
               <div className="relative">
                 <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("contactNumber")} className={`${inputClass} pl-11`} placeholder="+880 1XXX-XXXXXX" />
+                <input {...register("contactNumber")} className={`${inputClass} pl-11`} placeholder="Enter phone number" />
               </div>
             </div>
 
@@ -262,7 +262,7 @@ export const CreateProviderForm = ({ specialties = [] }: { specialties: any[] })
               <label className={labelClass}>Location</label>
               <div className="relative">
                 <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("address")} className={`${inputClass} pl-11`} placeholder="Dhaka, Bangladesh" />
+                <input {...register("address")} className={`${inputClass} pl-11`} placeholder="Enter location" />
               </div>
             </div>
           </div>
