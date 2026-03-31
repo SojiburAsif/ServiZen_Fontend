@@ -178,7 +178,7 @@ To explore the platform, you can use the following demo accounts:
 
 ## 🔗 Links
 
-- **🌐 Live Demo**: [https://servi-zen-backend.vercel.app/](https://servi-zen-backend.vercel.app/)
+- **🌐 Live Demo**: [https://servi-zen-fontend.vercel.app/](https://servi-zen-fontend.vercel.app/)
 - **🎥 Demo Video**: [Watch on Google Drive](https://drive.google.com/file/d/1TTPKsI8YCEszoxKHtXUTTRnQbkZBMIaQ/view)
 - **📚 Documentation**: [Coming Soon]
 - **🐛 Report Issues**: [GitHub Issues](https://github.com/your-username/servizen-frontend/issues)
