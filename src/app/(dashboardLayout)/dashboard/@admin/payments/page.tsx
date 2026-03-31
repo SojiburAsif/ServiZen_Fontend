@@ -4,10 +4,8 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   getAllPayments,
-  getPaymentById,
   AdminPayment,
   PaymentFilters,
-  PaymentDetailResponse,
 } from "@/services/admin-payment.service";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,14 +20,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -40,6 +30,7 @@ import {
   Calendar,
   CreditCard,
   Eye,
+  EyeOff,
   Filter,
   Search,
   User,
@@ -51,6 +42,10 @@ import {
   AlertCircle,
   Calendar as CalendarIcon,
   Clock,
+  DollarSign,
+  Hash,
+  Mail,
+  Phone,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -84,10 +79,7 @@ export default function AdminPaymentsPage() {
   const [meta, setMeta] = useState({ page: 1, totalPages: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedPayment, setSelectedPayment] = useState<AdminPayment | null>(null);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [detailedPayment, setDetailedPayment] = useState<AdminPayment | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -105,17 +97,24 @@ export default function AdminPaymentsPage() {
         ...(dateToFilter && { dateTo: dateToFilter }),
       };
 
+      console.log('Fetching payments with filters:', filters);
       const response = await getAllPayments(filters);
+      console.log('API Response:', response);
 
       if (response.success) {
+        console.log('Setting payments data:', response.data.data);
         setPayments(response.data.data);
         setMeta({
           page: response.data.meta.page,
           totalPages: Math.max(1, Math.ceil(response.data.meta.total / response.data.meta.limit)),
           total: response.data.meta.total,
         });
+      } else {
+        console.error('API response not successful:', response);
+        toast.error(response.message || "Failed to fetch payments");
       }
     } catch (error) {
+      console.error('Error fetching payments:', error);
       toast.error("Failed to fetch payments");
     } finally {
       setLoading(false);
@@ -141,26 +140,14 @@ export default function AdminPaymentsPage() {
     );
   }, [payments, searchTerm]);
 
-  const handleViewPayment = async (payment: AdminPayment) => {
-    try {
-      setIsProcessing(true);
-      const response = await getPaymentById(payment.id);
-
-      if (response.success) {
-        setDetailedPayment(response.data);
-        setIsViewDialogOpen(true);
-      }
-    } catch (error) {
-      toast.error("Failed to fetch payment details");
-    } finally {
-      setIsProcessing(false);
+  const toggleRowExpansion = (paymentId: string) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(paymentId)) {
+      newExpanded.delete(paymentId);
+    } else {
+      newExpanded.add(paymentId);
     }
-  };
-
-  const closeViewDialog = () => {
-    if (isProcessing) return;
-    setIsViewDialogOpen(false);
-    setDetailedPayment(null);
+    setExpandedRows(newExpanded);
   };
 
   const clearFilters = () => {
@@ -278,76 +265,266 @@ export default function AdminPaymentsPage() {
                           Loading...
                         </div>
                       ) : (
-                        "No payments found"
+                        <div className="flex flex-col items-center gap-2">
+                          <AlertCircle className="h-8 w-8 text-muted-foreground" />
+                          <p className="text-muted-foreground">No payments found</p>
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredPayments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell className="font-mono text-xs">
-                        {payment.id.slice(-8)}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {payment.transactionId.slice(-12)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
+                    <React.Fragment key={payment.id}>
+                      <TableRow className="hover:bg-muted/50">
+                        <TableCell className="font-mono text-xs">
+                          <div className="flex items-center gap-2">
+                            <Hash className="h-3 w-3 text-muted-foreground" />
+                            {payment.id.slice(-8)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">
+                          <div className="flex items-center gap-2">
+                            <CreditCard className="h-3 w-3 text-muted-foreground" />
+                            {payment.transactionId.slice(-12)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="font-medium">{payment.booking.client.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {payment.booking.client.email}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Wrench className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="font-medium">{payment.booking.provider.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {payment.booking.provider.email}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
                           <div>
-                            <p className="font-medium">{payment.booking.client.name}</p>
+                            <p className="font-medium">{payment.booking.service.name}</p>
                             <p className="text-xs text-muted-foreground">
-                              {payment.booking.client.email}
+                              ${moneyFormat(payment.booking.service.price)}
                             </p>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Wrench className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="font-medium">{payment.booking.provider.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {payment.booking.provider.email}
-                            </p>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="h-4 w-4 text-green-600" />
+                            {moneyFormat(payment.amount)}
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{payment.booking.service.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            ${moneyFormat(payment.booking.service.price)}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        ${moneyFormat(payment.amount)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={paymentStatusColors[payment.status]}>
-                          {payment.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 text-sm">
-                          <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                          {formatDate(payment.createdAt)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="hover:text-primary"
-                          onClick={() => handleViewPayment(payment)}
-                          disabled={isProcessing}
-                          aria-label="View payment details"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={paymentStatusColors[payment.status]}>
+                            {payment.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 text-sm">
+                            <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                            {formatDate(payment.createdAt)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="hover:text-primary"
+                            onClick={() => toggleRowExpansion(payment.id)}
+                            aria-label={expandedRows.has(payment.id) ? "Hide details" : "Show details"}
+                          >
+                            {expandedRows.has(payment.id) ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={9} className="p-0">
+                          {expandedRows.has(payment.id) && (
+                            <div className="border-t bg-muted/20 p-6">
+                              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                {/* Payment Details */}
+                                <Card className="border-0 shadow-none bg-background/50">
+                                  <CardHeader className="pb-3">
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                      <CreditCard className="h-5 w-5 text-blue-600" />
+                                      Payment Details
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="space-y-3">
+                                    <DetailItem
+                                      icon={<Hash className="h-4 w-4" />}
+                                      label="Full Payment ID"
+                                      value={payment.id}
+                                    />
+                                    <DetailItem
+                                      icon={<CreditCard className="h-4 w-4" />}
+                                      label="Transaction ID"
+                                      value={payment.transactionId}
+                                    />
+                                    <DetailItem
+                                      icon={<DollarSign className="h-4 w-4" />}
+                                      label="Amount"
+                                      value={`$${moneyFormat(payment.amount)}`}
+                                    />
+                                    <DetailItem
+                                      icon={<Calendar className="h-4 w-4" />}
+                                      label="Created At"
+                                      value={new Date(payment.createdAt).toLocaleString()}
+                                    />
+                                    <DetailItem
+                                      label="Status"
+                                      value={
+                                        <Badge className={paymentStatusColors[payment.status]}>
+                                          {payment.status}
+                                        </Badge>
+                                      }
+                                    />
+                                  </CardContent>
+                                </Card>
+
+                                {/* Client Details */}
+                                <Card className="border-0 shadow-none bg-background/50">
+                                  <CardHeader className="pb-3">
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                      <User className="h-5 w-5 text-green-600" />
+                                      Client Details
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="space-y-3">
+                                    <DetailItem
+                                      icon={<User className="h-4 w-4" />}
+                                      label="Name"
+                                      value={payment.booking.client.name}
+                                    />
+                                    <DetailItem
+                                      icon={<Mail className="h-4 w-4" />}
+                                      label="Email"
+                                      value={payment.booking.client.email}
+                                    />
+                                  </CardContent>
+                                </Card>
+
+                                {/* Provider Details */}
+                                <Card className="border-0 shadow-none bg-background/50">
+                                  <CardHeader className="pb-3">
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                      <Wrench className="h-5 w-5 text-orange-600" />
+                                      Provider Details
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="space-y-3">
+                                    <DetailItem
+                                      icon={<User className="h-4 w-4" />}
+                                      label="Name"
+                                      value={payment.booking.provider.name}
+                                    />
+                                    <DetailItem
+                                      icon={<Mail className="h-4 w-4" />}
+                                      label="Email"
+                                      value={payment.booking.provider.email}
+                                    />
+                                    {payment.booking.provider.profilePhoto && (
+                                      <div className="flex items-center gap-3">
+                                        <span className="text-sm font-medium text-muted-foreground">Photo:</span>
+                                        <img
+                                          src={payment.booking.provider.profilePhoto}
+                                          alt={payment.booking.provider.name}
+                                          className="w-12 h-12 rounded-full object-cover border-2 border-background"
+                                        />
+                                      </div>
+                                    )}
+                                  </CardContent>
+                                </Card>
+
+                                {/* Service Details */}
+                                <Card className="border-0 shadow-none bg-background/50">
+                                  <CardHeader className="pb-3">
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                      <CreditCard className="h-5 w-5 text-purple-600" />
+                                      Service Details
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="space-y-3">
+                                    <DetailItem
+                                      icon={<Wrench className="h-4 w-4" />}
+                                      label="Service Name"
+                                      value={payment.booking.service.name}
+                                    />
+                                    <DetailItem
+                                      icon={<DollarSign className="h-4 w-4" />}
+                                      label="Service Price"
+                                      value={`$${moneyFormat(payment.booking.service.price)}`}
+                                    />
+                                  </CardContent>
+                                </Card>
+
+                                {/* Booking Details */}
+                                <Card className="border-0 shadow-none bg-background/50">
+                                  <CardHeader className="pb-3">
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                      <Calendar className="h-5 w-5 text-indigo-600" />
+                                      Booking Details
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="space-y-3">
+                                    <DetailItem
+                                      icon={<Hash className="h-4 w-4" />}
+                                      label="Booking ID"
+                                      value={payment.booking.id}
+                                    />
+                                    <DetailItem
+                                      icon={<Calendar className="h-4 w-4" />}
+                                      label="Booking Date"
+                                      value={formatDate(payment.booking.bookingDate)}
+                                    />
+                                    <DetailItem
+                                      icon={<Clock className="h-4 w-4" />}
+                                      label="Booking Time"
+                                      value={formatTime(payment.booking.bookingTime)}
+                                    />
+                                    <DetailItem
+                                      icon={<DollarSign className="h-4 w-4" />}
+                                      label="Total Amount"
+                                      value={`$${moneyFormat(payment.booking.totalAmount)}`}
+                                    />
+                                    <DetailItem
+                                      label="Booking Status"
+                                      value={
+                                        <Badge className={paymentStatusColors[payment.booking.status]}>
+                                          {payment.booking.status}
+                                        </Badge>
+                                      }
+                                    />
+                                    <DetailItem
+                                      label="Payment Status"
+                                      value={
+                                        <Badge className={paymentStatusColors[payment.booking.paymentStatus]}>
+                                          {payment.booking.paymentStatus}
+                                        </Badge>
+                                      }
+                                    />
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    </React.Fragment>
                   ))
                 )}
               </TableBody>
@@ -384,183 +561,18 @@ export default function AdminPaymentsPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* View Payment Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={closeViewDialog}>
-        <DialogContent className="max-h-[90vh] w-[95vw] max-w-6xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">Payment Details</DialogTitle>
-            <DialogDescription>
-              Complete payment information and transaction details.
-            </DialogDescription>
-          </DialogHeader>
-
-          {detailedPayment ? (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Payment Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    <DetailItem label="Payment ID" value={detailedPayment.id} />
-                    <DetailItem label="Transaction ID" value={detailedPayment.transactionId} />
-                    <DetailItem label="Stripe Event ID" value={detailedPayment.stripeEventId} />
-                    <DetailItem
-                      label="Amount"
-                      value={`$${moneyFormat(detailedPayment.amount)}`}
-                    />
-                    <DetailItem label="Status" value={
-                      <Badge className={paymentStatusColors[detailedPayment.status]}>
-                        {detailedPayment.status}
-                      </Badge>
-                    } />
-                    <DetailItem
-                      label="Created At"
-                      value={new Date(detailedPayment.createdAt).toLocaleString()}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="grid gap-6 md:grid-cols-3">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <User className="h-5 w-5 text-blue-600" />
-                      Client Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div>
-                        <p className="font-medium">{detailedPayment.booking.client.name}</p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <User className="h-3.5 w-3.5" />
-                          {detailedPayment.booking.client.email}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Wrench className="h-5 w-5 text-green-600" />
-                      Provider Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div>
-                        <p className="font-medium">{detailedPayment.booking.provider.name}</p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <User className="h-3.5 w-3.5" />
-                          {detailedPayment.booking.provider.email}
-                        </p>
-                      </div>
-                      {detailedPayment.booking.provider.profilePhoto && (
-                        <img
-                          src={detailedPayment.booking.provider.profilePhoto}
-                          alt={detailedPayment.booking.provider.name}
-                          className="w-16 h-16 rounded-full object-cover"
-                        />
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <CreditCard className="h-5 w-5 text-yellow-600" />
-                      Service Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div>
-                        <p className="font-medium">{detailedPayment.booking.service.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Price: ${moneyFormat(detailedPayment.booking.service.price)}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Booking Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    <DetailItem label="Booking ID" value={detailedPayment.booking.id} />
-                    <DetailItem
-                      label="Booking Date"
-                      value={formatDate(detailedPayment.booking.bookingDate)}
-                    />
-                    <DetailItem
-                      label="Booking Time"
-                      value={formatTime(detailedPayment.booking.bookingTime)}
-                    />
-                    <DetailItem
-                      label="Total Amount"
-                      value={`$${moneyFormat(detailedPayment.booking.totalAmount)}`}
-                    />
-                    <DetailItem label="Booking Status" value={
-                      <Badge className={paymentStatusColors[detailedPayment.booking.status]}>
-                        {detailedPayment.booking.status}
-                      </Badge>
-                    } />
-                    <DetailItem label="Payment Status" value={
-                      <Badge className={paymentStatusColors[detailedPayment.booking.paymentStatus]}>
-                        {detailedPayment.booking.paymentStatus}
-                      </Badge>
-                    } />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {detailedPayment.paymentGatewayData && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Stripe Payment Gateway Data</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="bg-muted/50 rounded-lg p-4 overflow-x-auto">
-                      <pre className="text-xs whitespace-pre-wrap">
-                        {JSON.stringify(detailedPayment.paymentGatewayData, null, 2)}
-                      </pre>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          ) : (
-            <div className="py-10 text-center text-muted-foreground">
-              Loading details...
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={closeViewDialog} disabled={isProcessing}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
 
-function DetailItem({ label, value }: { label: string; value: React.ReactNode }) {
+function DetailItem({ icon, label, value }: { icon?: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
-    <div>
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <div className="mt-1">{value}</div>
+    <div className="flex items-start gap-3">
+      {icon && <div className="mt-0.5 text-muted-foreground">{icon}</div>}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-muted-foreground">{label}</p>
+        <div className="mt-1 text-sm font-medium break-all">{value}</div>
+      </div>
     </div>
   );
 }
