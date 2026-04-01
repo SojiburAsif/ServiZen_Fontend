@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Onest } from "next/font/google";
+import { Geist_Mono, Exo_2 } from "next/font/google";
 import "./globals.css";
 import QueryProviders from "@/lib/providers/QueryProvider";
 import { ThemeProvider } from "@/lib/providers/theme-provider";
@@ -7,8 +7,8 @@ import { Toaster } from "@/components/ui/sonner";
 
 export const dynamic = "force-dynamic";
 
-const onestSans = Onest({
-  variable: "--font-geist-sans",
+const exo2 = Exo_2({
+  variable: "--font-exo-2",
   subsets: ["latin"],
 });
 
@@ -31,7 +31,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${onestSans.variable} ${geistMono.variable} antialiased`}
+        className={`${exo2.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProviders>
           <ThemeProvider

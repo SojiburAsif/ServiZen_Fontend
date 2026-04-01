@@ -74,9 +74,20 @@ export default function HeroSection() {
             viewport={{ once: false, amount: 0.2 }}
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
           >
-            <p className="text-lg md:text-xl text-gray-700/80 dark:text-gray-300/80 leading-relaxed max-w-sm">
-              The perfect modern platform for all your professional home service needs.
-            </p>
+            <div className="relative">
+              {/* Static Large Illustration/Image */}
+              <div className="mb-6 w-88 h-43 md:w-104 md:h-88 pointer-events-none">
+                <img 
+                  src="/img.png" 
+                  alt="Service Illustration" 
+                  className="w-full h-full object-contain drop-shadow-2xl opacity-95 dark:opacity-100" 
+                />
+              </div>
+
+              <p className="text-lg md:text-xl text-gray-700/80 dark:text-gray-300/80 leading-relaxed max-w-sm relative z-10">
+                The perfect modern platform for all your professional home service needs.
+              </p>
+            </div>
             
             <div className="flex items-center gap-4">
               <button className="px-8 py-3 rounded-full bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-300 shadow-xl shadow-green-900/10">
