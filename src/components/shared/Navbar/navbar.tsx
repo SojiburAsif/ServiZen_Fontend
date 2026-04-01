@@ -207,7 +207,7 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
         
         {/* --- Logo Section --- */}
         <Link href="/" className="group flex items-center gap-3 transition-transform active:scale-95">
-          <img src="/favicon.ico" alt="" className="h-12 w-12 transition-transform group-hover:scale-110" />
+          <img src="/favicon.ico" alt="" className="h-12 w-12 transition-transform group-hover:scale-110 rounded-full animate-spin-slow" />
           <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             Serv<span className="font-serif italic text-gray-500 dark:text-gray-400">ZEN</span>
           </span>
@@ -464,7 +464,7 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                           <button onClick={() => setIsChangePasswordModalOpen(true)} className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-500 dark:hover:text-green-400 w-full text-left">
                             <Lock className="size-5" /> Change Password
                           </button>
-                        <Link href="/notification" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                        <Link href="/notification" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-100 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                            <Bell className="size-5" /> Notifications
                            <MobileNotificationBadge />
                         </Link>

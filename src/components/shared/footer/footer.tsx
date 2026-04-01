@@ -112,7 +112,7 @@ export default function Footer() {
         {/* Logo & Info */}
         <div className="col-span-1">
           <Link href="/" className="group flex items-center gap-2 transition-transform active:scale-95">
-            <img src="/favicon.ico" alt="" className="h-10 w-10" />
+            <img src="/favicon.ico" alt="" className="h-10 w-10 rounded-full animate-spin-slow" />
             <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
               Serv<span className="font-serif italic text-gray-500 dark:text-gray-400">ZEN</span>
             </span>
