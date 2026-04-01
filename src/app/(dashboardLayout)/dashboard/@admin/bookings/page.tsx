@@ -179,11 +179,9 @@ export default function AdminBookingsPage() {
   const [meta, setMeta] = useState({ page: 1, totalPages: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const [selectedBooking, setSelectedBooking] = useState<AdminBooking | null>(null);
-  const [detailedBooking, setDetailedBooking] = useState<AdminBooking | null>(null);
-
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -281,22 +279,14 @@ export default function AdminBookingsPage() {
     };
   }, [bookings]);
 
-  const openViewBooking = async (booking: AdminBooking) => {
-    try {
-      setIsProcessing(true);
-      const response = await getBookingById(booking.id);
-
-      if (response.success) {
-        setDetailedBooking(response.data);
-        setIsViewDialogOpen(true);
-      } else {
-        toast.error(response.message || "Failed to fetch booking details");
-      }
-    } catch (error: any) {
-      toast.error(error?.message || "Failed to fetch booking details");
-    } finally {
-      setIsProcessing(false);
+  const toggleRowExpansion = (bookingId: string) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(bookingId)) {
+      newExpanded.delete(bookingId);
+    } else {
+      newExpanded.add(bookingId);
     }
+    setExpandedRows(newExpanded);
   };
 
   const openUpdateBooking = (booking: AdminBooking) => {
@@ -364,12 +354,6 @@ export default function AdminBookingsPage() {
     } finally {
       setIsProcessing(false);
     }
-  };
-
-  const closeViewDialog = () => {
-    if (isProcessing) return;
-    setIsViewDialogOpen(false);
-    setDetailedBooking(null);
   };
 
   const closeUpdateDialog = () => {
@@ -479,54 +463,55 @@ export default function AdminBookingsPage() {
               </CardDescription>
             </div>
 
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name, email, service..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full border-black/10 pl-9 focus-visible:ring-2 focus-visible:ring-green-500 dark:border-white/10 sm:w-[260px]"
-                />
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                <div className="relative group">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-green-600" />
+                  <Input
+                    placeholder="Search by name, email, service..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full border-black/10 bg-black/5 pl-9 ring-offset-background transition-all focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-green-500 dark:border-white/10 dark:bg-white/5 dark:focus-visible:bg-black sm:w-[260px]"
+                  />
+                </div>
+
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full border-black/10 bg-black/5 transition-all hover:bg-white focus:ring-2 focus:ring-green-500 dark:border-white/10 dark:bg-white/5 dark:hover:bg-black sm:w-[160px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-black/10 dark:border-white/10">
+                    <SelectItem value="All Status" className="text-muted-foreground italic">All Statuses</SelectItem>
+                    {statusOptions.map((item) => (
+                      <SelectItem key={item.value} value={item.value} className="focus:bg-green-50 focus:text-green-700 dark:focus:bg-green-500/10 dark:focus:text-green-400">
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
+                  <SelectTrigger className="w-full border-black/10 bg-black/5 transition-all hover:bg-white focus:ring-2 focus:ring-green-500 dark:border-white/10 dark:bg-white/5 dark:hover:bg-black sm:w-[160px]">
+                    <SelectValue placeholder="Payment" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-black/10 dark:border-white/10">
+                    <SelectItem value="All Payment" className="text-muted-foreground italic">All Payments</SelectItem>
+                    {paymentOptions.map((item) => (
+                      <SelectItem key={item.value} value={item.value} className="focus:bg-green-50 focus:text-green-700 dark:focus:bg-green-500/10 dark:focus:text-green-400">
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    onClick={clearFilters}
+                    className="h-10 px-4 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                  >
+                    Reset
+                  </Button>
+                )}
               </div>
-
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full border-black/10 bg-white focus:ring-2 focus:ring-green-500 dark:border-white/10 dark:bg-black/30 sm:w-[160px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {statusOptions.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
-                <SelectTrigger className="w-full border-black/10 bg-white focus:ring-2 focus:ring-green-500 dark:border-white/10 dark:bg-black/30 sm:w-[160px]">
-                  <SelectValue placeholder="Payment" />
-                </SelectTrigger>
-                <SelectContent>
-                  {paymentOptions.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {hasActiveFilters && (
-                <Button
-                  variant="outline"
-                  onClick={clearFilters}
-                  className="border-black/10 bg-white text-black hover:border-green-500 hover:bg-green-50 dark:border-white/10 dark:bg-black/30 dark:text-white dark:hover:bg-green-500/10"
-                >
-                  <X className="mr-2 h-4 w-4" />
-                  Clear
-                </Button>
-              )}
-            </div>
           </div>
         </CardHeader>
 
@@ -563,8 +548,8 @@ export default function AdminBookingsPage() {
                   </TableRow>
                 ) : (
                   filteredBookings.map((booking) => (
+                    <React.Fragment key={booking.id}>
                     <TableRow
-                      key={booking.id}
                       className="transition-colors hover:bg-green-50/50 dark:hover:bg-green-500/5"
                     >
                       <TableCell className="font-mono text-xs font-medium text-black dark:text-white">
@@ -627,63 +612,220 @@ export default function AdminBookingsPage() {
                         ${formatMoney(booking.totalAmount)}
                       </TableCell>
 
-                      <TableCell>
-                        <Badge
-                          className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${bookingStatusColors[booking.status] || ""}`}
-                        >
-                          {booking.status}
-                        </Badge>
-                      </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-wider shadow-sm transition-all hover:scale-105 ${bookingStatusColors[booking.status] || ""}`}
+                          >
+                            {booking.status}
+                          </Badge>
+                        </TableCell>
 
-                      <TableCell>
-                        <Badge
-                          className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${paymentStatusColors[booking.paymentStatus] || ""}`}
-                        >
-                          {booking.paymentStatus}
-                        </Badge>
-                      </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-wider shadow-sm transition-all hover:scale-105 ${paymentStatusColors[booking.paymentStatus] || ""}`}
+                          >
+                            {booking.paymentStatus}
+                          </Badge>
+                        </TableCell>
 
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              disabled={isProcessing}
-                              className="rounded-full border border-black/10 bg-white text-black hover:bg-green-50 hover:text-green-700 dark:border-white/10 dark:bg-black/20 dark:text-white dark:hover:bg-green-500/10"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem
-                              onClick={() => openViewBooking(booking)}
-                              disabled={isProcessing}
-                            >
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => openUpdateBooking(booking)}
-                              disabled={isProcessing}
-                            >
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Update Status
-                            </DropdownMenuItem>
-                            {booking.status !== "CANCELLED" && (
-                              <DropdownMenuItem
-                                onClick={() => openCancelBooking(booking)}
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 rounded-full p-0 text-muted-foreground hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-500/10 dark:hover:text-green-400"
+                            onClick={() => toggleRowExpansion(booking.id)}
+                            disabled={isProcessing}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 disabled={isProcessing}
-                                className="text-red-600 focus:text-red-600"
+                                className="h-8 w-8 rounded-full p-0 text-muted-foreground hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-500/10 dark:hover:text-green-400"
                               >
-                                <XCircle className="mr-2 h-4 w-4" />
-                                Cancel Booking
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48 rounded-2xl border-black/10 shadow-xl dark:border-white/10 dark:bg-black/95 dark:backdrop-blur-md">
+                              <DropdownMenuItem
+                                onClick={() => toggleRowExpansion(booking.id)}
+                                disabled={isProcessing}
+                                className="rounded-xl px-3 py-2 text-sm font-medium focus:bg-green-50 focus:text-green-700 dark:focus:bg-green-500/10 dark:focus:text-green-400"
+                              >
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Details
                               </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+                              <DropdownMenuItem
+                                onClick={() => openUpdateBooking(booking)}
+                                disabled={isProcessing}
+                                className="rounded-xl px-3 py-2 text-sm font-medium focus:bg-green-50 focus:text-green-700 dark:focus:bg-green-500/10 dark:focus:text-green-400"
+                              >
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Update Status
+                              </DropdownMenuItem>
+                              {booking.status !== "CANCELLED" && (
+                                <DropdownMenuItem
+                                  onClick={() => openCancelBooking(booking)}
+                                  disabled={isProcessing}
+                                  className="rounded-xl px-3 py-2 text-sm font-medium text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-400 dark:focus:bg-red-500/10 dark:focus:text-red-400"
+                                >
+                                  <XCircle className="mr-2 h-4 w-4" />
+                                  Cancel Booking
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
                     </TableRow>
+                    {expandedRows.has(booking.id) && (
+                      <TableRow className="bg-green-50/20 dark:bg-green-500/5">
+                        <TableCell colSpan={9} className="p-0 border-t border-black/5 dark:border-white/5">
+                          <div className="p-6 md:p-8">
+                            <div className="grid gap-8">
+                              {/* Top Status & Date Bar */}
+                              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                                <div className="rounded-2xl border border-black/5 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-black/40">
+                                  <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">
+                                    <Calendar className="h-3 w-3" /> Date
+                                  </p>
+                                  <p className="mt-2 text-sm font-bold text-black dark:text-white">
+                                    {formatDate(booking.bookingDate)}
+                                  </p>
+                                </div>
+                                <div className="rounded-2xl border border-black/5 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-black/40">
+                                  <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">
+                                    <Clock className="h-3 w-3" /> Time
+                                  </p>
+                                  <p className="mt-2 text-sm font-bold text-black dark:text-white">
+                                    {formatTime(booking.bookingTime)}
+                                  </p>
+                                </div>
+                                <div className="rounded-2xl border border-black/5 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-black/40">
+                                  <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">
+                                    <DollarSign className="h-3 w-3" /> Amount
+                                  </p>
+                                  <p className="mt-2 text-sm font-bold text-green-600 dark:text-green-400">
+                                    ${formatMoney(booking.totalAmount)}
+                                  </p>
+                                </div>
+                                <div className="rounded-2xl border border-black/5 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-black/40">
+                                  <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">
+                                    Status
+                                  </p>
+                                  <div className="mt-2">
+                                    <Badge className={`rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${bookingStatusColors[booking.status] || ""}`}>
+                                      {booking.status}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Main Content Sections */}
+                              <div className="grid gap-8 md:grid-cols-2">
+                                <div className="space-y-6">
+                                  {/* User Info */}
+                                  <div>
+                                    <h4 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                      <User className="h-4 w-4 text-green-600" /> Client Information
+                                    </h4>
+                                    <div className="group relative rounded-3xl border border-black/5 bg-white p-5 shadow-sm transition-all hover:border-green-500/30 hover:shadow-md dark:border-white/5 dark:bg-white/5 dark:hover:border-green-500/30">
+                                      <p className="text-lg font-black text-black dark:text-white">
+                                        {booking.client?.name || "N/A"}
+                                      </p>
+                                      <p className="mt-1 text-sm font-medium text-muted-foreground">
+                                        {booking.client?.email || "N/A"}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {/* Service Info */}
+                                  <div>
+                                    <h4 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                      <Wrench className="h-4 w-4 text-green-600" /> Service Provider
+                                    </h4>
+                                    <div className="group relative flex items-center gap-4 rounded-3xl border border-black/5 bg-white p-5 shadow-sm transition-all hover:border-green-500/30 hover:shadow-md dark:border-white/5 dark:bg-white/5 dark:hover:border-green-500/30">
+                                      {booking.provider?.profilePhoto && (
+                                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl ring-2 ring-black/5 dark:ring-white/10">
+                                          <img
+                                            src={booking.provider.profilePhoto}
+                                            alt={booking.provider.name}
+                                            className="h-full w-full object-cover"
+                                          />
+                                        </div>
+                                      )}
+                                      <div>
+                                        <p className="text-lg font-black text-black dark:text-white">
+                                          {booking.provider?.name || "N/A"}
+                                        </p>
+                                        <p className="mt-1 text-sm font-medium text-muted-foreground">
+                                          {booking.provider?.email || "N/A"}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                  {/* Booking Detail Sections */}
+                                  <div>
+                                    <h4 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                      <CheckCircle className="h-4 w-4 text-green-600" /> Service Details
+                                    </h4>
+                                    <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
+                                      <div className="space-y-4">
+                                        <div className="flex items-center justify-between border-b border-black/5 pb-4 dark:border-white/5">
+                                          <span className="text-sm font-medium text-muted-foreground">Service Name</span>
+                                          <span className="font-bold text-black dark:text-white">{serviceLabel(booking.service)}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between border-b border-black/5 pb-4 dark:border-white/5">
+                                          <span className="text-sm font-medium text-muted-foreground">Base Price</span>
+                                          <span className="font-bold text-black dark:text-white">${formatMoney(booking.service?.price)}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                          <span className="text-sm font-medium text-muted-foreground">Payment Status</span>
+                                          <Badge className={`rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${paymentStatusColors[booking.paymentStatus] || ""}`}>
+                                            {booking.paymentStatus}
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Address Section */}
+                                  <div>
+                                    <h4 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                      <AlertCircle className="h-4 w-4 text-green-600" /> Location Details
+                                    </h4>
+                                    <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
+                                      <p className="text-sm font-bold text-black dark:text-white leading-relaxed">
+                                        {booking.address}
+                                      </p>
+                                      <p className="mt-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                        {booking.city}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="mt-8 flex justify-end">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => toggleRowExpansion(booking.id)}
+                                className="rounded-xl border-black/10 hover:bg-green-50 hover:text-green-700 dark:border-white/10 dark:hover:bg-green-500/10 dark:hover:text-green-400"
+                              >
+                                Hide Details
+                              </Button>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    </React.Fragment>
                   ))
                 )}
               </TableBody>
@@ -722,150 +864,6 @@ export default function AdminBookingsPage() {
           </div>
         </CardContent>
       </Card>
-
-      <Dialog open={isViewDialogOpen} onOpenChange={closeViewDialog}>
-        <DialogContent className="max-h-[92vh] w-full max-w-full overflow-y-auto rounded-3xl border border-black/10 bg-white dark:border-white/10 dark:bg-black">
-          <DialogHeader className="pb-2">
-            <DialogTitle className="text-2xl text-black dark:text-white">Booking Details</DialogTitle>
-            <DialogDescription>Complete booking information and service details.</DialogDescription>
-          </DialogHeader>
-
-          {detailedBooking ? (
-            <div className="space-y-6">
-              <Card className="border border-black/10 dark:border-white/10">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg text-black dark:text-white">Overview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    <DetailItem label="Booking ID" value={detailedBooking.id} />
-                    <DetailItem label="Booking Date" value={formatDate(detailedBooking.bookingDate)} />
-                    <DetailItem label="Booking Time" value={formatTime(detailedBooking.bookingTime)} />
-                    <DetailItem label="Total Amount" value={`$${formatMoney(detailedBooking.totalAmount)}`} />
-                    <DetailItem
-                      label="Status"
-                      value={
-                        <Badge className={`rounded-full border px-3 py-1 ${bookingStatusColors[detailedBooking.status] || ""}`}>
-                          {detailedBooking.status}
-                        </Badge>
-                      }
-                    />
-                    <DetailItem
-                      label="Payment Status"
-                      value={
-                        <Badge className={`rounded-full border px-3 py-1 ${paymentStatusColors[detailedBooking.paymentStatus] || ""}`}>
-                          {detailedBooking.paymentStatus}
-                        </Badge>
-                      }
-                    />
-                  </div>
-
-                  <div className="mt-4 rounded-2xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      Address
-                    </p>
-                    <p className="mt-2 text-sm text-black dark:text-white">
-                      {detailedBooking.address}, {detailedBooking.city}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="grid gap-6 lg:grid-cols-3">
-                <Card className="border border-black/10 dark:border-white/10">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg text-black dark:text-white">
-                      <User className="h-5 w-5 text-green-600" />
-                      Client Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <p className="font-semibold text-black dark:text-white">
-                      {detailedBooking.client?.name || "-"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {detailedBooking.client?.email || "-"}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="border border-black/10 dark:border-white/10">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg text-black dark:text-white">
-                      <Wrench className="h-5 w-5 text-green-600" />
-                      Provider Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <p className="font-semibold text-black dark:text-white">
-                        {detailedBooking.provider?.name || "-"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {detailedBooking.provider?.email || "-"}
-                      </p>
-                    </div>
-
-                    {detailedBooking.provider?.profilePhoto ? (
-                      <img
-                        src={detailedBooking.provider.profilePhoto}
-                        alt={detailedBooking.provider.name}
-                        className="h-20 w-20 rounded-2xl object-cover ring-1 ring-black/10 dark:ring-white/10"
-                      />
-                    ) : null}
-                  </CardContent>
-                </Card>
-
-                <Card className="border border-black/10 dark:border-white/10">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg text-black dark:text-white">
-                      <Star className="h-5 w-5 text-green-600" />
-                      Service Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <p className="font-semibold text-black dark:text-white">
-                        {serviceLabel(detailedBooking.service)}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Duration: {detailedBooking.service?.duration || "-"}
-                      </p>
-                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">
-                        ${formatMoney(detailedBooking.service?.price)}
-                      </p>
-                    </div>
-
-                    <Badge
-                      variant={detailedBooking.service?.isActive ? "default" : "secondary"}
-                      className={
-                        detailedBooking.service?.isActive
-                          ? "bg-green-600 text-white hover:bg-green-700 dark:bg-green-500 dark:text-black"
-                          : "bg-black/10 text-black dark:bg-white/10 dark:text-white"
-                      }
-                    >
-                      {detailedBooking.service?.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          ) : (
-            <div className="py-12 text-center text-muted-foreground">Loading details...</div>
-          )}
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={closeViewDialog}
-              disabled={isProcessing}
-              className="border-black/10 bg-white text-black hover:border-green-500 hover:bg-green-50 dark:border-white/10 dark:bg-black/30 dark:text-white dark:hover:bg-green-500/10"
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={isUpdateDialogOpen} onOpenChange={closeUpdateDialog}>
         <DialogContent className="max-h-[92vh] w-[96vw] max-w-3xl overflow-y-auto rounded-3xl border border-black/10 bg-white dark:border-white/10 dark:bg-black">

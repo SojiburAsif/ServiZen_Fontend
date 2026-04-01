@@ -24,10 +24,10 @@ import { ILoginPayload } from "@/types/auth.typs";
 import { AuthValidation } from "@/zod/auth.validation";
 
 // --- Helper functions for error handling ---
-const isVerificationRequired = (msg: string) => 
+const isVerificationRequired = (msg: string) =>
   /verify|verification|unverified|not verified/i.test(msg);
 
-const extractError = (err: unknown) => 
+const extractError = (err: unknown) =>
   (err as any)?.response?.data?.message || (err as any)?.message || "Login failed";
 
 const LoginForm = () => {
@@ -41,8 +41,8 @@ const LoginForm = () => {
     ? "Session mismatch. Please try again."
     : null;
 
-  useEffect(() => { 
-    clearGoogleOAuthLock(); 
+  useEffect(() => {
+    clearGoogleOAuthLock();
   }, []);
 
   const { mutateAsync, isPending } = useMutation({
@@ -97,7 +97,7 @@ const LoginForm = () => {
           setPendingAuth(value.email, value.password);
           // Using window.location to bypass any router-level state locks during 500 errors
           window.location.href = `/verify-email?email=${encodeURIComponent(value.email)}&notice=otp-sent`;
-          return; 
+          return;
         }
 
         // Otherwise, show standard error UI
@@ -126,9 +126,9 @@ const LoginForm = () => {
       <Card className="mx-auto w-full max-w-xs sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg overflow-hidden border-emerald-100 bg-white dark:bg-black shadow-2xl backdrop-blur-xl dark:border-emerald-900/30 rounded-2xl">
         <CardHeader className="space-y-3 pb-6 pt-4 text-center">
           <div className="flex justify-center">
-            <Link href="/" className="group flex items-center text-center gap-2 transition-transform active:scale-95">
-              <img src="/favicon.ico" alt="ServZEN" className="h-10 w-10" />
-              <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <Link href="/" className="group flex items-center gap-3 transition-transform active:scale-95">
+              <img src="/favicon.ico" alt="" className="h-12 w-12 transition-transform group-hover:scale-110 rounded-full animate-spin-slow" />
+              <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Serv<span className="font-serif italic text-gray-500 dark:text-gray-400">ZEN</span>
               </span>
             </Link>
@@ -145,10 +145,10 @@ const LoginForm = () => {
 
         <CardContent className="px-4 sm:px-6 md:px-8">
           <form
-            onSubmit={(e) => { 
-              e.preventDefault(); 
-              e.stopPropagation(); 
-              form.handleSubmit(); 
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              form.handleSubmit();
             }}
             className="space-y-6"
           >
@@ -194,7 +194,7 @@ const LoginForm = () => {
             </form.Field>
 
             <div className="flex justify-end">
-              <Link href="/forgot-password"  className="text-sm font-bold text-emerald-700 hover:text-emerald-600 dark:text-emerald-400">
+              <Link href="/forgot-password" className="text-sm font-bold text-emerald-700 hover:text-emerald-600 dark:text-emerald-400">
                 Forgot password?
               </Link>
             </div>

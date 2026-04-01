@@ -251,9 +251,9 @@ const RegisterForm = () => {
       <Card className="w-full max-w-4xl mx-auto overflow-hidden border border-green-200/80 dark:border-zinc-800 shadow-2xl bg-white/80 dark:bg-black backdrop-blur-xl">
         <CardHeader className="text-center space-y-3 pt-8 sm:pt-10 px-6 sm:px-8">
           <div className="flex justify-center">
-            <Link href="/" className="group flex items-center text-center gap-2 transition-transform active:scale-95">
-              <img src="/favicon.ico" alt="ServZEN" className="h-10 w-10" />
-              <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <Link href="/" className="group flex items-center gap-3 transition-transform active:scale-95">
+              <img src="/favicon.ico" alt="" className="h-12 w-12 transition-transform group-hover:scale-110 rounded-full animate-spin-slow" />
+              <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Serv<span className="font-serif italic text-gray-500 dark:text-gray-400">ZEN</span>
               </span>
             </Link>
