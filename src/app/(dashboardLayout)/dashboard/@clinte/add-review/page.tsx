@@ -21,45 +21,56 @@ export default async function AddReviewPage() {
   );
 
   return (
-    <main className="min-h-screen bg-black text-zinc-300 p-6 flex flex-col items-center justify-center">
-      {/* Container - Max width choto kora hoyeche (max-w-lg) */}
-      <div className="w-full max-w-lg">
+    <main className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 flex flex-col items-center justify-center">
+      {/* Container */}
+      <div className="w-full max-w-lg px-4 py-8">
         
-        {/* Header - Simple & Clean */}
-        <div className="mb-8 text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/5 border border-emerald-500/10 text-emerald-500/80 text-[11px] font-medium uppercase tracking-widest">
-            <Sparkles className="size-3" />
+        {/* Header - Fixed & Styled */}
+        <div className="mb-10 text-center space-y-3">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em]">
+            <Sparkles className="size-3 fill-emerald-500" />
             Feedback Portal
           </div>
-          <h1 className="text-3xl font-semibold tracking-tight text-white">
+          <h1 className="text-4xl font-black tracking-tighter uppercase dark:text-white">
             Write a <span className="text-emerald-500">Review</span>
           </h1>
-          <p className="text-zinc-500 text-sm font-medium">
-            Share your experience with the service provider.
+          <p className="text-zinc-500 text-sm font-medium max-w-xs mx-auto">
+            Your feedback helps us maintain the highest service standards.
           </p>
         </div>
 
-        {/* Content Area */}
-        <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-3xl p-6 sm:p-8 backdrop-blur-sm shadow-xl">
+        {/* Content Area - B&W Aesthetic */}
+        <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] p-8 md:p-10 shadow-sm relative overflow-hidden">
+          {/* Subtle Decorative Background Element */}
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 size-40 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+          
           {unreviewedBookings.length === 0 ? (
-            <div className="py-12 text-center space-y-4">
-              <div className="size-14 rounded-full bg-zinc-800/50 flex items-center justify-center mx-auto">
-                <MessageSquare className="size-6 text-zinc-600" />
+            <div className="py-16 text-center space-y-6">
+              <div className="size-20 rounded-3xl bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center mx-auto border border-zinc-100 dark:border-zinc-800 rotate-6 transition-transform group-hover:rotate-0">
+                <MessageSquare className="size-10 text-zinc-300 dark:text-zinc-700" />
               </div>
-              <p className="text-sm font-medium text-zinc-500">
-                You have no pending reviews at this moment.
-              </p>
+              <div className="space-y-1">
+                <h3 className="text-lg font-black uppercase tracking-tight text-zinc-900 dark:text-white">Clear Queue</h3>
+                <p className="text-sm font-medium text-zinc-400">
+                  You have no pending reviews at this moment.
+                </p>
+              </div>
             </div>
           ) : (
             /* Pass data to Client Component */
-            <AddReviewForm unreviewedBookings={unreviewedBookings} />
+            <div className="relative z-10">
+              <AddReviewForm unreviewedBookings={unreviewedBookings} />
+            </div>
           )}
         </div>
 
         {/* Footer info */}
-        <p className="mt-8 text-center text-[10px] text-zinc-700 font-medium uppercase tracking-[0.3em]">
-          Verified Transactions Only
-        </p>
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <div className="h-px w-12 bg-zinc-200 dark:bg-zinc-800" />
+          <p className="text-center text-[9px] text-zinc-400 font-bold uppercase tracking-[0.4em]">
+            Verified Secure Portal
+          </p>
+        </div>
       </div>
     </main>
   );

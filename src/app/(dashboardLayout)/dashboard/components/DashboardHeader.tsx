@@ -347,11 +347,11 @@ export function DashboardHeader({
           </header>
 
           {/* --- Dynamic Content Body --- */}
-          <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
+          <main className="flex-1 overflow-y-auto">
             {/* Ambient Background Glow for Main Content */}
             <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-emerald-500/5 blur-[120px] pointer-events-none" />
 
-            <div className="relative z-10 max-w-[1600px] mx-auto">
+            <div className="relative z-10 max-w-full mx-auto">
               {userRole === Role.ADMIN && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">{admin}</div>
               )}

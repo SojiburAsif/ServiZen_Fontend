@@ -32,244 +32,177 @@ export default function NotificationsPage() {
   const filteredNotifications = notifications.filter(notification => {
     if (filter === "all") return true;
     if (filter === "unread") return !notification.isRead;
-    // Assuming type could be stored or just defaulting to 'info' if missing
     return true; 
   });
 
   const getNotificationIcon = (type: string) => {
     if (type.includes("COMPLETED") || type.includes("PAID")) {
-      return <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />;
+      return <CheckCircle className="size-5 text-emerald-500" />;
     }
     if (type.includes("CANCELLED") || type.includes("REMINDER") || type.includes("REFUND")) {
-      return <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />;
+      return <AlertCircle className="size-5 text-amber-500" />;
     }
-    return <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />;
+    return <Info className="size-5 text-zinc-400" />;
   };
 
-  const getNotificationColor = (type: string) => {
-    if (type.includes("COMPLETED") || type.includes("PAID")) {
-      return "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20";
-    }
-    if (type.includes("CANCELLED") || type.includes("REMINDER") || type.includes("REFUND")) {
-      return "border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20";
-    }
-    return "border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20";
+  const getBgColor = (isRead: boolean) => {
+    if (!isRead) return "bg-zinc-50/80 dark:bg-zinc-900/40 border-emerald-500/20";
+    return "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800";
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-8">
-            {/* Header Skeleton */}
-            <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 animate-pulse">
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-2"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-96"></div>
-            </div>
-
-            {/* Notifications Skeleton */}
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
-                  <div className="flex items-start space-x-4">
-                    <div className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+      <main className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-zinc-100">
+        <div className="mx-auto w-full px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-3">
+              <div className="h-12 w-80 bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded-lg" />
+              <div className="h-4 w-96 bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded-lg" />
             </div>
           </div>
+          <div className="space-y-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-32 w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-3xl animate-pulse" />
+            ))}
+          </div>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen text-gray-900 dark:text-white"
-         style={{
-           background: 'linear-gradient(135deg, #FAFAFA 0%, #E2F7D8 50%, #80F279 100%)'
-         }}
-         data-theme="light">
+    <main className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-zinc-100">
+      <div className="mx-auto w-full px-4 py-8 sm:px-6 lg:px-8">
+        
+        {/* Header Section */}
+        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-black tracking-tighter uppercase dark:text-white">
+              Client <span className="text-emerald-500">Notifications</span>
+            </h1>
+            <p className="text-zinc-500 mt-2 max-w-md font-medium text-sm">
+              Stay updated with your latest activities and important service alerts.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4 bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+            <div className="size-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+               <Bell className="text-emerald-500 size-6" />
+            </div>
+            <div>
+              <p className="text-[10px] uppercase font-bold text-zinc-500">Unread Alerts</p>
+              <p className="text-xl font-black text-emerald-500 leading-none">
+                {unreadCount}
+              </p>
+            </div>
+          </div>
+        </div>
 
-      {/* Dark mode background */}
-      <div className="absolute inset-0 dark:block hidden"
-           style={{
-             background: 'linear-gradient(135deg, #050505 0%, #0a1f0a 50%, #052e05 100%)'
-           }}>
-      </div>
+        {/* Filters and Actions */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8 bg-zinc-50/50 dark:bg-zinc-900/30 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="w-full sm:w-48 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl font-bold text-xs uppercase tracking-widest">
+                <SelectValue placeholder="Filter" />
+              </SelectTrigger>
+              <SelectContent className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-xs font-bold uppercase tracking-widest">
+                <SelectItem value="all">All Notifications</SelectItem>
+                <SelectItem value="unread">Unread Only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      {/* Abstract background letters */}
-      <div className="absolute -bottom-20 -left-10 text-[300px] md:text-[400px] font-bold text-green-800/5 dark:text-green-500/5 leading-none select-none pointer-events-none transform -rotate-6 z-0">
-        S Z
-      </div>
+          <Button
+            variant="outline"
+            onClick={markAllAsRead}
+            disabled={unreadCount === 0}
+            className="w-full sm:w-auto border-zinc-200 dark:border-zinc-800 rounded-xl px-6 h-10 font-black uppercase text-[10px] tracking-widest hover:bg-emerald-500 hover:text-black hover:border-emerald-500 transition-all"
+          >
+            <CheckCheck className="h-4 w-4 mr-2" />
+            Mark All Read
+          </Button>
+        </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
-          {/* Header */}
-          <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  Client Notifications
-                </h1>
-                <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Stay updated with your latest activities and important alerts
-                </p>
+        {/* Notifications List */}
+        <div className="space-y-4">
+          {filteredNotifications.length === 0 ? (
+            <div className="rounded-[2.5rem] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-20 text-center shadow-sm">
+              <div className="mx-auto w-24 h-24 bg-zinc-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-6">
+                <Bell className="h-12 w-12 text-zinc-300 dark:text-zinc-700" />
               </div>
-              <div className="flex items-center space-x-4">
-                {unreadCount > 0 && (
-                  <Badge variant="destructive" className="px-3 py-1">
-                    {unreadCount} unread
-                  </Badge>
+              <h3 className="text-xl font-black uppercase tracking-tight text-zinc-900 dark:text-white">
+                Queue Clear
+              </h3>
+              <p className="text-zinc-500 text-sm font-medium">
+                {filter === "unread" ? "You've read everything!" : "No notifications to show."}
+              </p>
+            </div>
+          ) : (
+            filteredNotifications.map((notification) => (
+              <div
+                key={notification.id}
+                className={`relative overflow-hidden rounded-3xl border transition-all duration-300 p-6 md:p-8 ${getBgColor(notification.isRead)}`}
+              >
+                {!notification.isRead && (
+                   <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-500" />
                 )}
-                <div className="hidden md:flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                  <Bell className="h-5 w-5" />
-                  <span>Activity Feed</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Filters and Actions */}
-          <Card className="bg-white dark:bg-black shadow-sm border border-gray-200 dark:border-gray-700">
-            <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Select value={filter} onValueChange={setFilter}>
-                    <SelectTrigger className="w-full sm:w-48">
-                      <SelectValue placeholder="Filter notifications" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Notifications</SelectItem>
-                      <SelectItem value="unread">Unread Only</SelectItem>
-                      <SelectItem value="info">Information</SelectItem>
-                      <SelectItem value="success">Success</SelectItem>
-                      <SelectItem value="warning">Warnings</SelectItem>
-                      <SelectItem value="error">Errors</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={markAllAsRead}
-                    disabled={unreadCount === 0}
-                    className="border-gray-300 dark:border-gray-600"
-                  >
-                    <CheckCheck className="h-4 w-4 mr-2" />
-                    Mark All Read
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Notifications List */}
-          <div className="space-y-4">
-            {filteredNotifications.length === 0 ? (
-              <Card className="bg-white dark:bg-black shadow-sm border border-gray-200 dark:border-gray-700">
-                <CardContent className="p-16 text-center">
-                  <div className="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-6">
-                    <Bell className="h-12 w-12 text-gray-400" />
+                
+                <div className="flex items-start gap-6">
+                  <div className={`size-12 rounded-2xl flex items-center justify-center shrink-0 ${notification.isRead ? 'bg-zinc-100 dark:bg-zinc-800' : 'bg-emerald-500/10'}`}>
+                    {getNotificationIcon(notification.type)}
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                    {filter === "unread" ? "No unread notifications" : "No notifications found"}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                    {filter === "unread"
-                      ? "You've read all your notifications. Check back later for new updates!"
-                      : "You don't have any notifications matching your current filter."}
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              filteredNotifications.map((notification) => (
-                <Card
-                  key={notification.id}
-                  className={`shadow-sm border transition-all duration-200 hover:shadow-md ${
-                    notification.isRead
-                      ? "bg-white dark:bg-black border-gray-200 dark:border-gray-700"
-                      : `${getNotificationColor(notification.type)} border-l-4`
-                  }`}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4 flex-1">
-                        <div className={`flex-shrink-0 mt-1 ${!notification.isRead ? "" : "opacity-60"}`}>
-                          {getNotificationIcon(notification.type)}
-                        </div>
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h4 className={`text-lg font-semibold mb-2 ${
-                                notification.isRead
-                                  ? "text-gray-900 dark:text-white opacity-70"
-                                  : "text-gray-900 dark:text-white"
-                              }`}>
-                                {notification.title}
-                                {!notification.isRead && (
-                                  <Badge variant="secondary" className="ml-2 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                                    New
-                                  </Badge>
-                                )}
-                              </h4>
-
-                              <p className={`text-gray-700 dark:text-gray-300 leading-relaxed mb-3 ${
-                                notification.isRead ? "opacity-70" : ""
-                              }`}>
-                                {notification.message}
-                              </p>
-
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
-                                {format(new Date(notification.createdAt), "EEEE, MMMM dd, yyyy 'at' h:mm a")}
-                              </p>
-                            </div>
-                          </div>
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h4 className="text-lg font-black uppercase tracking-tight text-zinc-900 dark:text-white leading-none">
+                          {notification.title}
+                          {!notification.isRead && (
+                             <span className="ml-3 text-[9px] font-black bg-emerald-500 text-black px-2 py-0.5 rounded-full uppercase tracking-tighter align-middle">
+                               New
+                             </span>
+                          )}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Clock className="size-3 text-zinc-400" />
+                          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">
+                            {format(new Date(notification.createdAt), "dd MMM yyyy • h:mm a")}
+                          </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-2 ml-4">
-
-                        {!notification.isRead && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => markAsRead(notification.id)}
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
+                      {!notification.isRead && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => markAsRead(notification.id)}
+                          className="h-9 w-9 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:bg-emerald-500 hover:text-black hover:border-emerald-500 transition-all shrink-0"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
 
-          {/* Summary */}
-          {notifications.length > 0 && (
-            <div className="text-center">
-              <div className="inline-flex items-center px-4 py-2 bg-white dark:bg-black rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Showing <span className="font-semibold text-gray-900 dark:text-white">{filteredNotifications.length}</span> of{" "}
-                  <span className="font-semibold text-gray-900 dark:text-white">{notifications.length}</span> notifications
-                  {unreadCount > 0 && (
-                    <> • <span className="font-semibold text-blue-600 dark:text-blue-400">{unreadCount}</span> unread</>
-                  )}
-                </span>
+                    <p className={`text-sm leading-relaxed font-medium ${notification.isRead ? 'text-zinc-400' : 'text-zinc-600 dark:text-zinc-300'}`}>
+                      {notification.message}
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
+            ))
           )}
         </div>
+
+        {/* Footer info */}
+        {notifications.length > 0 && (
+          <div className="mt-10 flex flex-col items-center gap-4">
+            <div className="h-px w-12 bg-zinc-200 dark:bg-zinc-800" />
+            <p className="text-center text-[9px] text-zinc-400 font-bold uppercase tracking-[0.4em]">
+              Showing {filteredNotifications.length} of {notifications.length} Alerts
+            </p>
+          </div>
+        )}
       </div>
-    </div>
+    </main>
   );
 }

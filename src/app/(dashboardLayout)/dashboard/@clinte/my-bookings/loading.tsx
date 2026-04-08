@@ -4,10 +4,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MyBookingsLoading() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-white via-emerald-50 to-green-50 p-4 text-gray-900 dark:from-black dark:via-green-950 dark:to-black dark:text-white sm:p-6">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-zinc-100">
+      <div className="mx-auto w-full px-4 py-8 sm:px-6 lg:px-8">
         {/* Header Skeleton */}
-        <div className="mb-8 rounded-3xl border border-emerald-200 bg-white/90 p-6 shadow-xl backdrop-blur-xl dark:border-green-800 dark:bg-green-900/20 sm:p-8">
+        <div className="mb-8 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 p-6 shadow-sm backdrop-blur-xl sm:p-8">
           <Skeleton className="h-12 w-48 rounded-xl" />
           <Skeleton className="mt-3 h-5 w-64 rounded-lg" />
         </div>
@@ -17,7 +17,7 @@ export default function MyBookingsLoading() {
           {[1, 2, 3, 4].map((index) => (
             <div
               key={index}
-              className="rounded-3xl border border-emerald-200 bg-white/90 p-6 shadow-xl backdrop-blur-xl dark:border-green-800 dark:bg-green-900/20"
+              className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-6 shadow-sm"
             >
               <div className="flex items-center gap-4">
                 <Skeleton className="h-12 w-12 rounded-2xl" />
@@ -31,19 +31,19 @@ export default function MyBookingsLoading() {
         </div>
 
         {/* Table Skeleton */}
-        <div className="overflow-hidden rounded-3xl border border-emerald-200 bg-white/90 shadow-xl backdrop-blur-xl dark:border-green-800 dark:bg-green-900/20">
+        <div className="overflow-hidden rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
           <div className="overflow-x-auto">
             <table className="min-w-[1200px] w-full">
-              <thead className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
+              <thead className="bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800">
                 <tr>
-                  <th className="px-6 py-5 text-left font-semibold">#</th>
-                  <th className="px-6 py-5 text-left font-semibold">Service</th>
-                  <th className="px-6 py-5 text-left font-semibold">Date & Time</th>
-                  <th className="px-6 py-5 text-left font-semibold">Location</th>
-                  <th className="px-6 py-5 text-left font-semibold">Amount</th>
-                  <th className="px-6 py-5 text-left font-semibold">Status</th>
-                  <th className="px-6 py-5 text-left font-semibold">Payment</th>
-                  <th className="px-6 py-5 text-left font-semibold">Actions</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500">#</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500">Service</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500">Date & Time</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500">Location</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500">Amount</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500">Status</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500">Payment</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500">Actions</th>
                 </tr>
               </thead>
 
@@ -51,7 +51,7 @@ export default function MyBookingsLoading() {
                 {[1, 2, 3, 4, 5, 6].map((index) => (
                   <tr
                     key={index}
-                    className="border-t border-emerald-100 dark:border-green-800"
+                    className="border-t border-zinc-200 dark:border-zinc-800"
                   >
                     {/* Index */}
                     <td className="px-6 py-5 align-top">
@@ -93,7 +93,7 @@ export default function MyBookingsLoading() {
 
                     {/* Amount */}
                     <td className="px-6 py-5 align-top">
-                      <Skeleton className="h-7 w-32 rounded-lg" />
+                      <Skeleton className="h-7 w-20 rounded-lg" />
                     </td>
 
                     {/* Status */}

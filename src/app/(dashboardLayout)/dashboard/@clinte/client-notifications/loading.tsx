@@ -1,64 +1,54 @@
-"use client";
-
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AddNotificationLoading() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-white via-emerald-50 to-green-50 px-4 py-6 text-slate-900 dark:from-black dark:via-green-950 dark:to-black dark:text-white sm:px-6 sm:py-10">
-      <div className="mx-auto max-w-4xl">
-
-        {/* HEADER SKELETON */}
-        <div className="relative overflow-hidden rounded-[2rem] border border-emerald-200 bg-white/90 p-6 shadow-2xl backdrop-blur-xl dark:border-green-800 dark:bg-green-900/20 sm:p-8">
-          <div className="relative">
-            <div className="mb-4 inline-flex items-center gap-2">
-              <Skeleton className="h-8 w-40 rounded-full" />
+    <main className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-zinc-100">
+      <div className="mx-auto w-full px-4 py-8 sm:px-6 lg:px-8">
+        
+        {/* Header Section Skeleton */}
+        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-3">
+            <Skeleton className="h-12 w-64 bg-zinc-100 dark:bg-zinc-900 rounded-lg" />
+            <Skeleton className="h-4 w-96 bg-zinc-100 dark:bg-zinc-900 rounded-lg" />
+          </div>
+          
+          <div className="flex items-center gap-4 bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 w-full md:w-48">
+            <Skeleton className="size-10 rounded-full bg-zinc-200 dark:bg-zinc-800" />
+            <div className="space-y-2">
+              <Skeleton className="h-2 w-16 bg-zinc-200 dark:bg-zinc-800" />
+              <Skeleton className="h-5 w-24 bg-zinc-200 dark:bg-zinc-800" />
             </div>
-
-            <Skeleton className="h-12 w-64 rounded-xl mb-4" />
-            <Skeleton className="h-5 w-96 rounded-lg" />
           </div>
         </div>
 
-        {/* FORM CARD SKELETON */}
-        <div className="mt-8 rounded-[2rem] border border-emerald-200 bg-white/90 p-6 shadow-2xl backdrop-blur-xl dark:border-green-800 dark:bg-green-900/20 sm:p-8">
-          
-          {/* Booking Select */}
-          <div className="mb-8">
-            <Skeleton className="h-5 w-32 rounded-lg mb-3" />
-            <Skeleton className="h-12 w-full rounded-xl" />
-          </div>
+        {/* Filters Skeleton */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8 bg-zinc-50/50 dark:bg-zinc-900/30 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+          <Skeleton className="h-10 w-full sm:w-48 bg-zinc-100 dark:bg-zinc-900 rounded-xl" />
+          <Skeleton className="h-10 w-full sm:w-40 bg-zinc-100 dark:bg-zinc-900 rounded-xl" />
+        </div>
 
-          {/* Rating Section */}
-          <div className="mb-8">
-            <Skeleton className="h-5 w-24 rounded-lg mb-3" />
-            <div className="flex gap-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-10 w-10 rounded-lg" />
-              ))}
-            </div>
-          </div>
-
-          {/* Comment Section */}
-          <div className="mb-8">
-            <Skeleton className="h-5 w-36 rounded-lg mb-3" />
-            <Skeleton className="h-32 w-full rounded-xl" />
-          </div>
-
-          {/* Review Details Cards */}
-          <div className="mb-8 grid gap-4 md:grid-cols-2">
-            {[1, 2].map((i) => (
-              <div key={i} className="rounded-2xl border border-emerald-100 dark:border-green-800/50 bg-emerald-50/50 dark:bg-green-900/10 p-4">
-                <Skeleton className="h-4 w-24 rounded-lg mb-3" />
-                <Skeleton className="h-6 w-32 rounded-lg" />
+        {/* Notifications List Skeleton */}
+        <div className="space-y-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 md:p-8 overflow-hidden relative">
+              <div className="flex items-start gap-6">
+                <Skeleton className="size-12 rounded-2xl bg-zinc-100 dark:bg-zinc-900" />
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-48 bg-zinc-100 dark:bg-zinc-900" />
+                      <Skeleton className="h-3 w-32 bg-zinc-100 dark:bg-zinc-900" />
+                    </div>
+                    <Skeleton className="size-9 rounded-xl bg-zinc-100 dark:bg-zinc-900" />
+                  </div>
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full bg-zinc-100 dark:bg-zinc-900" />
+                    <Skeleton className="h-4 w-3/4 bg-zinc-100 dark:bg-zinc-900" />
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex gap-3 pt-4 border-t border-emerald-100 dark:border-green-800/50">
-            <Skeleton className="h-12 w-32 rounded-xl" />
-            <Skeleton className="h-12 w-32 rounded-xl" />
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     </main>

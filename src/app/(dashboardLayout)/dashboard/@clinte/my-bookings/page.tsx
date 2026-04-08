@@ -63,17 +63,17 @@ const formatTime = (value: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "PENDING":
-      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+      return "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700";
     case "ACCEPTED":
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      return "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20";
     case "WORKING":
-      return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
+      return "bg-zinc-900 text-white dark:bg-white dark:text-black border-zinc-900 dark:border-white";
     case "COMPLETED":
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      return "bg-emerald-500 text-black border-emerald-500";
     case "CANCELLED":
-      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      return "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 border-red-100 dark:border-red-500/20";
     default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      return "bg-zinc-50 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400 border-zinc-100 dark:border-zinc-800";
   }
 };
 
@@ -100,8 +100,8 @@ const renderStars = (rating: number) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`size-5 ${
-            star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+          className={`size-4 ${
+            star <= rating ? "text-emerald-500 fill-emerald-500" : "text-zinc-200 dark:text-zinc-800"
           }`}
         />
       ))}
@@ -326,76 +326,76 @@ export default async function MyBookingsPage() {
   const pendingCount = bookings.filter((b: any) => b.status === "PENDING").length;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#F5FFF3] via-white to-[#DFF9E2] p-4 text-gray-900 dark:from-[#010F08] dark:via-[#041F0E] dark:to-[#03200F] dark:text-white sm:p-6">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-white/5 sm:p-8">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-            My Bookings
+    <main className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-zinc-100">
+      <div className="mx-auto w-full px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 p-6 shadow-sm backdrop-blur-xl sm:p-8">
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white sm:text-4xl uppercase">
+            My <span className="text-emerald-500">Bookings</span>
           </h1>
-          <p className="mt-2 text-slate-600 dark:text-slate-300">
+          <p className="mt-2 text-zinc-500 dark:text-zinc-400">
             View and manage all your bookings here
           </p>
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
-          <div className="rounded-3xl border border-white/60 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+          <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-6 shadow-sm">
             <div className="flex items-center gap-4">
-              <div className="rounded-2xl bg-blue-100 p-3 dark:bg-blue-500/20">
-                <CalendarDays className="size-6 text-blue-600 dark:text-blue-400" />
+              <div className="rounded-2xl bg-zinc-100 p-3 dark:bg-zinc-800">
+                <CalendarDays className="size-6 text-zinc-600 dark:text-zinc-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">
+                <p className="text-xs font-bold uppercase text-zinc-500">
                   Total Bookings
                 </p>
-                <p className="text-2xl font-bold text-slate-700 dark:text-slate-100">
+                <p className="text-2xl font-black text-zinc-900 dark:text-zinc-100">
                   {bookings.length}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/60 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+          <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-6 shadow-sm">
             <div className="flex items-center gap-4">
-              <div className="rounded-2xl bg-green-100 p-3 dark:bg-green-500/20">
-                <CheckCircle className="size-6 text-green-600 dark:text-green-400" />
+              <div className="rounded-2xl bg-emerald-100/50 p-3 dark:bg-emerald-500/10">
+                <CheckCircle className="size-6 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">
+                <p className="text-xs font-bold uppercase text-zinc-500">
                   Completed
                 </p>
-                <p className="text-2xl font-bold text-slate-700 dark:text-slate-100">
+                <p className="text-2xl font-black text-zinc-900 dark:text-zinc-100">
                   {completedCount}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/60 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+          <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-6 shadow-sm">
             <div className="flex items-center gap-4">
-              <div className="rounded-2xl bg-yellow-100 p-3 dark:bg-yellow-500/20">
+              <div className="rounded-2xl bg-yellow-100/50 p-3 dark:bg-yellow-500/10">
                 <AlertCircle className="size-6 text-yellow-600 dark:text-yellow-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">
+                <p className="text-xs font-bold uppercase text-zinc-500">
                   Pending
                 </p>
-                <p className="text-2xl font-bold text-slate-700 dark:text-slate-100">
+                <p className="text-2xl font-black text-zinc-900 dark:text-zinc-100">
                   {pendingCount}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/60 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+          <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-6 shadow-sm">
             <div className="flex items-center gap-4">
-              <div className="rounded-2xl bg-purple-100 p-3 dark:bg-purple-500/20">
-                <Star className="size-6 text-purple-600 dark:text-purple-400" />
+              <div className="rounded-2xl bg-zinc-100 p-3 dark:bg-zinc-800">
+                <Star className="size-6 text-zinc-600 dark:text-zinc-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">
+                <p className="text-xs font-bold uppercase text-zinc-500">
                   Reviews Given
                 </p>
-                <p className="text-2xl font-bold text-slate-700 dark:text-slate-100">
+                <p className="text-2xl font-black text-zinc-900 dark:text-zinc-100">
                   {reviews.length}
                 </p>
               </div>
@@ -403,23 +403,23 @@ export default async function MyBookingsPage() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-white/60 bg-white/80 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+        <div className="overflow-hidden rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
           <div className="overflow-x-auto">
-            <table className="min-w-[1200px] w-full">
-              <thead className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
+            <table className="min-w-full w-full border-collapse">
+              <thead className="bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800">
                 <tr>
-                  <th className="px-6 py-5 text-left font-semibold">#</th>
-                  <th className="px-6 py-5 text-left font-semibold">Service</th>
-                  <th className="px-6 py-5 text-left font-semibold">Date & Time</th>
-                  <th className="px-6 py-5 text-left font-semibold">Location</th>
-                  <th className="px-6 py-5 text-left font-semibold">Amount</th>
-                  <th className="px-6 py-5 text-left font-semibold">Status</th>
-                  <th className="px-6 py-5 text-left font-semibold">Payment</th>
-                  <th className="px-6 py-5 text-left font-semibold">Actions</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500 w-[50px]">#</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500 min-w-[200px]">Service</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500 min-w-[150px]">Date & Time</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500 min-w-[300px]">Location & Address</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500 min-w-[120px]">Amount</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500 min-w-[130px]">Status</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500 min-w-[130px]">Payment</th>
+                  <th className="px-6 py-5 text-left text-[11px] font-bold uppercase text-zinc-500 min-w-[150px]">Actions</th>
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                 {bookings.map((booking: Booking, index: number) => {
                   const hasReview = reviewsMap[booking.id];
                   const canReview = booking.status === "COMPLETED" && !hasReview;
@@ -429,11 +429,11 @@ export default async function MyBookingsPage() {
                   return (
                     <tr
                       key={booking.id}
-                      className="border-t border-white/20 transition-colors hover:bg-white/50 dark:border-white/5 dark:hover:bg-white/5"
+                      className="transition-colors hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50"
                     >
                       <td className="px-6 py-5 align-top">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/20">
-                          <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+                          <span className="text-sm font-bold text-zinc-600 dark:text-zinc-400">
                             {index + 1}
                           </span>
                         </div>
@@ -441,14 +441,14 @@ export default async function MyBookingsPage() {
 
                       <td className="px-6 py-5 align-top">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-500/20 dark:to-purple-500/20">
-                            <Hash className="size-5 text-blue-600 dark:text-blue-400" />
+                          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+                            <Hash className="size-5 text-zinc-500" />
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-900 dark:text-white">
+                            <p className="font-bold text-zinc-900 dark:text-white">
                               {booking.service?.name}
                             </p>
-                            <p className="text-sm text-slate-600 dark:text-slate-300">
+                            <p className="text-xs text-zinc-500">
                               {booking.service?.duration} hours
                             </p>
                           </div>
@@ -457,14 +457,14 @@ export default async function MyBookingsPage() {
 
                       <td className="px-6 py-5 align-top">
                         <div className="flex items-center gap-3">
-                          <div className="rounded-xl bg-slate-100 p-2 dark:bg-slate-500/20">
-                            <CalendarDays className="size-4 text-slate-600 dark:text-slate-400" />
+                          <div className="rounded-xl bg-zinc-100 p-2 dark:bg-zinc-800">
+                            <CalendarDays className="size-4 text-zinc-500" />
                           </div>
                           <div>
-                            <p className="font-medium text-slate-900 dark:text-white">
+                            <p className="font-bold text-zinc-900 dark:text-white">
                               {formatDate(booking.bookingDate)}
                             </p>
-                            <p className="flex items-center gap-1 text-sm text-slate-600 dark:text-slate-300">
+                            <p className="flex items-center gap-1 text-xs text-zinc-500">
                               <Clock3 className="size-3" />
                               {formatTime(booking.bookingTime)}
                             </p>
@@ -473,15 +473,15 @@ export default async function MyBookingsPage() {
                       </td>
 
                       <td className="px-6 py-5 align-top">
-                        <div className="flex items-center gap-3">
-                          <div className="rounded-xl bg-red-100 p-2 dark:bg-red-500/20">
-                            <MapPin className="size-4 text-red-600 dark:text-red-400" />
+                        <div className="flex items-start gap-3">
+                          <div className="rounded-xl bg-zinc-100 p-2 dark:bg-zinc-800 flex-shrink-0">
+                            <MapPin className="size-4 text-zinc-500" />
                           </div>
-                          <div>
-                            <p className="font-medium text-slate-900 dark:text-white">
+                          <div className="flex flex-col gap-1">
+                            <p className="font-bold text-zinc-900 dark:text-white">
                               {booking.city}
                             </p>
-                            <p className="max-w-[220px] text-sm text-slate-600 dark:text-slate-300">
+                            <p className="text-xs text-zinc-500 leading-relaxed break-words">
                               {booking.address}
                             </p>
                           </div>
@@ -489,10 +489,10 @@ export default async function MyBookingsPage() {
                       </td>
 
                       <td className="px-6 py-5 align-top">
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="size-4 text-emerald-600 dark:text-emerald-400" />
-                          <span className="text-lg font-bold text-slate-900 dark:text-white">
-                            ৳{booking.totalAmount}
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-bold text-zinc-500">৳</span>
+                          <span className="text-lg font-black text-zinc-900 dark:text-white">
+                            {booking.totalAmount}
                           </span>
                         </div>
                       </td>
@@ -501,7 +501,7 @@ export default async function MyBookingsPage() {
                         {canChangeStatus ? (
                           <div className="flex flex-col gap-2">
                             <Badge
-                              className={`flex w-28 items-center justify-center gap-1 rounded-full px-3 py-1 ${getStatusColor(
+                              className={`flex w-fit items-center justify-center gap-1 rounded-full px-3 py-1 text-[10px] font-bold uppercase ${getStatusColor(
                                 booking.status
                               )}`}
                             >
@@ -512,7 +512,7 @@ export default async function MyBookingsPage() {
                           </div>
                         ) : (
                           <Badge
-                            className={`flex w-fit items-center gap-1 rounded-full px-3 py-1 ${getStatusColor(
+                            className={`flex w-fit items-center gap-1 rounded-full px-3 py-1 text-[10px] font-bold uppercase ${getStatusColor(
                               booking.status
                             )}`}
                           >
@@ -525,10 +525,10 @@ export default async function MyBookingsPage() {
                       <td className="px-6 py-5 align-top">
                         <div className="flex flex-col gap-2">
                           <Badge
-                            className={`w-fit rounded-full px-3 py-1 ${
+                            className={`w-fit rounded-full px-3 py-1 text-[10px] font-bold uppercase ${
                               booking.paymentStatus === "PAID"
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                ? "bg-emerald-500 text-black"
+                                : "bg-red-500 text-white"
                             }`}
                           >
                             {booking.paymentStatus}
@@ -548,7 +548,7 @@ export default async function MyBookingsPage() {
                           {canReview && <ReviewDialog booking={booking} />}
 
                           {booking.status === "COMPLETED" && hasReview && (
-                            <Badge className="w-fit rounded-full bg-slate-100 px-3 py-1 text-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            <Badge className="w-fit rounded-full bg-zinc-100 px-3 py-1 text-[10px] font-bold uppercase text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
                               Review Submitted
                             </Badge>
                           )}
@@ -563,14 +563,14 @@ export default async function MyBookingsPage() {
         </div>
 
         {bookings.length === 0 && (
-          <div className="mt-8 rounded-3xl border border-white/60 bg-white/80 p-12 text-center shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-500/20">
-              <CalendarDays className="size-8 text-slate-400" />
+          <div className="mt-8 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-12 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+              <CalendarDays className="size-8 text-zinc-400" />
             </div>
-            <h3 className="mb-2 text-xl font-semibold text-slate-900 dark:text-white">
+            <h3 className="mb-2 text-xl font-bold text-zinc-900 dark:text-white">
               No Bookings Found
             </h3>
-            <p className="text-slate-600 dark:text-slate-300">
+            <p className="text-zinc-500">
               You haven&apos;t made any bookings yet.
             </p>
           </div>
