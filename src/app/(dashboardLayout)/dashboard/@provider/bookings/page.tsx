@@ -5,7 +5,6 @@ import { format } from "date-fns";
 import {
   AlertCircle,
   AlertTriangle,
-  ArrowRight,
   Calendar,
   CheckCircle2,
   ChevronLeft,
@@ -13,11 +12,9 @@ import {
   Clock,
   DollarSign,
   Eye,
-  Filter,
   Mail,
   MapPin,
   MoreVertical,
-  PauseCircle,
   PlayCircle,
   RefreshCw,
   Search,
@@ -25,10 +22,19 @@ import {
   Sparkles,
   User,
   XCircle,
+  Hash,
+  Activity,
+  CreditCard,
+  History,
+  Navigation,
+  X,
+  Smartphone,
+  Info,
+  Layers
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -45,13 +51,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -62,7 +61,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 
 import {
@@ -78,45 +76,27 @@ const statusMeta = {
   PENDING: {
     label: "Pending",
     icon: AlertCircle,
-    className:
-      "bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/20 dark:bg-amber-500/15 dark:text-amber-300",
+    color: "amber",
   },
   ACCEPTED: {
     label: "Accepted",
     icon: CheckCircle2,
-    className:
-      "bg-sky-500/10 text-sky-700 ring-1 ring-sky-500/20 dark:bg-sky-500/15 dark:text-sky-300",
+    color: "sky",
   },
   WORKING: {
     label: "Working",
     icon: PlayCircle,
-    className:
-      "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-300",
+    color: "emerald",
   },
   COMPLETED: {
     label: "Completed",
     icon: CheckCircle2,
-    className:
-      "bg-green-500/10 text-green-700 ring-1 ring-green-500/20 dark:bg-green-500/15 dark:text-green-300",
+    color: "green",
   },
   CANCELLED: {
     label: "Cancelled",
     icon: XCircle,
-    className:
-      "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20 dark:bg-rose-500/15 dark:text-rose-300",
-  },
-} as const;
-
-const paymentMeta = {
-  PAID: {
-    label: "Paid",
-    className:
-      "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-300",
-  },
-  UNPAID: {
-    label: "Unpaid",
-    className:
-      "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20 dark:bg-rose-500/15 dark:text-rose-300",
+    color: "rose",
   },
 } as const;
 
@@ -157,15 +137,15 @@ function StatCard({
   icon: React.ElementType;
 }) {
   return (
-    <div className="rounded-3xl border border-white/40 bg-white/70 p-5 shadow-sm backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-slate-950/60">
+    <div className="group rounded-[2rem] border border-zinc-100 bg-white p-6 transition-all hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5 dark:border-zinc-800 dark:bg-zinc-950">
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+        <div className="space-y-1">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
             {label}
           </p>
-          <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">{value}</p>
+          <p className="text-3xl font-black text-zinc-900 dark:text-white">{value}</p>
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-50 text-zinc-600 transition-colors group-hover:bg-emerald-500 group-hover:text-white dark:bg-zinc-900 dark:text-zinc-400">
           <Icon className="h-5 w-5" />
         </div>
       </div>
@@ -205,7 +185,6 @@ export default function BookingsPage() {
 
   useEffect(() => {
     fetchBookings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   const visibleBookings = useMemo(() => {
@@ -239,8 +218,6 @@ export default function BookingsPage() {
       pending: list.filter((b) => b.status === "PENDING").length,
       active: list.filter((b) => ["ACCEPTED", "WORKING"].includes(b.status)).length,
       completed: list.filter((b) => b.status === "COMPLETED").length,
-      cancelled: list.filter((b) => b.status === "CANCELLED").length,
-      unpaid: list.filter((b) => b.paymentStatus === "UNPAID").length,
     };
   }, [bookings]);
 
@@ -315,9 +292,18 @@ export default function BookingsPage() {
   const getStatusBadge = (status: Booking["status"]) => {
     const meta = statusMeta[status];
     const Icon = meta.icon;
+    
+    const colorMap: Record<string, string> = {
+      amber: "bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-500/20",
+      sky: "bg-sky-500/10 text-sky-600 dark:text-sky-400 ring-sky-500/20",
+      emerald: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-emerald-500/20",
+      green: "bg-green-500/10 text-green-600 dark:text-green-400 ring-green-500/20",
+      rose: "bg-rose-500/10 text-rose-600 dark:text-rose-400 ring-rose-500/20",
+    };
+
     return (
       <span
-        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${meta.className}`}
+        className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider ring-1 ${colorMap[meta.color] || ""}`}
       >
         <Icon className="h-3.5 w-3.5" />
         {meta.label}
@@ -326,57 +312,34 @@ export default function BookingsPage() {
   };
 
   const getPaymentBadge = (paymentStatus: Booking["paymentStatus"]) => {
-    const meta = paymentMeta[paymentStatus];
-    return (
-      <span
-        className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${meta.className}`}
-      >
-        {meta.label}
+    return paymentStatus === "PAID" ? (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-600 ring-1 ring-emerald-500/20 dark:text-emerald-400">
+        Paid
+      </span>
+    ) : (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-rose-600 ring-1 ring-rose-500/20 dark:text-rose-400">
+        Unpaid
       </span>
     );
   };
 
   if (loading && !bookings) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="space-y-8">
-          <div className="animate-pulse rounded-[2rem] border border-white/40 bg-white/60 p-8 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60">
-            <div className="h-8 w-64 rounded-full bg-slate-200 dark:bg-slate-800" />
-            <div className="mt-4 h-4 w-96 rounded-full bg-slate-200 dark:bg-slate-800" />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-28 animate-pulse rounded-3xl border border-white/40 bg-white/60 dark:border-white/10 dark:bg-slate-950/60"
-                />
-              ))}
-            </div>
-
-            <div className="animate-pulse rounded-[2rem] border border-white/40 bg-white/60 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60">
-              <div className="h-12 w-full rounded-2xl bg-slate-200 dark:bg-slate-800" />
-            </div>
-
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="animate-pulse rounded-[2rem] border border-white/40 bg-white/70 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="w-full space-y-3">
-                      <div className="h-5 w-1/3 rounded-full bg-slate-200 dark:bg-slate-800" />
-                      <div className="h-4 w-1/2 rounded-full bg-slate-200 dark:bg-slate-800" />
-                      <div className="h-4 w-2/3 rounded-full bg-slate-200 dark:bg-slate-800" />
-                    </div>
-                    <div className="h-10 w-24 rounded-full bg-slate-200 dark:bg-slate-800" />
-                  </div>
-                </div>
-              ))}
-            </div>
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="space-y-10">
+          <div className="h-44 animate-pulse rounded-[2.5rem] bg-zinc-100 dark:bg-zinc-900" />
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-32 animate-pulse rounded-[2rem] bg-zinc-100 dark:bg-zinc-900" />
+            ))}
+          </div>
+          <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-48 animate-pulse rounded-[2.5rem] bg-zinc-50 dark:bg-zinc-900/50" />
+            ))}
           </div>
         </div>
+      </div>
     );
   }
 
@@ -390,135 +353,102 @@ export default function BookingsPage() {
 
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="space-y-8">
-          {/* Header */}
-          <div className="rounded-[2rem] border border-white/40 bg-white/70 p-6 shadow-[0_20px_80px_rgba(16,185,129,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60 sm:p-8">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="max-w-2xl">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/15 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-                  <Sparkles className="h-4 w-4" />
-                  Provider Booking Console
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="space-y-10">
+          
+          {/* Header Section */}
+          <div className="relative overflow-hidden rounded-[3rem] border border-zinc-100 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-950 sm:p-12">
+            <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-2xl space-y-6">
+                <div className="inline-flex items-center gap-2.5 rounded-full border border-zinc-100 bg-zinc-50/50 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-900/50">
+                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500">
+                    <Sparkles className="h-3 w-3 text-white" />
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                    Management Portal
+                  </span>
                 </div>
-
-                <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-                  My Bookings
-                </h1>
-                <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
-                  Review incoming requests, update service progress, manage payment status,
-                  and keep your booking workflow organized.
-                </p>
+                
+                <div className="space-y-2">
+                  <h1 className="text-4xl font-black tracking-tight text-zinc-900 dark:text-white sm:text-5xl">
+                    Service Bookings
+                  </h1>
+                  <p className="text-lg text-zinc-500 dark:text-zinc-400">
+                    Oversee your business operations, track service milestones, and manage customer relations from one dashboard.
+                  </p>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <div className="grid w-full grid-cols-2 gap-4 sm:w-auto md:grid-cols-4 lg:grid-cols-1 xl:grid-cols-2">
                 <StatCard label="Total" value={stats.total} icon={Calendar} />
                 <StatCard label="Pending" value={stats.pending} icon={AlertCircle} />
-                <StatCard label="Active" value={stats.active} icon={PlayCircle} />
-                <StatCard label="Completed" value={stats.completed} icon={CheckCircle2} />
+                <StatCard label="In Progress" value={stats.active} icon={PlayCircle} />
+                <StatCard label="Success" value={stats.completed} icon={CheckCircle2} />
               </div>
+            </div>
+            
+            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-emerald-500/5 blur-3xl dark:bg-emerald-500/10" />
+            <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-zinc-500/5 blur-3xl" />
+          </div>
+
+          {/* Filter Bar */}
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
+            <div className="relative flex-1 group">
+              <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 transition-colors group-focus-within:text-emerald-500" />
+              <Input
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                placeholder="Search bookings..."
+                className="h-14 rounded-2xl border-zinc-100 bg-white pl-12 shadow-sm transition-all focus-visible:ring-emerald-500/10 dark:border-zinc-800 dark:bg-zinc-950"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Select
+                value={filters.status || "all"}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    status: value === "all" ? undefined : (value as Booking["status"]),
+                    page: 1,
+                  }))
+                }
+              >
+                <SelectTrigger className="h-14 w-[160px] rounded-2xl border-zinc-100 bg-white px-5 font-medium dark:border-zinc-800 dark:bg-zinc-950">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-zinc-100 dark:border-zinc-800">
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="PENDING">Pending</SelectItem>
+                  <SelectItem value="ACCEPTED">Accepted</SelectItem>
+                  <SelectItem value="WORKING">Working</SelectItem>
+                  <SelectItem value="COMPLETED">Completed</SelectItem>
+                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="outline"
+                onClick={fetchBookings}
+                disabled={loading}
+                className="h-14 rounded-2xl border-zinc-100 bg-white px-6 font-bold text-zinc-900 transition-all hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:hover:bg-zinc-900"
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                Sync
+              </Button>
             </div>
           </div>
 
-          {/* Filters */}
-          <Card className="border border-white/40 bg-white/70 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60">
-            <CardContent className="p-4 sm:p-6">
-              <div className="grid gap-4 xl:grid-cols-[1.4fr_0.8fr_0.8fr_auto]">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />
-                  <Input
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    placeholder="Search by service, client, city, or status"
-                    className="h-12 rounded-2xl border-white/40 bg-white/80 pl-11 text-sm shadow-inner shadow-white/40 placeholder:text-slate-400 focus-visible:border-emerald-400 focus-visible:ring-emerald-400/20 dark:border-white/10 dark:bg-slate-900/80 dark:text-white"
-                  />
-                </div>
-
-                <Select
-                  value={filters.status || "all"}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      status: value === "all" ? undefined : (value as Booking["status"]),
-                      page: 1,
-                    }))
-                  }
-                >
-                  <SelectTrigger className="h-12 rounded-2xl border-white/40 bg-white/80 text-sm shadow-inner shadow-white/40 dark:border-white/10 dark:bg-slate-900/80 dark:text-white">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-2xl border border-white/20 bg-white/95 text-slate-800 shadow-2xl dark:border-white/10 dark:bg-slate-950 dark:text-slate-100">
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="PENDING">Pending</SelectItem>
-                    <SelectItem value="ACCEPTED">Accepted</SelectItem>
-                    <SelectItem value="WORKING">Working</SelectItem>
-                    <SelectItem value="COMPLETED">Completed</SelectItem>
-                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={filters.paymentStatus || "all"}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      paymentStatus:
-                        value === "all" ? undefined : (value as Booking["paymentStatus"]),
-                      page: 1,
-                    }))
-                  }
-                >
-                  <SelectTrigger className="h-12 rounded-2xl border-white/40 bg-white/80 text-sm shadow-inner shadow-white/40 dark:border-white/10 dark:bg-slate-900/80 dark:text-white">
-                    <SelectValue placeholder="Filter by payment" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-2xl border border-white/20 bg-white/95 text-slate-800 shadow-2xl dark:border-white/10 dark:bg-slate-950 dark:text-slate-100">
-                    <SelectItem value="all">All Payments</SelectItem>
-                    <SelectItem value="PAID">Paid</SelectItem>
-                    <SelectItem value="UNPAID">Unpaid</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Button
-                  variant="outline"
-                  onClick={fetchBookings}
-                  disabled={loading}
-                  className="h-12 rounded-2xl border-white/50 bg-white/80 px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-900"
-                >
-                  <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-                  Refresh
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Bookings List */}
-          <div className="space-y-4">
+          {/* Booking Cards Grid */}
+          <div className="space-y-6">
             {visibleBookings.length === 0 ? (
-              <Card className="border border-white/40 bg-white/70 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60">
-                <CardContent className="px-6 py-16 text-center sm:px-10">
-                  <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
-                    <Calendar className="h-11 w-11" />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                    No bookings found
-                  </h3>
-                  <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-slate-600 dark:text-slate-300">
-                    {searchText || filters.status || filters.paymentStatus
-                      ? "Try adjusting your filters or search terms."
-                      : "New bookings will appear here automatically."}
-                  </p>
-
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setSearchText("");
-                      setFilters({ page: 1, limit: 10 });
-                    }}
-                    className="mt-6 rounded-2xl border-white/50 bg-white/80 px-5 text-sm font-semibold dark:border-white/10 dark:bg-slate-900/80"
-                  >
-                    Clear filters
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="flex flex-col items-center justify-center rounded-[3rem] border-2 border-dashed border-zinc-100 bg-zinc-50/30 py-24 dark:border-zinc-800/50 dark:bg-zinc-950/30">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-xl dark:bg-zinc-900">
+                  <Search className="h-8 w-8 text-zinc-300" />
+                </div>
+                <h3 className="mt-6 text-xl font-bold text-zinc-900 dark:text-white">No Bookings Found</h3>
+                <p className="mt-2 text-zinc-500">We couldn`t find any results matching your filters.</p>
+              </div>
             ) : (
               visibleBookings.map((booking) => {
                 const isBusy = updatingBooking === booking.id;
@@ -526,210 +456,124 @@ export default function BookingsPage() {
                 return (
                   <Card
                     key={booking.id}
-                    className="group overflow-hidden border border-white/40 bg-white/75 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-slate-950/60"
+                    className="group border border-zinc-100 bg-white transition-all hover:border-emerald-500/20 hover:shadow-2xl hover:shadow-zinc-500/5 dark:border-zinc-800 dark:bg-zinc-950"
+                    style={{ borderRadius: "2.5rem" }}
                   >
-                    <CardContent className="p-5 sm:p-6">
-                      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="flex-1">
-                          <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                            <div>
-                              <div className="mb-2 flex items-center gap-2">
-                                <Badge className="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-700 ring-1 ring-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-300">
-                                  Booking #{booking.id.slice(-6).toUpperCase()}
-                                </Badge>
-                                {booking.paymentStatus === "PAID" ? (
-                                  <Badge className="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-700 ring-1 ring-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-300">
-                                    Paid
-                                  </Badge>
-                                ) : (
-                                  <Badge className="rounded-full bg-rose-500/10 px-3 py-1 text-rose-700 ring-1 ring-rose-500/20 dark:bg-rose-500/15 dark:text-rose-300">
-                                    Unpaid
-                                  </Badge>
-                                )}
-                              </div>
-
-                              <h3 className="text-xl font-black text-slate-900 dark:text-white">
-                                {booking.service.name}
-                              </h3>
-
-                              <div className="mt-2 flex flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-300">
-                                <span className="inline-flex items-center gap-2">
-                                  <User className="h-4 w-4 text-emerald-500" />
-                                  {booking.client.name}
-                                </span>
-                                <span className="inline-flex items-center gap-2">
-                                  <Calendar className="h-4 w-4 text-emerald-500" />
-                                  {format(new Date(booking.bookingDate), "MMM dd, yyyy")}
-                                </span>
-                                <span className="inline-flex items-center gap-2">
-                                  <Clock className="h-4 w-4 text-emerald-500" />
-                                  {booking.bookingTime}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-2">
-                              {getStatusBadge(booking.status)}
-                              {getPaymentBadge(booking.paymentStatus)}
-                            </div>
+                    <CardContent className="p-8">
+                      <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
+                        {/* Service Content Section */}
+                        <div className="flex-1 space-y-4">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <Badge variant="outline" className="rounded-lg border-zinc-100 bg-zinc-50 px-2 py-0.5 text-[10px] font-black uppercase text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900">
+                              ID: #{booking.id.slice(-6).toUpperCase()}
+                            </Badge>
+                            {getStatusBadge(booking.status)}
+                            {getPaymentBadge(booking.paymentStatus)}
                           </div>
 
-                          <div className="grid gap-3 md:grid-cols-2">
-                            <div className="flex items-start gap-3 rounded-2xl border border-white/40 bg-white/60 p-4 dark:border-white/10 dark:bg-slate-900/60">
-                              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                              <div>
-                                <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                                  Service Location
-                                </p>
-                                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                                  {booking.address}, {booking.city}
-                                </p>
-                              </div>
-                            </div>
+                          <h3 className="text-2xl font-black text-zinc-900 dark:text-white">
+                            {booking.service.name}
+                          </h3>
 
-                            <div className="flex items-start gap-3 rounded-2xl border border-white/40 bg-white/60 p-4 dark:border-white/10 dark:bg-slate-900/60">
-                              <DollarSign className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                              <div>
-                                <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                                  Total Amount
-                                </p>
-                                <p className="mt-1 text-lg font-black text-emerald-600 dark:text-emerald-300">
-                                  {formatMoney(booking.totalAmount)}
-                                </p>
-                              </div>
+                          <div className="flex flex-wrap items-center gap-6 text-sm font-bold text-zinc-500 dark:text-zinc-400">
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-emerald-500" />
+                              {booking.client.name}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-emerald-500" />
+                              {format(new Date(booking.bookingDate), "MMM dd, yyyy")}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4 text-emerald-500" />
+                              {booking.bookingTime}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-emerald-500" />
+                              {booking.city}
                             </div>
                           </div>
+                        </div>
 
-                          <div className="mt-4 flex flex-col gap-3 border-t border-white/40 pt-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                              Booked on{" "}
-                              {format(new Date(booking.createdAt), "MMM dd, yyyy 'at' h:mm a")}
-                            </p>
-
-                            <div className="flex flex-wrap items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setSelectedBooking(booking)}
-                                className="rounded-2xl border-white/50 bg-white/80 text-slate-700 dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200"
-                              >
-                                <Eye className="mr-2 h-4 w-4" />
-                                View details
-                              </Button>
-
-                              {/* Quick Status Actions */}
-                              <div className="flex items-center gap-1">
-                                {getAllowedStatusTransitions(booking.status).slice(0, 2).map((status) => {
-                                  const metaStatus = statusMeta[status];
-                                  const StatusIcon = metaStatus.icon;
-
-                                  return (
-                                    <Button
-                                      key={status}
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleStatusUpdate(booking.id, status)}
-                                      disabled={isBusy}
-                                      className={`rounded-xl border-2 px-3 py-1.5 text-xs font-semibold transition-all hover:scale-105 ${
-                                        status === "ACCEPTED"
-                                          ? "border-sky-500/50 bg-sky-500/10 text-sky-700 hover:bg-sky-500/20 dark:border-sky-500/30 dark:bg-sky-500/15 dark:text-sky-300"
-                                          : status === "WORKING"
-                                          ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300"
-                                          : status === "COMPLETED"
-                                          ? "border-green-500/50 bg-green-500/10 text-green-700 hover:bg-green-500/20 dark:border-green-500/30 dark:bg-green-500/15 dark:text-green-300"
-                                          : "border-amber-500/50 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300"
-                                      }`}
-                                      title={`Mark as ${metaStatus.label}`}
-                                    >
-                                      {isBusy ? (
-                                        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                                      ) : (
-                                        <StatusIcon className="h-3.5 w-3.5" />
-                                      )}
-                                      <span className="ml-1 hidden sm:inline">{metaStatus.label}</span>
-                                    </Button>
-                                  );
-                                })}
-
-                                {/* More Actions Dropdown */}
+                        {/* Pricing & Actions Section */}
+                        <div className="flex flex-col items-start gap-4 lg:items-end lg:w-[280px]">
+                          <div className="flex w-full items-center justify-between lg:justify-end lg:gap-6">
+                            <div className="text-left lg:text-right">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Total Yield</p>
+                              <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{formatMoney(booking.totalAmount)}</p>
+                            </div>
+                            <Button
+                              onClick={() => setSelectedBooking(booking)}
+                              variant="outline"
+                              size="icon"
+                              className="h-10 w-10 rounded-xl border-zinc-100 dark:border-zinc-800"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          
+                          <div className="flex w-full flex-col gap-2">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Quick Action</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              {getAllowedStatusTransitions(booking.status).slice(0, 2).map((status) => {
+                                const metaStatus = statusMeta[status];
+                                const StatusIcon = metaStatus.icon;
+                                return (
+                                  <Button
+                                    key={status}
+                                    onClick={() => handleStatusUpdate(booking.id, status)}
+                                    disabled={isBusy}
+                                    variant="outline"
+                                    className="h-10 rounded-xl border-zinc-100 bg-white px-3 text-[10px] font-bold uppercase tracking-tight hover:bg-emerald-50 hover:text-emerald-600 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-emerald-500/10 sm:text-[11px]"
+                                  >
+                                    <StatusIcon className="mr-2 h-3 w-3" />
+                                    {metaStatus.label}
+                                  </Button>
+                                );
+                              })}
+                              {getAllowedStatusTransitions(booking.status).length > 2 && (
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
                                     <Button
                                       variant="outline"
-                                      size="sm"
-                                      disabled={isBusy}
-                                      className="rounded-xl border-white/50 bg-white/80 px-2 text-slate-700 dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200"
-                                      title="More actions"
+                                      className="h-10 rounded-xl border-zinc-100 bg-white px-3 text-[11px] font-bold uppercase dark:border-zinc-800 dark:bg-zinc-950"
                                     >
-                                      {isBusy ? (
-                                        <RefreshCw className="h-4 w-4 animate-spin" />
-                                      ) : (
-                                        <MoreVertical className="h-4 w-4" />
-                                      )}
+                                      More...
                                     </Button>
                                   </DropdownMenuTrigger>
-
-                                  <DropdownMenuContent
-                                    align="end"
-                                    className="w-56 rounded-2xl border border-white/20 bg-white/95 p-2 shadow-2xl dark:border-white/10 dark:bg-slate-950"
-                                  >
-                                    <div className="px-2 pb-2 pt-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                                      Status Actions
-                                    </div>
-
-                                    {getAllowedStatusTransitions(booking.status).map((status) => {
-                                      const metaStatus = statusMeta[status];
-                                      const StatusIcon = metaStatus.icon;
-
-                                      return (
-                                        <DropdownMenuItem
-                                          key={status}
-                                          onClick={() => handleStatusUpdate(booking.id, status)}
-                                          disabled={isBusy}
-                                          className="cursor-pointer rounded-xl px-3 py-2.5 text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                                        >
-                                          <StatusIcon className={`mr-3 h-4 w-4 ${
-                                            status === "ACCEPTED" ? "text-sky-500" :
-                                            status === "WORKING" ? "text-emerald-500" :
-                                            status === "COMPLETED" ? "text-green-500" :
-                                            status === "CANCELLED" ? "text-rose-500" :
-                                            "text-amber-500"
-                                          }`} />
-                                          <div className="flex flex-col">
-                                            <span className="font-medium">Mark as {metaStatus.label}</span>
-                                            <span className="text-xs text-slate-500 dark:text-slate-400">
-                                              {status === "ACCEPTED" ? "Accept this booking request" :
-                                               status === "WORKING" ? "Start working on this service" :
-                                               status === "COMPLETED" ? "Mark service as finished" :
-                                               status === "CANCELLED" ? "Cancel this booking" :
-                                               "Move to next status"}
-                                            </span>
-                                          </div>
-                                        </DropdownMenuItem>
-                                      );
+                                  <DropdownMenuContent align="end" className="w-48 rounded-2xl border-zinc-100 p-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
+                                    {getAllowedStatusTransitions(booking.status).slice(2).map((status) => {
+                                       const metaStatus = statusMeta[status];
+                                       return (
+                                         <DropdownMenuItem
+                                           key={status}
+                                           onClick={() => handleStatusUpdate(booking.id, status)}
+                                           className="rounded-xl font-bold text-xs"
+                                         >
+                                           Mark as {metaStatus.label}
+                                         </DropdownMenuItem>
+                                       );
                                     })}
-
                                     {canCancelBooking(booking) && (
-                                      <>
-                                        <DropdownMenuSeparator className="my-2 bg-slate-200 dark:bg-slate-800" />
-                                        <DropdownMenuItem
-                                          onClick={() => handleCancelBooking(booking.id)}
-                                          disabled={isBusy}
-                                          className="cursor-pointer rounded-xl px-3 py-2.5 text-rose-600 transition-colors hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/20"
-                                        >
-                                          <XCircle className="mr-3 h-4 w-4" />
-                                          <div className="flex flex-col">
-                                            <span className="font-medium">Cancel Booking</span>
-                                            <span className="text-xs text-rose-500 dark:text-rose-400">
-                                              Only possible for unpaid bookings
-                                            </span>
-                                          </div>
-                                        </DropdownMenuItem>
-                                      </>
+                                      <DropdownMenuItem
+                                        onClick={() => handleCancelBooking(booking.id)}
+                                        className="rounded-xl font-bold text-xs text-rose-500"
+                                      >
+                                        Cancel Booking
+                                      </DropdownMenuItem>
                                     )}
                                   </DropdownMenuContent>
                                 </DropdownMenu>
-                              </div>
+                              )}
+                              {getAllowedStatusTransitions(booking.status).length <= 2 && canCancelBooking(booking) && (
+                                <Button
+                                  onClick={() => handleCancelBooking(booking.id)}
+                                  variant="ghost"
+                                  className="h-10 rounded-xl text-rose-500 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/10"
+                                >
+                                  <XCircle className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -741,35 +585,45 @@ export default function BookingsPage() {
             )}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination Controls */}
           {meta && total > currentLimit && (
-            <div className="flex flex-col gap-4 rounded-[2rem] border border-white/40 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60 lg:flex-row lg:items-center lg:justify-between">
-              <div className="text-sm text-slate-600 dark:text-slate-300">
-                Showing {showingStart} to {showingEnd} of {total} bookings
-              </div>
+            <div className="flex flex-col items-center justify-between gap-6 rounded-[2.5rem] border border-zinc-100 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950 lg:flex-row">
+              <p className="text-sm font-bold text-zinc-400">
+                Displaying <span className="text-zinc-900 dark:text-white">{showingStart}-{showingEnd}</span> of <span className="text-zinc-900 dark:text-white">{total}</span>
+              </p>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={() => setFilters((prev) => ({ ...prev, page: (prev.page ?? 1) - 1 }))}
                   disabled={currentPage <= 1 || loading}
-                  className="rounded-2xl border-white/50 bg-white/80 text-slate-700 dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200"
+                  className="h-12 rounded-xl border-zinc-100 px-4 font-bold dark:border-zinc-800"
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" />
-                  Previous
+                  Prev
                 </Button>
 
-                <div className="rounded-full border border-white/40 bg-white/70 px-4 py-2 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200">
-                  Page {currentPage} of {totalPages}
+                <div className="flex items-center gap-2">
+                   {[...Array(totalPages)].map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setFilters(prev => ({ ...prev, page: i + 1 }))}
+                      className={`h-10 w-10 rounded-xl text-sm font-black transition-all ${
+                        currentPage === i + 1 
+                        ? "bg-zinc-900 text-white shadow-xl dark:bg-white dark:text-black" 
+                        : "text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                   ))}
                 </div>
 
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={() => setFilters((prev) => ({ ...prev, page: (prev.page ?? 1) + 1 }))}
                   disabled={currentPage >= totalPages || loading}
-                  className="rounded-2xl border-white/50 bg-white/80 text-slate-700 dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200"
+                  className="h-12 rounded-xl border-zinc-100 px-4 font-bold dark:border-zinc-800"
                 >
                   Next
                   <ChevronRight className="ml-2 h-4 w-4" />
@@ -780,177 +634,174 @@ export default function BookingsPage() {
         </div>
       </div>
 
-      {/* Booking Details Dialog */}
-      <Dialog open={!!selectedBooking} onOpenChange={(open) => !open && setSelectedBooking(null)}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[2rem] border border-white/40 bg-white/95 p-0 shadow-2xl dark:border-white/10 dark:bg-slate-950 sm:max-w-4xl">
-          <div className="border-b border-slate-200/70 px-6 py-5 dark:border-slate-800">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-xl font-black text-slate-900 dark:text-white">
-                <Calendar className="h-5 w-5 text-emerald-500" />
-                Booking Details
-              </DialogTitle>
-              <DialogDescription className="text-sm text-slate-600 dark:text-slate-300">
-                Full booking information, status, and service context.
-              </DialogDescription>
-            </DialogHeader>
-          </div>
+      {/* Optimized Booking Detail Modal */}
+      {selectedBooking && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md animate-in fade-in duration-300" 
+            onClick={() => setSelectedBooking(null)}
+          />
+          
+          <div className="relative z-10 flex h-full max-h-[700px] w-full max-w-5xl flex-col overflow-hidden bg-white shadow-2xl animate-in zoom-in-95 duration-300 dark:bg-zinc-950" 
+            style={{ borderRadius: "2rem" }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-zinc-100 px-8 py-5 dark:border-zinc-800">
+               <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+                     <Layers className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">Booking Management</h3>
+                    <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest">ID: {selectedBooking.id.slice(-10).toUpperCase()}</p>
+                  </div>
+               </div>
+               <button 
+                onClick={() => setSelectedBooking(null)}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-50 text-zinc-400 transition-all hover:bg-rose-50 hover:text-rose-500 dark:bg-zinc-900"
+               >
+                 <X className="h-5 w-5" />
+               </button>
+            </div>
 
-          {selectedBooking && (
-            <div className="space-y-6 px-6 py-6">
-              <div className="grid gap-6 lg:grid-cols-2">
-                <Card className="rounded-3xl border border-white/40 bg-white/70 shadow-sm dark:border-white/10 dark:bg-slate-900/70">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">
-                      Service Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-12 w-12 rounded-2xl ring-2 ring-emerald-500/20">
-                        <AvatarImage src={selectedBooking.provider.profilePhoto} />
-                        <AvatarFallback className="rounded-2xl bg-emerald-500/10 font-bold text-emerald-600 dark:text-emerald-300">
-                          {selectedBooking.provider.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold text-slate-900 dark:text-white">
-                          {selectedBooking.service.name}
-                        </p>
-                        <p className="text-sm text-slate-600 dark:text-slate-300">
-                          Provider: {selectedBooking.provider.name}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/70">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-emerald-500" />
-                        <span className="text-sm text-slate-700 dark:text-slate-300">
-                          Duration: {selectedBooking.service.duration}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-emerald-500" />
-                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-300">
-                          {formatMoney(selectedBooking.totalAmount)}
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="rounded-3xl border border-white/40 bg-white/70 shadow-sm dark:border-white/10 dark:bg-slate-900/70">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">
-                      Client Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-12 w-12 rounded-2xl ring-2 ring-emerald-500/20">
-                        <AvatarFallback className="rounded-2xl bg-emerald-500/10 font-bold text-emerald-600 dark:text-emerald-300">
-                          {selectedBooking.client.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold text-slate-900 dark:text-white">
-                          {selectedBooking.client.name}
-                        </p>
-                        <div className="mt-1 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                          <Mail className="h-3.5 w-3.5 text-emerald-500" />
-                          {selectedBooking.client.email}
+            <div className="flex-1 overflow-y-auto p-8">
+              <div className="grid grid-cols-1 gap-8">
+                
+                {/* 1. Service Details */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800">
+                    <Sparkles className="h-4 w-4 text-emerald-500" />
+                    <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">Service Details</h4>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <div className="rounded-2xl bg-zinc-50 p-5 dark:bg-zinc-900/50">
+                      <h5 className="text-lg font-bold text-zinc-900 dark:text-white leading-tight">
+                        {selectedBooking.service.name}
+                      </h5>
+                      <div className="mt-4 grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-zinc-400 uppercase">Duration</p>
+                          <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{selectedBooking.service.duration}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-zinc-400 uppercase">Total Fee</p>
+                          <p className="text-sm font-bold text-emerald-600">{formatMoney(selectedBooking.totalAmount)}</p>
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+
+                    <div className="rounded-2xl border border-zinc-100 p-5 dark:border-zinc-800">
+                      <div className="flex items-start gap-3">
+                        <MapPin className="mt-1 h-4 w-4 text-zinc-400" />
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-zinc-400 uppercase">Location Target</p>
+                          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                            {selectedBooking.address}, {selectedBooking.city}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Consumer Information */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800">
+                    <User className="h-4 w-4 text-emerald-500" />
+                    <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">Consumer Identity</h4>
+                  </div>
+                  
+                  <div className="flex items-center gap-6 rounded-2xl border border-zinc-100 p-6 dark:border-zinc-800">
+                    <div className="h-14 w-14 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xl uppercase">
+                        {selectedBooking.client.name.charAt(0)}
+                    </div>
+                    <div className="flex-1">
+                      <h5 className="text-lg font-bold text-zinc-900 dark:text-white">{selectedBooking.client.name}</h5>
+                      <p className="text-sm font-medium text-zinc-500">{selectedBooking.client.email}</p>
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                      <ShieldCheck className="h-3 w-3" />
+                      Verified Account
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Booking Information */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800">
+                     <Calendar className="h-4 w-4 text-emerald-500" />
+                     <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">Booking Schedule</h4>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <div className="flex items-center justify-between rounded-xl border border-zinc-100 p-4 dark:border-zinc-800">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="h-4 w-4 text-zinc-400" />
+                        <span className="text-xs font-semibold">{format(new Date(selectedBooking.bookingDate), "MMM dd, yyyy")}</span>
+                      </div>
+                      <div className="flex items-center gap-3 border-l border-zinc-100 pl-3 dark:border-zinc-800">
+                        <Clock className="h-4 w-4 text-zinc-400" />
+                        <span className="text-xs font-semibold">{selectedBooking.bookingTime}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-xl bg-zinc-50 p-4 dark:bg-zinc-900/50">
+                       <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Status:</span>
+                       {getStatusBadge(selectedBooking.status)}
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-xl bg-zinc-50 p-4 dark:bg-zinc-900/50">
+                       <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Payment:</span>
+                       {getPaymentBadge(selectedBooking.paymentStatus)}
+                    </div>
+                  </div>
+                </div>
+
               </div>
-
-              <Card className="rounded-3xl border border-white/40 bg-white/70 shadow-sm dark:border-white/10 dark:bg-slate-900/70">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">
-                    Booking Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/70">
-                      <Calendar className="h-4 w-4 text-emerald-500" />
-                      <span className="text-sm text-slate-700 dark:text-slate-300">
-                        {format(new Date(selectedBooking.bookingDate), "EEEE, MMMM dd, yyyy")}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/70">
-                      <Clock className="h-4 w-4 text-emerald-500" />
-                      <span className="text-sm text-slate-700 dark:text-slate-300">
-                        {selectedBooking.bookingTime}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/70">
-                    <MapPin className="mt-0.5 h-4 w-4 text-emerald-500" />
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                        Service Location
-                      </p>
-                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                        {selectedBooking.address}, {selectedBooking.city}
-                      </p>
-                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                        Lat: {selectedBooking.latitude}, Lng: {selectedBooking.longitude}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3 border-t border-slate-200/70 pt-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex flex-wrap items-center gap-2">
-                      {getStatusBadge(selectedBooking.status)}
-                      {getPaymentBadge(selectedBooking.paymentStatus)}
-                    </div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">
-                      Booked on{" "}
-                      {format(new Date(selectedBooking.createdAt), "MMM dd, yyyy 'at' h:mm a")}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
-      {/* Status Change Confirmation Dialog */}
+            {/* Modal Footer / Actions */}
+            <div className="flex items-center justify-end gap-3 border-t border-zinc-100 bg-zinc-50 px-8 py-5 dark:border-zinc-800 dark:bg-zinc-950/20">
+               <Button 
+                variant="outline" 
+                onClick={() => setSelectedBooking(null)}
+                className="h-10 rounded-xl font-bold text-xs"
+               >
+                 Close View
+               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Action Dialog */}
       <AlertDialog
         open={statusChangeConfirm?.isOpen || false}
-        onOpenChange={(open) => {
-          if (!open) setStatusChangeConfirm(null);
-        }}
+        onOpenChange={(open) => !open && setStatusChangeConfirm(null)}
       >
-        <AlertDialogContent className="backdrop-blur-md bg-white/95 border border-white/40 shadow-2xl dark:border-white/10 dark:bg-slate-950">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
-              Confirm Status Change
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-600 dark:text-slate-300">
-              Are you sure you want to change the booking status to{" "}
-              <span className="font-medium text-slate-900 dark:text-white">
-                {statusChangeConfirm?.newStatus}
-              </span>
-              ? This action cannot be undone.
-            </AlertDialogDescription>
+        <AlertDialogContent className="max-w-md rounded-[3rem] border-none bg-white p-10 shadow-2xl dark:bg-zinc-950">
+          <AlertDialogHeader className="hidden">
+             <AlertDialogTitle>Confirm Action</AlertDialogTitle>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="bg-white/80 hover:bg-white border-white/50 text-slate-700 dark:bg-slate-900/80 dark:border-white/10 dark:text-slate-200 dark:hover:bg-slate-900">
-              Cancel
+          <div className="flex flex-col items-center text-center">
+            <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-amber-50 text-amber-500 dark:bg-amber-500/10">
+              <AlertTriangle className="h-10 w-10" />
+            </div>
+            <h3 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white uppercase">Sync Status?</h3>
+            <p className="mt-4 text-lg text-zinc-500 font-medium leading-relaxed">
+              Transitioning to <span className="font-black text-zinc-900 dark:text-white uppercase tracking-wider">{statusChangeConfirm?.newStatus}</span>. This protocol notifies the consumer immediately.
+            </p>
+          </div>
+          <AlertDialogFooter className="mt-10 flex gap-4 sm:flex-row flex-col">
+            <AlertDialogCancel className="h-14 flex-1 rounded-2xl border-zinc-100 bg-white text-lg font-bold transition-all hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900">
+              Go Back
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmStatusUpdate}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="h-14 flex-1 rounded-2xl bg-zinc-900 text-lg font-bold text-white transition-all hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
             >
-              Confirm Change
+              Confirm
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -54,7 +54,7 @@ export default async function CreateServicespage() {
   }
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-8">
       <CreateServiceForm specialties={providerProfile.specialties!} />
     </div>
   );

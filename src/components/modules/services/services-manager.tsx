@@ -87,13 +87,13 @@ export const ServicesManager = ({ providerId, specialtyOptions = [] }: { context
 
   return (
     <div className="space-y-6">
-      {/* Filter Row - Glass Effect */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white/40 dark:bg-black/20 backdrop-blur-xl p-4 rounded-3xl border border-white/40 dark:border-white/5 shadow-2xl shadow-green-900/5">
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 h-4 w-4" />
+      {/* Tactical Toolbar */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-black dark:bg-zinc-900 p-6 rounded-[2.5rem] border border-zinc-200 dark:border-zinc-800 shadow-xl text-white">
+        <div className="relative w-full md:w-96 group">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-500 h-4 w-4 group-focus-within:text-emerald-500 transition-colors" />
           <Input 
             placeholder="Search your services..." 
-            className="pl-11 h-12 rounded-2xl border-none bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md shadow-inner focus-visible:ring-green-500"
+            className="pl-12 h-14 rounded-2xl border-none bg-zinc-800/50 dark:bg-black/50 text-white placeholder:text-zinc-500 font-bold focus-visible:ring-1 focus-visible:ring-emerald-500/50"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -101,75 +101,90 @@ export const ServicesManager = ({ providerId, specialtyOptions = [] }: { context
         
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-12 w-full md:w-44 rounded-2xl border-none bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md shadow-inner">
-              <SelectValue placeholder="Status" />
+            <SelectTrigger className="h-14 w-full md:w-48 rounded-2xl border-none bg-zinc-800/50 dark:bg-black/50 text-white font-bold tracking-tight">
+              <SelectValue placeholder="Filter Status" />
             </SelectTrigger>
-            <SelectContent className="rounded-2xl border-none shadow-2xl backdrop-blur-xl">
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active Only</SelectItem>
-              <SelectItem value="inactive">Paused Only</SelectItem>
+            <SelectContent className="rounded-2xl border-zinc-800 bg-black text-white shadow-2xl">
+              <SelectItem value="all" className="font-bold focus:bg-emerald-500 focus:text-black">All Catalog</SelectItem>
+              <SelectItem value="active" className="font-bold focus:bg-emerald-500 focus:text-black">Active Only</SelectItem>
+              <SelectItem value="inactive" className="font-bold focus:bg-emerald-500 focus:text-black">Hidden Only</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="ghost" size="icon" onClick={fetchServices} className="rounded-2xl h-12 w-12 bg-white/60 dark:bg-zinc-900/60 hover:bg-green-100 dark:hover:bg-green-900/30 transition-all">
-            <RefreshCw className={`h-4 w-4 text-green-700 dark:text-green-400 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="ghost" size="icon" onClick={fetchServices} className="rounded-2xl h-14 w-14 bg-zinc-800/50 dark:bg-black/50 hover:bg-emerald-500 hover:text-black transition-all group">
+            <RefreshCw className={`h-5 w-5 text-zinc-400 group-hover:text-black ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </div>
 
-      {/* Table Container - Glass Effect */}
-      <div className="rounded-[2rem] border border-white/40 dark:border-white/5 overflow-hidden bg-white/40 dark:bg-black/20 backdrop-blur-xl shadow-2xl shadow-green-900/5">
+      {/* Catalog Table */}
+      <div className="rounded-[3rem] border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-black shadow-2xl shadow-zinc-900/5">
         <Table>
-          <TableHeader className="bg-white/40 dark:bg-white/5">
-            <TableRow className="border-white/20 dark:border-white/5 hover:bg-transparent">
-              <TableHead className="font-bold text-zinc-900 dark:text-zinc-100 h-14 pl-6 uppercase text-[11px] tracking-widest">Service Info</TableHead>
-              <TableHead className="font-bold uppercase text-[11px] tracking-widest">Price</TableHead>
-              <TableHead className="font-bold uppercase text-[11px] tracking-widest text-center">Performance</TableHead>
-              <TableHead className="font-bold uppercase text-[11px] tracking-widest">Status</TableHead>
-              <TableHead className="text-right pr-6 uppercase text-[11px] tracking-widest">Manage</TableHead>
+          <TableHeader className="bg-zinc-50 dark:bg-zinc-900/50">
+            <TableRow className="border-zinc-100 dark:border-zinc-800 hover:bg-transparent">
+              <TableHead className="font-black text-zinc-400 dark:text-zinc-500 h-16 pl-10 uppercase text-[10px] tracking-[0.2em]">Service Architecture</TableHead>
+              <TableHead className="font-black text-zinc-400 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em]">Financials</TableHead>
+              <TableHead className="font-black text-zinc-400 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em] text-center">Volume</TableHead>
+              <TableHead className="font-black text-zinc-400 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em]">Status</TableHead>
+              <TableHead className="text-right pr-10 font-black text-zinc-400 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={5} className="h-48 text-center"><LoaderPulse /></TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="h-64 text-center"><LoaderPulse /></TableCell></TableRow>
             ) : filteredServices.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="h-48 text-center text-zinc-500 font-medium tracking-tight">No matching services found in your catalog.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="h-64 text-center">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="p-6 rounded-full bg-zinc-50 dark:bg-zinc-900">
+                    <Search className="h-8 w-8 text-zinc-300" />
+                  </div>
+                  <p className="text-zinc-500 font-bold tracking-tight">No services found in this category.</p>
+                </div>
+              </TableCell></TableRow>
             ) : filteredServices.map((service) => (
-              <TableRow key={service.id} className="group border-white/10 dark:border-white/5 hover:bg-white/40 dark:hover:bg-white/5 transition-all">
-                <TableCell className="pl-6">
-                  <div className="py-2">
-                    <Link href={`/services/${service.id}`} className="font-bold text-zinc-900 dark:text-white hover:text-green-600 block transition-colors leading-tight">
+              <TableRow key={service.id} className="group border-zinc-50 dark:border-zinc-900 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-all duration-300">
+                <TableCell className="pl-10 h-24">
+                  <div className="flex flex-col">
+                    <Link href={`/services/${service.id}`} className="font-black text-lg text-zinc-900 dark:text-white hover:text-emerald-500 transition-colors leading-none mb-1">
                       {service.name}
                     </Link>
-                    <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-tighter mt-1 block">{service.specialty?.title || "General"}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className="font-black text-zinc-900 dark:text-white tracking-tighter">৳{service.price}</span>
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-col items-center justify-center gap-1">
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
-                      <TrendingUp size={12} />
-                      <span className="text-[11px] font-bold">{service.totalPaidBookings || 0}</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="rounded-full border-zinc-200 dark:border-zinc-800 bg-transparent text-zinc-400 text-[9px] font-black uppercase tracking-widest px-2 group-hover:border-emerald-500/30 transition-colors">
+                        {service.specialty?.title || "General"}
+                      </Badge>
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">ID: {service.id.slice(0, 8)}</span>
                     </div>
-                    <span className="text-[10px] font-medium text-zinc-400">Total Bookings</span>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge className={`rounded-full px-3 py-0.5 h-6 border-none font-black text-[10px] uppercase shadow-sm ${service.isActive ? 'bg-green-500 text-white' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'}`}>
-                    {service.isActive ? 'Live' : 'Hidden'}
-                  </Badge>
+                  <span className="text-xl font-black text-zinc-900 dark:text-white tracking-tighter">৳{service.price}</span>
                 </TableCell>
-                <TableCell className="text-right pr-6">
-                  <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl bg-white/50 dark:bg-zinc-900/50 hover:bg-green-500 hover:text-white transition-all shadow-sm" onClick={() => handleToggleStatus(service)}>
-                      {service.isActive ? <PauseCircle size={18} /> : <PlayCircle size={18} />}
+                <TableCell>
+                  <div className="flex flex-col items-center justify-center gap-1.5">
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/50 transition-all">
+                      <TrendingUp size={12} className="text-emerald-500" />
+                      <span className="text-xs font-black">{service.totalPaidBookings || 0}</span>
+                    </div>
+                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.1em]">Revenue Unit</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <div className={`h-2 w-2 rounded-full ${service.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${service.isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'}`}>
+                      {service.isActive ? 'Live' : 'Hidden'}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-right pr-10">
+                  <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
+                    <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl bg-zinc-100 dark:bg-zinc-900 hover:bg-emerald-500 hover:text-black transition-all" onClick={() => handleToggleStatus(service)}>
+                      {service.isActive ? <PauseCircle size={20} /> : <PlayCircle size={20} />}
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-black transition-all shadow-sm" onClick={() => { setSelectedService(service); setEditorOpen(true); }}>
-                      <PencilLine size={18} />
+                    <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl bg-zinc-100 dark:bg-zinc-900 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all" onClick={() => { setSelectedService(service); setEditorOpen(true); }}>
+                      <PencilLine size={20} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl bg-white/50 dark:bg-zinc-900/50 hover:bg-red-500 hover:text-white transition-all shadow-sm group/del" onClick={() => setServiceToDelete(service)}>
-                      <Trash2 size={18} className="group-hover/del:animate-pulse" />
+                    <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl bg-zinc-100 dark:bg-zinc-900 hover:bg-red-500 hover:text-white transition-all group/del" onClick={() => setServiceToDelete(service)}>
+                      <Trash2 size={20} />
                     </Button>
                   </div>
                 </TableCell>
@@ -181,18 +196,18 @@ export const ServicesManager = ({ providerId, specialtyOptions = [] }: { context
 
       <ServiceEditorSheet open={editorOpen} onOpenChange={setEditorOpen} service={selectedService} specialtyOptions={specialtyOptions} onUpdated={fetchServices} />
 
-      {/* Modern Alert Dialog */}
+      {/* High-Contrast Alert Dialog */}
       <AlertDialog open={!!serviceToDelete} onOpenChange={(o) => !o && setServiceToDelete(null)}>
-        <AlertDialogContent className="rounded-[2.5rem] border-none bg-white/80 dark:bg-zinc-950/80 backdrop-blur-2xl shadow-2xl p-8">
+        <AlertDialogContent className="rounded-[3rem] border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl p-10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-black tracking-tight">Remove Service?</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-500 font-medium">
-              This action cannot be undone. The service will be permanently removed from the marketplace catalog.
+            <AlertDialogTitle className="text-3xl font-black tracking-tight leading-none text-zinc-900 dark:text-white">Delete <span className="text-red-500">Service?</span></AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-500 font-bold text-lg mt-4">
+              This will permanently purge this offering from your catalog. This action is irreversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-6 gap-3">
-            <AlertDialogCancel className="rounded-2xl border-none bg-zinc-100 dark:bg-zinc-900 h-12 font-bold px-6">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="rounded-2xl bg-red-500 hover:bg-red-600 border-none h-12 font-bold px-6 shadow-lg shadow-red-500/20">Delete Service</AlertDialogAction>
+          <AlertDialogFooter className="mt-8 gap-4">
+            <AlertDialogCancel className="rounded-2xl border-none bg-zinc-100 dark:bg-zinc-900 h-14 font-black px-8">ABORT</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="rounded-2xl bg-red-500 hover:bg-red-600 border-none h-14 font-black px-8 shadow-xl shadow-red-500/20">CONFIRM PURGE</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

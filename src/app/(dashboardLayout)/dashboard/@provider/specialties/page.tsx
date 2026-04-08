@@ -184,186 +184,200 @@ export default function ProviderSpecialtiesPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-white via-emerald-50/30 to-white dark:from-black dark:via-zinc-950 dark:to-black py-12 px-4 font-sans text-zinc-900 dark:text-zinc-100">
-      <div className="max-w-6xl mx-auto space-y-12">
-        
-        {/* Header Section */}
-        <section className="relative overflow-hidden rounded-[40px] bg-white border border-emerald-100 dark:bg-zinc-900/50 dark:border-white/5 p-8 lg:p-12 shadow-sm">
-          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-            <Sparkles className="w-32 h-32 text-emerald-500" />
-          </div>
-          <div className="relative z-10 flex flex-col lg:flex-row justify-between gap-8">
-            <div className="max-w-2xl space-y-4">
-              <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-none px-4 py-1 rounded-full uppercase tracking-widest text-[10px] font-black">
+    <main className="mx-auto max-w-7xl space-y-10 px-4 py-10 sm:px-6 lg:px-8">
+      {/* Header Section */}
+      <section className="relative overflow-hidden rounded-[3rem] border border-zinc-100 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-950 sm:p-12">
+        <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl space-y-6">
+            <div className="inline-flex items-center gap-2.5 rounded-full border border-zinc-100 bg-zinc-50/50 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-900/50">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500">
+                <Sparkles className="h-3 w-3 text-white" />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
                 Provider Studio
-              </Badge>
-              <h1 className="text-4xl lg:text-6xl font-black tracking-tighter">
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              <h1 className="text-4xl font-black tracking-tight text-zinc-900 dark:text-white sm:text-5xl">
                 Specialty <span className="text-emerald-500">Manager</span>
               </h1>
-              <p className="text-lg text-zinc-500 dark:text-zinc-400 font-medium">
+              <p className="text-lg text-zinc-500 dark:text-zinc-400">
                 Customize your professional profile by selecting the expertise that defines your brand. 
               </p>
             </div>
-            
-            <div className="flex flex-wrap gap-4">
-              {stats.map((stat, i) => (
-                <div key={i} className="flex flex-col items-center justify-center w-28 h-28 rounded-[2rem] bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/10 transition-transform hover:scale-105">
-                  <stat.icon className="w-5 h-5 text-emerald-600 mb-2" />
-                  <span className="text-2xl font-black">{stat.value}</span>
-                  <span className="text-[10px] uppercase font-bold tracking-wider opacity-50">{stat.label}</span>
-                </div>
-              ))}
-            </div>
           </div>
-        </section>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <div className="rounded-[32px] bg-white dark:bg-zinc-900/40 border border-zinc-100 dark:border-white/5 p-8">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h2 className="text-2xl font-black tracking-tight">Catalog Selection</h2>
-                  <p className="text-sm text-zinc-500">Choose multiple to bulk update</p>
+          <div className="grid w-full grid-cols-2 gap-4 sm:w-auto md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+            {stats.map((stat, i) => (
+              <div key={i} className="group rounded-[2rem] border border-zinc-100 bg-white p-6 transition-all hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5 dark:border-zinc-800 dark:bg-zinc-950">
+                <div className="flex flex-col items-center justify-center text-center">
+                  <stat.icon className="mb-2 h-5 w-5 text-emerald-600" />
+                  <span className="text-3xl font-black text-zinc-900 dark:text-white">{stat.value}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">{stat.label}</span>
                 </div>
-                {selected.length > 0 && (
-                  <Button 
-                    onClick={handleAdd} 
-                    disabled={adding}
-                    className="rounded-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 font-bold shadow-lg shadow-emerald-500/20"
-                  >
-                    {adding ? <Loader2 className="animate-spin mr-2" /> : <PlusCircle className="w-4 h-4 mr-2" />}
-                    Publish {selected.length} Items
-                  </Button>
-                )}
               </div>
+            ))}
+          </div>
+        </div>
 
-              {loading ? (
-                <div className="flex justify-center py-20"><Loader2 className="animate-spin text-emerald-500 w-10 h-10" /></div>
-              ) : availableSpecialties.length === 0 ? (
-                <div className="text-center py-12 rounded-3xl border-2 border-dashed border-zinc-100 dark:border-zinc-800">
-                  <p className="text-zinc-400 font-medium">All specialties are currently active.</p>
-                </div>
-              ) : (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {availableSpecialties.map((s) => (
-                    <div 
-                      key={s.id}
-                      onClick={() => handleSelect(s.id)}
-                      className={`group cursor-pointer relative p-5 rounded-3xl border-2 transition-all ${
-                        selected.includes(s.id) 
-                        ? "border-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10" 
-                        : "border-zinc-50 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/20 hover:border-emerald-200"
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <Checkbox checked={selected.includes(s.id)} onCheckedChange={() => handleSelect(s.id)} className="mt-1 rounded-full border-zinc-300 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600" />
-                        <div>
-                          <p className="font-bold">{s.title}</p>
-                          <p className="text-xs text-zinc-500 line-clamp-2 mt-1 leading-relaxed">{s.description || "Expert level specialty"}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-emerald-500/5 blur-3xl dark:bg-emerald-500/10" />
+        <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-zinc-500/5 blur-3xl" />
+      </section>
+
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="space-y-8 lg:col-span-2">
+          <div className="rounded-[2.5rem] border border-zinc-100 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white">Catalog Selection</h2>
+                <p className="text-sm font-bold text-zinc-500">Choose multiple to bulk update</p>
+              </div>
+              {selected.length > 0 && (
+                <Button 
+                  onClick={handleAdd} 
+                  disabled={adding}
+                  className="h-12 rounded-2xl bg-emerald-500 px-6 font-black text-white shadow-xl shadow-emerald-500/20 hover:bg-emerald-600"
+                >
+                  {adding ? <Loader2 className="mr-2 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
+                  Publish {selected.length} Items
+                </Button>
               )}
             </div>
+
+            {loading ? (
+              <div className="flex justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-emerald-500" /></div>
+            ) : availableSpecialties.length === 0 ? (
+              <div className="rounded-[2rem] border-2 border-dashed border-zinc-100 py-12 text-center dark:border-zinc-800">
+                <p className="font-bold text-zinc-400">All specialties are currently active.</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {availableSpecialties.map((s) => (
+                  <div 
+                    key={s.id}
+                    onClick={() => handleSelect(s.id)}
+                    className={`group relative cursor-pointer rounded-[2rem] border-2 p-5 transition-all ${
+                      selected.includes(s.id) 
+                      ? "border-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10" 
+                      : "border-zinc-50 bg-zinc-50/50 hover:border-emerald-200 dark:border-zinc-900 dark:bg-zinc-900/20"
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <Checkbox 
+                        checked={selected.includes(s.id)} 
+                        onCheckedChange={() => handleSelect(s.id)} 
+                        className="mt-1 h-5 w-5 rounded-lg border-zinc-300 data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500" 
+                      />
+                      <div>
+                        <p className="font-black text-zinc-900 dark:text-white">{s.title}</p>
+                        <p className="mt-1 text-xs font-medium leading-relaxed text-zinc-500 line-clamp-2">{s.description || "Expert level specialty"}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="rounded-[2.5rem] bg-zinc-900 p-8 text-white shadow-2xl dark:bg-zinc-950">
+            <h3 className="text-xl font-black uppercase tracking-tight">Quick Add</h3>
+            <p className="mb-6 text-sm font-bold text-zinc-400 uppercase tracking-widest">Instantly add a single specialty</p>
+            <form onSubmit={handleSingleAdd} className="space-y-4">
+              <Select value={singleSelect} onValueChange={setSingleSelect} disabled={adding}>
+                <SelectTrigger className="h-14 rounded-2xl border-white/10 bg-white/5 text-white">
+                  <SelectValue placeholder="Browse list..." />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-zinc-800 bg-zinc-950 text-white">
+                  {availableSpecialties.map(s => <SelectItem key={s.id} value={s.id} className="rounded-xl focus:bg-emerald-500 focus:text-white">{s.title}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Button type="submit" disabled={!singleSelect || adding} className="h-14 w-full rounded-2xl bg-white font-black text-zinc-900 hover:bg-zinc-100">
+                {adding ? <Loader2 className="animate-spin text-emerald-500" /> : "Confirm Add"}
+              </Button>
+            </form>
           </div>
 
-          <div className="space-y-6">
-            <div className="rounded-[32px] bg-zinc-950 dark:bg-emerald-600 p-8 text-white shadow-xl">
-              <h3 className="text-xl font-black mb-2">Quick Add</h3>
-              <p className="text-sm opacity-80 mb-6">Instantly add a single specialty</p>
-              <form onSubmit={handleSingleAdd} className="space-y-4">
-                <Select value={singleSelect} onValueChange={setSingleSelect} disabled={adding}>
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white rounded-2xl h-12">
-                    <SelectValue placeholder="Browse list..." />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-none shadow-2xl">
-                    {availableSpecialties.map(s => <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Button type="submit" disabled={!singleSelect || adding} className="w-full h-12 rounded-2xl bg-white text-emerald-600 hover:bg-emerald-50 dark:text-emerald-700 font-black">
-                  {adding ? <Loader2 className="animate-spin" /> : "Confirm Add"}
-                </Button>
-              </form>
-            </div>
-
-            <div className="rounded-[32px] bg-white dark:bg-zinc-900/40 border border-zinc-100 dark:border-white/5 p-8">
-              <h4 className="text-xs font-black uppercase tracking-widest text-emerald-600 mb-6">Profile Impact</h4>
-              <div className="space-y-6 text-zinc-600 dark:text-zinc-400">
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 text-emerald-600 font-bold">1</div>
-                  <p className="text-sm font-medium">Specialties help customers find you in search results.</p>
-                </div>
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 text-emerald-600 font-bold">2</div>
-                  <p className="text-sm font-medium">Verified badges increase trust by up to 40%.</p>
-                </div>
+          <div className="rounded-[2.5rem] border border-zinc-100 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-950">
+            <h4 className="mb-6 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Profile Impact</h4>
+            <div className="space-y-6">
+              <div className="flex gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 font-black text-emerald-600">1</div>
+                <p className="text-sm font-bold text-zinc-600 dark:text-zinc-400">Specialties help customers find you in search results.</p>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 font-black text-emerald-600">2</div>
+                <p className="text-sm font-bold text-zinc-600 dark:text-zinc-400">Verified badges increase trust by up to 40%.</p>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Active Table Section */}
-        <section className="rounded-[40px] bg-white dark:bg-zinc-900/40 border border-zinc-100 dark:border-white/5 overflow-hidden shadow-sm">
-          <div className="p-8 border-b border-zinc-50 dark:border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div>
-              <h2 className="text-2xl font-black tracking-tight">Active Specialties</h2>
-              <p className="text-sm text-zinc-500">Currently visible on your public profile</p>
-            </div>
-            <Badge variant="outline" className="rounded-full px-4 py-1 font-bold border-zinc-200">{mySpecialties.length} Total Items</Badge>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-zinc-50/50 dark:bg-black/20">
-                <TableRow className="hover:bg-transparent border-none">
-                  <TableHead className="w-[300px] font-bold text-zinc-400 py-6 pl-8 uppercase text-[10px] tracking-widest">Specialty</TableHead>
-                  <TableHead className="font-bold text-zinc-400 py-6 uppercase text-[10px] tracking-widest">Details</TableHead>
-                  <TableHead className="text-right font-bold text-zinc-400 py-6 pr-8 uppercase text-[10px] tracking-widest">Control</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mySpecialties.map((s) => (
-                  <TableRow key={s.id} className="group border-b border-zinc-50 dark:border-white/5 hover:bg-emerald-50/30 dark:hover:bg-emerald-500/5 transition-colors">
-                    <TableCell className="py-6 pl-8">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl overflow-hidden border border-zinc-100 dark:border-zinc-800 shadow-sm transition-transform group-hover:scale-110 bg-white dark:bg-zinc-800">
-                          <SpecialtyIconBadge icon={s.icon} />
-                        </div>
-                        <div>
-                          <p className="font-black">{s.title}</p>
-                          <Badge className="h-4 text-[8px] bg-emerald-500/10 text-emerald-600 border-none">LIVE</Badge>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-6">
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-md line-clamp-1">{s.description || "A signature professional service specialty."}</p>
-                    </TableCell>
-                    <TableCell className="py-6 pr-8 text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemove(s.id)}
-                        disabled={removingId === s.id}
-                        className="rounded-xl text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
-                      >
-                        {removingId === s.id ? <Loader2 className="animate-spin w-4 h-4" /> : <Trash2 size={18} />}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {mySpecialties.length === 0 && !loading && (
-              <div className="py-20 text-center">
-                <LayoutGrid className="w-12 h-12 text-zinc-200 dark:text-zinc-800 mx-auto mb-4" />
-                <p className="text-zinc-400 font-medium">No specialties added yet. Start curating above!</p>
-              </div>
-            )}
-          </div>
-        </section>
       </div>
+
+      {/* Active Table Section */}
+      <section className="overflow-hidden rounded-[3rem] border border-zinc-100 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="flex flex-col items-center gap-4 border-b border-zinc-50 p-8 dark:border-zinc-900 sm:flex-row sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white">Active Specialties</h2>
+            <p className="text-sm font-bold text-zinc-500">Currently visible on your public profile</p>
+          </div>
+          <Badge variant="outline" className="rounded-full border-zinc-200 px-4 py-1 font-black text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">{mySpecialties.length} Total Items</Badge>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-zinc-50/50 dark:bg-zinc-900/50">
+              <TableRow className="border-none hover:bg-transparent">
+                <TableHead className="py-6 pl-8 text-[10px] font-black uppercase tracking-widest text-zinc-400 w-[300px]">Specialty</TableHead>
+                <TableHead className="py-6 text-[10px] font-black uppercase tracking-widest text-zinc-400">Details</TableHead>
+                <TableHead className="py-6 pr-8 text-right text-[10px] font-black uppercase tracking-widest text-zinc-400">Control</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {mySpecialties.map((s) => (
+                <TableRow key={s.id} className="group border-b border-zinc-50 transition-colors hover:bg-emerald-50/20 dark:border-zinc-900 dark:hover:bg-emerald-500/5">
+                  <TableCell className="py-6 pl-8">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-zinc-100 bg-white transition-transform group-hover:scale-110 dark:border-zinc-800 dark:bg-zinc-800">
+                        <SpecialtyIconBadge icon={s.icon} />
+                      </div>
+                      <div>
+                        <p className="font-black text-zinc-900 dark:text-white">{s.title}</p>
+                        <Badge className="h-4 border-none bg-emerald-500/10 text-[8px] font-black text-emerald-600">LIVE</Badge>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <p className="max-w-md text-sm font-medium text-zinc-500 line-clamp-1 dark:text-zinc-400">{s.description || "A signature professional service specialty."}</p>
+                  </TableCell>
+                  <TableCell className="py-6 pr-8 text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemove(s.id)}
+                      disabled={removingId === s.id}
+                      className="h-10 w-10 rounded-xl text-zinc-400 transition-all hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10"
+                    >
+                      {removingId === s.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 size={18} />}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {mySpecialties.length === 0 && !loading && (
+            <div className="py-24 text-center">
+              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-zinc-50 dark:bg-zinc-900">
+                <LayoutGrid className="h-10 w-10 text-zinc-300" />
+              </div>
+              <p className="font-bold text-zinc-400">No specialties added yet. Start curating above!</p>
+            </div>
+          )}
+        </div>
+      </section>
     </main>
   );
+
 }

@@ -120,28 +120,27 @@ export default function ProviderEarningsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
-          {/* Header Skeleton */}
-          <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 animate-pulse">
-            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-2"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-96"></div>
-          </div>
+      <div className="max-w-7xl mx-auto space-y-8 mt-4">
+        {/* Header Skeleton */}
+        <div className="bg-black dark:bg-zinc-900 rounded-[3rem] p-8 md:p-12 animate-pulse">
+          <div className="h-10 bg-zinc-800 rounded-full w-64 mb-4"></div>
+          <div className="h-4 bg-zinc-800 rounded-full w-96"></div>
+        </div>
 
-          {/* Stats Cards Skeleton */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
-                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
-                  </div>
-                  <div className="h-12 w-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-                </div>
+        {/* Stats Cards Skeleton */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white dark:bg-black rounded-[2rem] border border-zinc-200 dark:border-zinc-800 p-6 animate-pulse">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-900 rounded-2xl"></div>
+                <div className="h-4 bg-zinc-100 dark:bg-zinc-900 rounded-full w-12"></div>
               </div>
-            ))}
-          </div>
+              <div className="space-y-2">
+                <div className="h-4 bg-zinc-100 dark:bg-zinc-900 rounded-full w-20"></div>
+                <div className="h-8 bg-zinc-100 dark:bg-zinc-900 rounded-full w-32"></div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -158,225 +157,168 @@ export default function ProviderEarningsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="space-y-8">
-          {/* Header */}
-          <div className="bg-white dark:bg-black rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  Earnings & Payouts
-                </h1>
-                <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Track your income, bookings, and financial performance
-                </p>
-              </div>
-              <div className="hidden md:flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                <BarChart3 className="h-5 w-5" />
-                <span>Financial Dashboard</span>
-              </div>
+    <div className="max-w-7xl mx-auto space-y-8 mt-4 pb-12">
+      {/* Tactical Header */}
+      <div className="group relative overflow-hidden bg-black dark:bg-zinc-900 rounded-[3rem] p-8 md:p-12 text-white">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold tracking-widest uppercase">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              Financial Performance
             </div>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-none">
+              Earnings &amp; <span className="text-emerald-500">Payouts</span>
+            </h1>
+            <p className="max-w-xl text-zinc-400 font-medium text-lg leading-relaxed">
+              Track your income, monitor growth, and manage your financial dashboard with precision.
+            </p>
           </div>
-
-          {/* Stats Cards */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-green-700 dark:text-green-300 mb-1">
-                      Total Earnings
-                    </p>
-                    <p className="text-3xl font-bold text-green-800 dark:text-green-200">
-                      ৳{stats.totalEarnings.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                      All time income
-                    </p>
-                  </div>
-                  <div className="bg-green-500 rounded-lg p-3">
-                    <DollarSign className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1">
-                      This Month
-                    </p>
-                    <p className="text-3xl font-bold text-blue-800 dark:text-blue-200">
-                      ৳{stats.monthlyEarnings.toLocaleString()}
-                    </p>
-                    <div className="flex items-center mt-1">
-                      {stats.growthPercentage >= 0 ? (
-                        <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
-                      ) : (
-                        <ArrowDownRight className="h-3 w-3 text-red-500 mr-1" />
-                      )}
-                      <span className={`text-xs ${stats.growthPercentage >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                        {stats.growthPercentage >= 0 ? '+' : ''}{stats.growthPercentage.toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                  <div className="bg-blue-500 rounded-lg p-3">
-                    <TrendingUp className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-1">
-                      Wallet Balance
-                    </p>
-                    <p className="text-3xl font-bold text-purple-800 dark:text-purple-200">
-                      ৳{stats.walletBalance.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-                      Available for withdrawal
-                    </p>
-                  </div>
-                  <div className="bg-purple-500 rounded-lg p-3">
-                    <Wallet className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-800 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-orange-700 dark:text-orange-300 mb-1">
-                      Average Rating
-                    </p>
-                    <p className="text-3xl font-bold text-orange-800 dark:text-orange-200">
-                      {stats.averageRating.toFixed(1)}
-                    </p>
-                    <div className="flex items-center mt-1">
-                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
-                      <span className="text-xs text-orange-600 dark:text-orange-400">Excellent</span>
-                    </div>
-                  </div>
-                  <div className="bg-orange-500 rounded-lg p-3">
-                    <Star className="h-6 w-6 text-white fill-current" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" className="bg-white/5 border-white/10 hover:bg-emerald-500 hover:text-white rounded-full px-8 h-12 font-bold transition-all duration-300">
+              Download Report
+            </Button>
+            <Button className="bg-emerald-500 hover:bg-emerald-600 text-black rounded-full px-8 h-12 font-black shadow-lg shadow-emerald-500/20 transition-all duration-300">
+              Withdraw Funds
+            </Button>
           </div>
+        </div>
+      </div>
 
-          {/* Bookings Overview */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Booking Stats */}
-            <Card className="bg-white dark:bg-black shadow-sm border border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
-                  <Calendar className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
-                  Booking Overview
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Completed</span>
-                  </div>
-                  <span className="text-lg font-bold text-green-700 dark:text-green-300">
-                    {stats.completedBookings}
-                  </span>
+      {/* Stats Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: "Total Earnings", value: `৳${stats.totalEarnings.toLocaleString()}`, icon: DollarSign, trend: "All time income", accent: "emerald" },
+          { label: "This Month", value: `৳${stats.monthlyEarnings.toLocaleString()}`, icon: TrendingUp, trend: `${stats.growthPercentage >= 0 ? "+" : ""}${stats.growthPercentage.toFixed(1)}% vs last month`, accent: "blue" },
+          { label: "Wallet Balance", value: `৳${stats.walletBalance.toLocaleString()}`, icon: Wallet, trend: "Available for withdrawal", accent: "purple" },
+          { label: "Average Rating", value: stats.averageRating.toFixed(1), icon: Star, trend: "Based on all reviews", accent: "orange" },
+        ].map((item, i) => (
+          <Card key={i} className="group overflow-hidden bg-white dark:bg-black rounded-[2.5rem] border border-zinc-200 dark:border-zinc-800 hover:border-emerald-500/30 transition-all duration-500">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-between mb-6">
+                <div className={`p-4 rounded-2xl bg-${item.accent === "emerald" ? "emerald" : "zinc"}-100 dark:bg-${item.accent === "emerald" ? "emerald" : "zinc"}-900/50 group-hover:scale-110 transition-transform duration-500`}>
+                  <item.icon className={`h-6 w-6 text-${item.accent === "emerald" ? "emerald-500" : "zinc-400"}`} />
                 </div>
-
-                <div className="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Pending</span>
-                  </div>
-                  <span className="text-lg font-bold text-yellow-700 dark:text-yellow-300">
-                    {stats.pendingBookings}
-                  </span>
+                <Badge variant="outline" className="rounded-full border-zinc-200 dark:border-zinc-800 font-bold text-[10px] tracking-widest uppercase py-1">
+                  Active
+                </Badge>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-zinc-500 dark:text-zinc-400 tracking-wider uppercase">
+                  {item.label}
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <h3 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white">
+                    {item.value}
+                  </h3>
                 </div>
-
-                <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Bookings</span>
-                  </div>
-                  <span className="text-lg font-bold text-blue-700 dark:text-blue-300">
-                    {stats.totalBookings}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Earnings */}
-            <Card className="bg-white dark:bg-black shadow-sm border border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
-                  <CreditCard className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
-                  Recent Earnings
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {stats.recentBookings.map((booking) => (
-                    <div key={booking.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {booking.clientName}
-                        </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                          {booking.serviceName}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500">
-                          {format(booking.date, "MMM dd, yyyy")}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold text-green-600 dark:text-green-400">
-                          ৳{booking.amount.toLocaleString()}
-                        </p>
-                        <Badge
-                          variant={booking.status === "COMPLETED" ? "default" : "secondary"}
-                          className={`text-xs mt-1 ${
-                            booking.status === "COMPLETED"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                              : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                          }`}
-                        >
-                          {booking.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Action Buttons */}
-          <Card className="bg-white dark:bg-black shadow-sm border border-gray-200 dark:border-gray-700">
-            <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button variant="outline" className="border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 text-green-700 dark:text-green-300 px-6 py-2">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  View Detailed Report
-                </Button>
-                <Button variant="outline" className="border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 text-green-700 dark:text-green-300 px-6 py-2">
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Payment History
-                </Button>
+                <p className="text-xs font-medium text-zinc-400 mt-2 flex items-center gap-1">
+                  {item.label === "This Month" && (
+                    stats.growthPercentage >= 0 ? 
+                    <ArrowUpRight className="h-3 w-3 text-emerald-500" /> : 
+                    <ArrowDownRight className="h-3 w-3 text-red-500" />
+                  )}
+                  {item.trend}
+                </p>
               </div>
             </CardContent>
           </Card>
-        </div>
+        ))}
       </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Detailed Metrics */}
+        <Card className="lg:col-span-1 bg-white dark:bg-black rounded-[3rem] border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+          <CardHeader className="p-8 pb-0">
+            <CardTitle className="text-xl font-black tracking-tight flex items-center gap-3">
+              <div className="h-2 w-2 rounded-full bg-emerald-500" />
+              Booking Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 space-y-4">
+            {[
+              { label: "Completed", count: stats.completedBookings, color: "emerald", icon: CheckCircle },
+              { label: "Pending", count: stats.pendingBookings, color: "zinc", icon: Clock },
+              { label: "Total Volume", count: stats.totalBookings, color: "zinc", icon: Users },
+            ].map((metric, i) => (
+              <div key={i} className="flex items-center justify-between p-5 rounded-3xl border border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
+                <div className="flex items-center gap-4">
+                  <div className={`p-2 rounded-xl bg-${metric.color}-500/10`}>
+                    <metric.icon className={`h-5 w-5 text-${metric.color === "emerald" ? "emerald-500" : "zinc-400"}`} />
+                  </div>
+                  <span className="font-bold text-zinc-700 dark:text-zinc-300">{metric.label}</span>
+                </div>
+                <span className="text-xl font-black text-zinc-900 dark:text-white">{metric.count}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Recent Transactions */}
+        <Card className="lg:col-span-2 bg-white dark:bg-black rounded-[3rem] border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+          <CardHeader className="p-8 flex flex-row items-center justify-between">
+            <CardTitle className="text-xl font-black tracking-tight flex items-center gap-3">
+              <div className="h-2 w-2 rounded-full bg-emerald-500" />
+              Recent Earnings
+            </CardTitle>
+            <Button variant="ghost" className="text-zinc-500 hover:text-white hover:bg-black rounded-full text-xs font-bold uppercase tracking-widest px-4">
+              View All
+            </Button>
+          </CardHeader>
+          <CardContent className="px-8 pb-8">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-separate border-spacing-y-3">
+                <thead>
+                  <tr className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                    <th className="px-6 py-2">Transaction</th>
+                    <th className="px-6 py-2">Amount</th>
+                    <th className="px-6 py-2">Status</th>
+                    <th className="px-6 py-2 text-right">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.recentBookings.length > 0 ? (
+                    stats.recentBookings.map((booking) => (
+                      <tr key={booking.id} className="group bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors duration-200">
+                        <td className="px-6 py-4 first:rounded-l-3xl">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-zinc-900 dark:text-white">{booking.serviceName}</span>
+                            <span className="text-xs font-medium text-zinc-500">{booking.clientName}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="font-black text-zinc-900 dark:text-white">৳{booking.amount}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <Badge className="bg-emerald-500/10 text-emerald-500 border-none rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest">
+                            {booking.status}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 last:rounded-r-3xl text-right">
+                          <span className="text-xs font-bold text-zinc-500">{format(booking.date, "MMM dd, yyyy")}</span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="py-20 text-center">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="p-4 rounded-full bg-zinc-100 dark:bg-zinc-900">
+                            <CreditCard className="h-6 w-6 text-zinc-400" />
+                          </div>
+                          <p className="text-sm font-bold text-zinc-500">No recent transactions found</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

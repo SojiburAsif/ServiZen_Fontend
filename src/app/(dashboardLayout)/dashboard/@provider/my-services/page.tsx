@@ -35,27 +35,34 @@ export default async function ProviderMyServicesPage() {
   const specialtyCount = specialtyOptions.length;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 p-6 md:p-10 font-sans">
+    <div className="max-w-7xl mx-auto space-y-12 p-6 md:p-12 font-sans bg-white dark:bg-zinc-950 min-h-screen">
       
-      {/* --- Minimal Modern Header --- */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <Badge className="bg-emerald-500/10 text-emerald-600 border-none px-3 py-1 text-[10px] uppercase tracking-widest font-bold">
-            Provider Workspace
-          </Badge>
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">My Services</h1>
-          <p className="text-zinc-500 dark:text-zinc-400 max-w-xl text-base">
-            Manage your service catalog, adjust pricing, and track your performance from one dashboard.
-          </p>
+      {/* --- Refined Minimalist Header --- */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-zinc-100 dark:border-zinc-800 pb-10">
+        <div className="space-y-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-100 bg-zinc-50/50 px-3 py-1 dark:border-zinc-800 dark:bg-zinc-900/50">
+            <Sparkles className="h-3 w-3 text-emerald-500" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+              Provider Workspace
+            </span>
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white">
+              My Services
+            </h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-xl font-medium">
+              Manage your service catalog, adjust pricing, and track your performance from one dashboard.
+            </p>
+          </div>
         </div>
         
         <div className="flex items-center gap-3">
-          <Button asChild variant="outline" className="rounded-xl h-12 border-zinc-200 dark:border-zinc-800">
+          <Button asChild variant="outline" className="rounded-2xl h-12 border-zinc-200 px-5 text-xs font-bold transition-all hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900">
             <Link href="/dashboard/manage-services" className="gap-2">
-              Advanced Manager <ArrowUpRight className="h-4 w-4" />
+              Advanced Manager <ArrowUpRight className="h-3 w-3" />
             </Link>
           </Button>
-          <Button asChild className="rounded-xl h-12 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20">
+          <Button asChild className="rounded-2xl h-12 bg-zinc-900 px-6 text-xs font-black text-white shadow-2xl transition-all hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200">
             <Link href="/dashboard/create-service" className="gap-2">
               <Plus className="h-4 w-4" /> New Service
             </Link>
@@ -63,48 +70,66 @@ export default async function ProviderMyServicesPage() {
         </div>
       </header>
 
-      {/* --- Snapshot Stats --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="group p-6 rounded-[24px] bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 flex items-center gap-5 transition-all hover:shadow-md">
-          <div className="h-14 w-14 rounded-2xl bg-white dark:bg-zinc-800 flex items-center justify-center shadow-sm text-emerald-600">
-            <Layers size={24} />
+      {/* --- High-Contrast Stat Cards --- */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="group p-6 rounded-[2rem] bg-white border border-zinc-100 flex items-center justify-between transition-all hover:border-zinc-900 dark:bg-zinc-900 dark:border-zinc-800 dark:hover:border-white">
+          <div className="flex items-center gap-5">
+            <div className="h-12 w-12 rounded-xl bg-zinc-900 text-white flex items-center justify-center shadow-lg dark:bg-white dark:text-black">
+              <Layers size={20} />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Active Categories</p>
+              <h3 className="text-lg font-black text-zinc-900 dark:text-white">{specialtyCount} Specialties</h3>
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Linked Specialties</p>
-            <h3 className="text-2xl font-bold">{specialtyCount} Categories</h3>
-          </div>
+          <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
         </div>
 
-        <div className="group p-6 rounded-[24px] bg-zinc-900 dark:bg-emerald-950 border border-zinc-800 flex items-center gap-5 transition-all hover:shadow-md">
-          <div className="h-14 w-14 rounded-2xl bg-white/10 flex items-center justify-center text-emerald-400">
-            <Wallet size={24} />
+        <div className="group p-6 rounded-[2rem] bg-zinc-900 border border-zinc-800 flex items-center gap-5 transition-all hover:shadow-xl dark:bg-white dark:border-zinc-100">
+          <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center text-white dark:bg-zinc-900 dark:text-white">
+            <Wallet size={20} />
           </div>
-          <div>
-            <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Total Revenue</p>
-            <h3 className="text-2xl font-bold text-white">
+          <div className="space-y-0.5">
+            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Total Revenue</p>
+            <h3 className="text-lg font-black text-white dark:text-zinc-900">
               {formatCurrency(providerProfile.totalEarned ?? providerProfile.walletBalance ?? 0)}
             </h3>
           </div>
         </div>
       </div>
 
-      {/* --- Categories Badge Section --- */}
-      <div className="py-2 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
-        <span className="text-sm font-semibold text-zinc-400">Categories:</span>
-        <div className="flex flex-wrap gap-2">
+      {/* --- Structured Categories Bar --- */}
+      <div className="p-2 flex flex-col gap-4">
+        <h5 className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.3em] text-zinc-400">
+           <div className="h-1 w-8 bg-emerald-500 rounded-full" />
+           Industry Focus
+        </h5>
+        <div className="flex flex-wrap gap-3">
           {specialtyOptions.map((s) => (
-            <Badge key={s.id} variant="secondary" className="rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 font-medium px-4">
+            <Badge key={s.id} variant="secondary" className="rounded-xl bg-zinc-50 border border-zinc-100 text-zinc-900 font-bold px-5 py-2 text-xs transition-all hover:bg-zinc-900 hover:text-white dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-100 dark:hover:bg-white dark:hover:text-black">
               {s.title}
             </Badge>
           ))}
-          {specialtyCount === 0 && <span className="text-sm text-zinc-400">No specialties linked.</span>}
+          {specialtyCount === 0 && (
+            <div className="flex items-center gap-2 text-sm font-medium text-zinc-400 italic">
+              <Layers className="h-4 w-4" />
+              Initial setup required: No specialties linked.
+            </div>
+          )}
         </div>
       </div>
 
-      {/* --- Main Manager Component --- */}
-      <div className="pt-4">
-        <ServicesManager context="provider" providerId={providerProfile.id} specialtyOptions={specialtyOptions} />
+      {/* --- Management Matrix --- */}
+      <div className="pt-8 border-t border-zinc-50 dark:border-zinc-900">
+        <div className="mb-8">
+           <h4 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white">Service Matrix</h4>
+           <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mt-1">Direct control over deployment state and pricing modules.</p>
+        </div>
+        <div className="bg-zinc-50/50 rounded-[3rem] p-4 dark:bg-zinc-900/30">
+          <ServicesManager context="provider" providerId={providerProfile.id} specialtyOptions={specialtyOptions} />
+        </div>
       </div>
     </div>
   );
 }
+   
