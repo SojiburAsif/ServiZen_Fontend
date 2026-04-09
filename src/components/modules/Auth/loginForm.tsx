@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { publicEnv } from "@/lib/env";
-import { clearGoogleOAuthLock, startGoogleOAuth } from "@/lib/googleOAuth";
 import { clearPendingAuth, setPendingAuth } from "@/lib/pendingAuth";
 import { loginAction } from "@/services/auth.service";
 import { ILoginPayload } from "@/types/auth.typs";
@@ -40,10 +39,6 @@ const LoginForm = () => {
   const oauthError = searchParams.get("error") === "state_mismatch"
     ? "Session mismatch. Please try again."
     : null;
-
-  useEffect(() => {
-    clearGoogleOAuthLock();
-  }, []);
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (payload: ILoginPayload) => loginAction(payload),
@@ -87,12 +82,10 @@ const LoginForm = () => {
 
   const handleGoogleLogin = () => {
     setIsGooglePending(true);
-    const result = startGoogleOAuth({
-      apiBaseUrl: publicEnv.NEXT_PUBLIC_API_BASE_URL,
-      callbackPath: "/dashboard",
-      appOrigin: publicEnv.NEXT_PUBLIC_APP_ORIGIN,
-    });
-    if (!result.started) setIsGooglePending(false);
+    const callbackPath = "/dashboard";
+    const callbackURL = new URL(callbackPath, publicEnv.NEXT_PUBLIC_APP_ORIGIN || window.location.origin).toString();
+    const endpoint = `${publicEnv.NEXT_PUBLIC_API_BASE_URL.replace(/\/+$/, "")}/auth/login/google?callbackURL=${encodeURIComponent(callbackURL)}`;
+    window.location.assign(endpoint);
   };
 
   return (

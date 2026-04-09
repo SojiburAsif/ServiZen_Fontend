@@ -33,7 +33,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { env, publicEnv } from "@/lib/env";
-import { clearGoogleOAuthLock, startGoogleOAuth } from "@/lib/googleOAuth";
 import { clearPendingAuth, setPendingAuth } from "@/lib/pendingAuth";
 import { registerAction, loginAction } from "@/services/auth.service";
 import { IRegisterPayload } from "@/types/auth.typs";
@@ -117,10 +116,6 @@ const RegisterForm = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [isGooglePending, setIsGooglePending] = useState(false);
-
-  useEffect(() => {
-    clearGoogleOAuthLock();
-  }, []);
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (payload: IRegisterPayload) => registerAction(payload),
@@ -517,21 +512,10 @@ const RegisterForm = () => {
                 setServerError(null);
                 setIsGooglePending(true);
 
-                const result = startGoogleOAuth({
-                  apiBaseUrl: publicEnv.NEXT_PUBLIC_API_BASE_URL,
-                  callbackPath: "/dashboard",
-                  appOrigin: publicEnv.NEXT_PUBLIC_APP_ORIGIN,
-                });
-
-                if (!result.started) {
-                  setIsGooglePending(false);
-                  if (result.reason === "already_inflight") {
-                    setServerError("Google login is already in progress. Please wait a moment and try again.");
-                    return;
-                  }
-
-                  setServerError("Google login start failed. Please try again.");
-                }
+                  const callbackPath = "/dashboard";
+                  const callbackURL = new URL(callbackPath, publicEnv.NEXT_PUBLIC_APP_ORIGIN || window.location.origin).toString();
+                  const endpoint = `${publicEnv.NEXT_PUBLIC_API_BASE_URL.replace(/\/+$/, "")}/auth/login/google?callbackURL=${encodeURIComponent(callbackURL)}`;
+                  window.location.assign(endpoint);
               }}
             >
               <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
