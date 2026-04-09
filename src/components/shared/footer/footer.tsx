@@ -174,7 +174,7 @@ export default function Footer() {
       </div>
 
     
-      {/* Scroll to Top Button */}
+      {/* Scroll to  Home Top Button */}
       {showTopBtn && (
         <motion.button
           onClick={scrollToTop}
