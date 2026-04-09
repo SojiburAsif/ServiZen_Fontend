@@ -405,12 +405,14 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                      </DropdownMenuItem>
                    )}
 
+{!user?.isGoogleLogin && (
 <DropdownMenuItem asChild className="p-0">
                       <button onClick={() => setIsChangePasswordModalOpen(true)} className="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full cursor-pointer text-left">
                         <Lock className="size-4 mr-3 text-gray-500 group-hover:text-green-500" />
                         Change Password
                       </button>
                     </DropdownMenuItem>
+)}
 
                    <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800 my-2" />
 
@@ -488,9 +490,12 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                           </Link>
                         )}                          {user?.emailVerified === false && (
                             <button onClick={handleVerifyEmailClick} disabled={isSendingOtp} className="group w-full text-left flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30"><Shield className="size-5 text-amber-500" />{isSendingOtp ? "Sending..." : "Verify Email"}</button>
-                          )}                          <button onClick={() => setIsChangePasswordModalOpen(true)} className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-500 dark:hover:text-green-400 w-full text-left">
-                            <Lock className="size-5" /> Change Password
-                          </button>
+                          )}                          
+                          {!user?.isGoogleLogin && (
+                            <button onClick={() => setIsChangePasswordModalOpen(true)} className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-500 dark:hover:text-green-400 w-full text-left">
+                              <Lock className="size-5" /> Change Password
+                            </button>
+                          )}
                         <Link href="/notification" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-100 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                            <Bell className="size-5" /> Notifications
                            <MobileNotificationBadge />

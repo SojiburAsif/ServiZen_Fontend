@@ -309,12 +309,14 @@ export function DashboardHeader({
                          </DropdownMenuItem>
                        )}
 
-                       <DropdownMenuItem asChild className="p-0">
-                         <button onClick={() => setIsChangePasswordModalOpen(true)} className="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full cursor-pointer text-left">
-                           <Lock className="size-4 mr-3 text-gray-500 group-hover:text-green-500" />
-                           Change Password
-                         </button>
-                       </DropdownMenuItem>
+{!user?.isGoogleLogin && (
+                         <DropdownMenuItem asChild className="p-0">
+                           <button onClick={() => setIsChangePasswordModalOpen(true)} className="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full cursor-pointer text-left">
+                             <Lock className="size-4 mr-3 text-gray-500 group-hover:text-green-500" />
+                             Change Password
+                           </button>
+                         </DropdownMenuItem>
+                       )}
 
                        <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800 my-2" />
 

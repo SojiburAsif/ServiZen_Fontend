@@ -58,6 +58,7 @@ export type AuthUserInfo = {
   status?: string;
   isDeleted?: boolean;
   emailVerified: boolean;
+  isGoogleLogin?: boolean;
 };
 
 const pickFirstString = (...values: unknown[]) => {
@@ -521,6 +522,13 @@ const persistAuthTokens = async (payload: unknown) => {
       24 * 60 * 60,
     );
   }
+
+  try {
+    const { deleteCookie } = await import("@/lib/cookieUtils");
+    await deleteCookie("isGoogleLogin");
+  } catch {
+    // ignore
+  }
 };
 
 export const loginAction = async (
@@ -901,6 +909,13 @@ export async function getUserInfo(): Promise<AuthUserInfo | null> {
       sessionToken,
     );
 
+    const isGoogleLogin = cookieStore.get("isGoogleLogin")?.value === "true";
+
+    const appendFlag = (u: AuthUserInfo | null) => {
+      if (u) u.isGoogleLogin = isGoogleLogin;
+      return u;
+    };
+
     if (!cookieHeader) {
       return null;
     }
@@ -915,7 +930,7 @@ export async function getUserInfo(): Promise<AuthUserInfo | null> {
         sessionToken,
       );
 
-      return sessionUser || fallbackUser;
+      return appendFlag(sessionUser || fallbackUser);
     }
 
     const res = await fetch(`${serverEnv.BASE_API_URL}/auth/me`, {
@@ -935,16 +950,24 @@ export async function getUserInfo(): Promise<AuthUserInfo | null> {
         sessionToken,
       );
 
-      return sessionUser || fallbackUser;
+      return appendFlag(sessionUser || fallbackUser);
     }
 
     const payload = await res.json();
     const normalizedUser = normalizeUserInfo(payload?.data, authToken);
 
-    return normalizedUser || fallbackUser;
+    return appendFlag(normalizedUser || fallbackUser);
   } catch (error) {
     console.error("Error fetching user info:", error);
-    return getFallbackUserFromToken(accessToken);
+    const fb = getFallbackUserFromToken(accessToken);
+    try {
+      const cookieStore = await cookies();
+      const isGoogleLogin = cookieStore.get("isGoogleLogin")?.value === "true";
+      if (fb) fb.isGoogleLogin = isGoogleLogin;
+    } catch {
+      // ignore in edge cases
+    }
+    return fb;
   }
 }
 
@@ -997,7 +1020,8 @@ export async function logoutApiResponse() {
     "accessToken", 
     "refreshToken", 
     "better-auth.session_token", 
-    "better-auth.session_data"
+    "better-auth.session_data",
+    "isGoogleLogin"
   ];
   
   for (const name of cookieNames) {
