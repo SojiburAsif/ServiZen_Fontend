@@ -1,54 +1,29 @@
-export default function AdminProvidersLoading() {
+﻿export default function AdminProvidersLoading() {
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="space-y-3">
-          <div className="h-6 w-28 animate-pulse rounded-full bg-muted" />
-          <div className="space-y-2">
-            <div className="h-10 w-72 animate-pulse rounded-xl bg-muted" />
-            <div className="h-4 w-96 max-w-full animate-pulse rounded-xl bg-muted" />
-          </div>
-        </div>
-        <div className="h-24 w-full max-w-sm animate-pulse rounded-2xl bg-muted md:w-80" />
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 space-y-10">
+      {/* Header Skeleton */}
+      <div className="h-44 animate-pulse rounded-[3rem] bg-zinc-100 dark:bg-zinc-900" />
+      
+      {/* Stat Cards Skeleton */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-32 animate-pulse rounded-[2.5rem] bg-zinc-100 dark:bg-zinc-900" />
+        ))}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="h-28 animate-pulse rounded-2xl bg-muted" />
-        <div className="h-28 animate-pulse rounded-2xl bg-muted" />
-        <div className="h-28 animate-pulse rounded-2xl bg-muted" />
-        <div className="h-28 animate-pulse rounded-2xl bg-muted" />
-      </div>
-
-      <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-        <div className="border-b bg-muted/30 p-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-2">
-              <div className="h-6 w-40 animate-pulse rounded bg-muted" />
-              <div className="h-4 w-80 max-w-full animate-pulse rounded bg-muted" />
-            </div>
-
-            <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto lg:min-w-[540px]">
-              <div className="h-10 flex-1 animate-pulse rounded-lg bg-muted" />
-              <div className="h-10 w-full animate-pulse rounded-lg bg-muted sm:w-28" />
-            </div>
+      {/* Table Skeleton */}
+      <div className="rounded-[2.5rem] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden">
+        <div className="p-8 border-b border-zinc-100 dark:border-zinc-900">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="h-8 w-48 animate-pulse rounded-lg bg-zinc-100 dark:bg-zinc-900" />
+            <div className="h-12 w-[300px] animate-pulse rounded-2xl bg-zinc-100 dark:bg-zinc-900" />
           </div>
         </div>
-
-        <div className="p-4">
-          <div className="space-y-3">
-            <div className="h-14 animate-pulse rounded-xl bg-muted" />
-            <div className="h-14 animate-pulse rounded-xl bg-muted" />
-            <div className="h-14 animate-pulse rounded-xl bg-muted" />
-            <div className="h-14 animate-pulse rounded-xl bg-muted" />
-            <div className="h-14 animate-pulse rounded-xl bg-muted" />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 border-t bg-muted/10 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="h-4 w-44 animate-pulse rounded bg-muted" />
-          <div className="flex gap-2">
-            <div className="h-9 w-24 animate-pulse rounded-lg bg-muted" />
-            <div className="h-9 w-24 animate-pulse rounded-lg bg-muted" />
+        <div className="p-0">
+          <div className="space-y-4 p-8">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-20 animate-pulse rounded-2xl bg-zinc-50 dark:bg-zinc-900/50" />
+            ))}
           </div>
         </div>
       </div>

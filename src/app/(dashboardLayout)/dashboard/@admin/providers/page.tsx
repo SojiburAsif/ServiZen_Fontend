@@ -1,19 +1,35 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
+﻿"use client";
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  BadgeCheck,
+  Building2,
+  Eye,
+  Search,
+  ShieldAlert,
+  Star,
+  Users,
+  MoreVertical,
+  Trash2,
+} from "lucide-react";
+import { toast } from "sonner";
+
 import {
   getAllProviders,
   getProviderById,
   deleteProvider,
-  updateProviderStatus,
   ProviderListItem,
   ProviderDetailedProfile,
 } from "@/services/provider.service";
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -23,88 +39,56 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Dialog,
   DialogContent,
-  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Mail,
-  Trash2,
-  Eye,
-  Search,
-  UserCheck,
-  ShieldAlert,
-  ChevronLeft,
-  ChevronRight,
-  Briefcase,
-  Loader2,
-  Phone,
-  Star,
-  RefreshCcw,
-  X,
-  Building2,
-  BadgeCheck,
-  Users,
-  Edit2,
-  User,
-  AlertCircle,
-  DollarSign,
-} from "lucide-react";
-import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 const statusColors: Record<string, string> = {
-  ACTIVE:
-    "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400",
-  BLOCKED:
-    "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400",
-  DELETED:
-    "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-500/10 dark:text-slate-500",
-  PENDING:
-    "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400",
+  ACTIVE: "bg-emerald-500 text-white border-none",
+  BLOCKED: "bg-red-500 text-white border-none",
+  DELETED: "bg-zinc-400 text-white border-none",
+  PENDING: "bg-amber-500 text-white border-none",
 };
 
-const moneyFormat = (value?: number | null) => {
-  const amount = value ?? 0;
-  return amount.toLocaleString(undefined, {
+const formatMoney = (value?: number | null) =>
+  new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 0,
-  });
-};
+  }).format(value ?? 0);
 
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  description,
-}: {
-  title: string;
-  value: string | number;
-  icon: React.ElementType;
-  description: string;
-}) {
+function DetailItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <Card className="border-muted/30 shadow-sm bg-card/80 backdrop-blur">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {title}
-            </p>
-            <p className="mt-2 text-3xl font-black tracking-tight">{value}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+    <div className="rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-white/5 p-4">
+      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">{label}</p>
+      <div className="text-sm font-bold text-zinc-900 dark:text-white">{value}</div>
+    </div>
+  );
+}
+
+function StatCard({ title, value, icon: Icon, description }: { title: string; value: string | number; icon: React.ElementType; description: string }) {
+  return (
+    <Card className="group overflow-hidden bg-white dark:bg-black rounded-2xl border border-zinc-200 dark:border-zinc-800">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900/50 group-hover:bg-zinc-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-all duration-500">
+            <Icon className="h-4 w-4" />
           </div>
-          <div className="rounded-2xl bg-primary/10 p-3 text-primary">
-            <Icon className="h-5 w-5" />
+          <div className="space-y-0.5">
+            <p className="text-[9px] font-black uppercase tracking-[0.15em] text-zinc-500 dark:text-zinc-400 leading-none">{title}</p>
+            <h3 className="text-lg font-black tracking-tight text-zinc-900 dark:text-white leading-none">{value}</h3>
           </div>
+        </div>
+        <div className="flex items-center justify-between pt-2 border-t border-zinc-50 dark:border-zinc-900">
+          <p className="text-[8px] font-medium text-zinc-400 uppercase tracking-widest">{description}</p>
         </div>
       </CardContent>
     </Card>
@@ -121,14 +105,11 @@ export default function AdminProvidersPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [detailedProvider, setDetailedProvider] = useState<ProviderDetailedProfile | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
-  const [providerToRestore, setProviderToRestore] = useState<ProviderListItem | null>(null);
 
   const fetchProviders = useCallback(async (page: number = 1) => {
     try {
       setLoading(true);
       const response = await getAllProviders(page, 10);
-
       if (response) {
         setProviders(response.data);
         setMeta({
@@ -137,621 +118,184 @@ export default function AdminProvidersPage() {
           total: response.meta.total,
         });
       }
-    } catch (error) {
-      toast.error("Failed to fetch providers");
-    } finally {
-      setLoading(false);
-    }
+    } catch { toast.error("Failed to fetch"); } finally { setLoading(false); }
   }, []);
 
-  useEffect(() => {
-    fetchProviders();
-  }, [fetchProviders]);
+  useEffect(() => { fetchProviders(1); }, [fetchProviders]);
 
   const filteredProviders = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
-
-    if (!q) return providers;
-
-    return providers.filter((provider) => {
-      const name = provider.name?.toLowerCase() ?? "";
-      const email = provider.email?.toLowerCase() ?? "";
-      const phone = provider.contactNumber?.toLowerCase() ?? "";
-      const reg = provider.registrationNumber?.toLowerCase() ?? "";
-      const status = provider.user?.status?.toLowerCase() ?? "";
-
-      return (
-        name.includes(q) ||
-        email.includes(q) ||
-        phone.includes(q) ||
-        reg.includes(q) ||
-        status.includes(q)
-      );
-    });
+    return q ? providers.filter(p => p.name?.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q) || p.contactNumber?.toLowerCase().includes(q)) : providers;
   }, [providers, searchTerm]);
 
-  const stats = useMemo(() => {
-    const active = providers.filter((p) => p.user?.status === "ACTIVE").length;
-    const blocked = providers.filter((p) => p.user?.status === "BLOCKED").length;
-    const pending = providers.filter((p) => p.user?.status === "PENDING").length;
-
-    return { active, blocked, pending };
-  }, [providers]);
+  const stats = useMemo(() => ({
+    active: providers.filter(p => p.user?.status === "ACTIVE").length,
+    blocked: providers.filter(p => p.user?.status === "BLOCKED").length,
+    pending: providers.filter(p => p.user?.status === "PENDING").length,
+    total: meta.total
+  }), [providers, meta.total]);
 
   const handleViewProvider = async (provider: ProviderListItem) => {
-    setIsProcessing(true);
     try {
-      const providerDetails = await getProviderById(provider.id);
-      if (providerDetails) {
-        setDetailedProvider(providerDetails);
-        setIsViewDialogOpen(true);
-      }
-    } catch (error) {
-      toast.error("Failed to load provider details");
-    } finally {
-      setIsProcessing(false);
-    }
+      setIsProcessing(true);
+      const data = await getProviderById(provider.id);
+      if (data) { setDetailedProvider(data); setIsViewDialogOpen(true); }
+    } catch { toast.error("Failed to load details"); } finally { setIsProcessing(false); }
   };
 
   const handleDeleteProvider = async () => {
     if (!selectedProvider) return;
-
-    setIsProcessing(true);
     try {
+      setIsProcessing(true);
       await deleteProvider(selectedProvider.id);
-      toast.success("Provider deleted successfully");
-
-      if (
-        isViewDialogOpen &&
-        detailedProvider &&
-        detailedProvider.id === selectedProvider.id
-      ) {
-        setIsViewDialogOpen(false);
-        setDetailedProvider(null);
-      }
-
+      toast.success("Provider deleted");
       setIsDeleteDialogOpen(false);
-      setSelectedProvider(null);
-
-      const nextPage =
-        filteredProviders.length <= 1 && meta.page > 1 ? meta.page - 1 : meta.page;
-
-      await fetchProviders(nextPage);
-    } catch (error) {
-      toast.error("Failed to delete provider");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const closeDeleteDialog = () => {
-    if (isProcessing) return;
-    setIsDeleteDialogOpen(false);
-    setSelectedProvider(null);
-  };
-
-  const closeViewDialog = () => {
-    if (isProcessing) return;
-    setIsViewDialogOpen(false);
-    setDetailedProvider(null);
-  };
-
-  const handleRestoreProvider = async () => {
-    if (!providerToRestore) return;
-
-    setIsProcessing(true);
-    try {
-      await updateProviderStatus(providerToRestore.id, false);
-      toast.success("Provider restored successfully");
-
-      setIsRestoreDialogOpen(false);
-      setProviderToRestore(null);
-
-      await fetchProviders(meta.page);
-    } catch (error) {
-      toast.error("Failed to restore provider");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const closeRestoreDialog = () => {
-    if (isProcessing) return;
-    setIsRestoreDialogOpen(false);
-    setProviderToRestore(null);
+      fetchProviders(meta.page);
+    } catch { toast.error("Failed"); } finally { setIsProcessing(false); }
   };
 
   if (loading && providers.length === 0) {
     return (
-      <div className="flex h-[80vh] items-center justify-center px-4">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <div>
-            <p className="text-base font-semibold">Loading providers...</p>
-            <p className="text-sm text-muted-foreground">
-              Please wait while we fetch the latest data.
-            </p>
-          </div>
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 space-y-10">
+        <div className="h-44 animate-pulse rounded-[3rem] bg-zinc-100 dark:bg-zinc-900" />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+          {[1,2,3,4].map(i => <div key={i} className="h-32 animate-pulse rounded-[2rem] bg-zinc-100 dark:bg-zinc-900" />)}
+        </div>
+        <div className="space-y-4">
+          {[1,2,3,4,5].map(i => <div key={i} className="h-24 animate-pulse rounded-[2rem] bg-zinc-50 dark:bg-zinc-900/50" />)}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
-            <BadgeCheck className="h-3.5 w-3.5" />
-            Admin panel
-          </div>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight md:text-4xl">
-              Provider Management
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground md:text-base">
-              View, search, inspect, and manage all service providers from one place.
-            </p>
-          </div>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+      <div className="flex flex-col gap-2 mb-2">
+        <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 text-[8px] font-black tracking-widest uppercase w-fit">
+          <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute h-full w-full rounded-full bg-zinc-400 opacity-75"></span><span className="relative h-1.5 w-1.5 bg-zinc-500 rounded-full"></span></span>
+          Control Center
         </div>
-
-        <Card className="border-none bg-primary/5 shadow-none">
-          <CardContent className="flex items-center gap-4 px-6 py-4">
-            <div className="text-right">
-              <p className="text-xs font-bold uppercase text-muted-foreground">
-                Total Providers
-              </p>
-              <p className="text-2xl font-black">{meta.total}</p>
-            </div>
-            <UserCheck className="h-9 w-9 text-primary opacity-60" />
-          </CardContent>
-        </Card>
+        <h1 className="text-2xl font-black tracking-tight uppercase text-zinc-900 dark:text-white">Providers Overview</h1>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <StatCard
-          title="Visible on page"
-          value={filteredProviders.length}
-          icon={Users}
-          description="Providers matching your current search."
-        />
-        <StatCard
-          title="Active"
-          value={stats.active}
-          icon={BadgeCheck}
-          description="Approved and currently active."
-        />
-        <StatCard
-          title="Pending"
-          value={stats.pending}
-          icon={Building2}
-          description="Waiting for review or approval."
-        />
-        <StatCard
-          title="Blocked"
-          value={stats.blocked}
-          icon={ShieldAlert}
-          description="Restricted providers."
-        />
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Total Volume" value={stats.total} icon={Users} description="Registered entities" />
+        <StatCard title="Active" value={stats.active} icon={BadgeCheck} description="Verified & Operational" />
+        <StatCard title="Awaiting" value={stats.pending} icon={Building2} description="Pending authorization" />
+        <StatCard title="Restricted" value={stats.blocked} icon={ShieldAlert} description="Access terminated" />
       </div>
 
-      <Card className="overflow-hidden border-muted/30 shadow-lg">
-        <CardHeader className="border-b bg-muted/30">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <CardTitle className="text-xl">Providers list</CardTitle>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Search by name, email, phone number, registration number, or status.
-              </p>
-            </div>
-
-            <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto lg:min-w-[540px]">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search providers..."
-                  className="pl-10 pr-10 bg-background"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                {searchTerm && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSearchTerm("")}
-                    className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2"
-                    aria-label="Clear search"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
+      <Card className="rounded-[2.5rem] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden">
+        <CardHeader className="p-8 border-b border-zinc-100 dark:border-zinc-900">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <CardTitle className="text-2xl font-black tracking-tight flex items-center gap-3">
+              <div className="h-2 w-2 rounded-full bg-black dark:bg-white" />Entity Directory
+            </CardTitle>
+            <div className="flex flex-wrap gap-3">
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                <Input placeholder="Search records..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-[200px] md:w-[300px] h-12 bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 rounded-2xl pl-12" />
               </div>
-
-              <Button
-                variant="outline"
-                onClick={() => fetchProviders(meta.page)}
-                disabled={loading}
-                className="shrink-0"
-              >
-                <RefreshCcw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-                Refresh
-              </Button>
             </div>
           </div>
         </CardHeader>
-
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="min-w-[260px] font-bold">
-                    Provider Information
-                  </TableHead>
-                  <TableHead className="min-w-[220px] font-bold">
-                    Contact & Rating
-                  </TableHead>
-                  <TableHead className="min-w-[120px] font-bold">Status</TableHead>
-                  <TableHead className="px-6 text-right font-bold">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-
+              <TableHeader><TableRow className="bg-zinc-50 dark:bg-zinc-900/50 border-none">
+                <TableHead className="py-6 px-8 text-[10px] font-black uppercase tracking-widest text-zinc-400">Identity / Email</TableHead>
+                <TableHead className="py-6 px-8 text-[10px] font-black uppercase tracking-widest text-zinc-400">Professional Profile</TableHead>
+                <TableHead className="py-6 px-8 text-[10px] font-black uppercase tracking-widest text-zinc-400">Status</TableHead>
+                <TableHead className="py-6 px-8 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right">Actions</TableHead>
+              </TableRow></TableHeader>
               <TableBody>
-                {filteredProviders.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="h-72 text-center">
-                      <div className="mx-auto flex max-w-sm flex-col items-center justify-center gap-3 text-muted-foreground">
-                        <div className="rounded-full bg-muted p-4">
-                          <ShieldAlert className="h-8 w-8 opacity-40" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-foreground">
-                            No providers found
-                          </p>
-                          <p className="text-sm">
-                            Try a different search term or refresh the list.
-                          </p>
-                        </div>
-                        {searchTerm && (
-                          <Button variant="outline" onClick={() => setSearchTerm("")}>
-                            Clear search
-                          </Button>
-                        )}
+                {filteredProviders.map((provider) => (
+                  <TableRow key={provider.id} className="group border-b border-zinc-100 dark:border-zinc-900 hover:bg-zinc-100/50 dark:hover:bg-zinc-900/50 transition-colors">
+                    <TableCell className="py-6 px-8">
+                      <div className="font-black text-zinc-900 dark:text-white uppercase truncate max-w-[200px]">{provider.name}</div>
+                      <div className="text-[10px] text-zinc-400 uppercase font-black truncate max-w-[200px]">{provider.email}</div>
+                    </TableCell>
+                    <TableCell className="py-6 px-8">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Star className="h-3 w-3 text-zinc-900 dark:text-white fill-current" />
+                        <span className="font-black text-xs text-zinc-900 dark:text-white">{provider.averageRating?.toFixed(1) || "0.0"}</span>
+                      </div>
+                      <div className="text-[10px] text-zinc-400 uppercase font-black">EXP: {provider.experience || "0"} YEARS</div>
+                    </TableCell>
+                    <TableCell className="py-6 px-8">
+                      <Badge className={`rounded-full px-3 py-1 text-[10px] font-black uppercase ${statusColors[provider.user?.status || "ACTIVE"]}`}>
+                        {provider.user?.status || "ACTIVE"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-6 px-8 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleViewProvider(provider)} className="rounded-xl h-10 w-10 border border-zinc-100 dark:border-zinc-800"><Eye className="h-4 w-4" /></Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="rounded-xl h-10 w-10"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="rounded-2xl border-zinc-200 dark:border-zinc-800">
+                               <DropdownMenuItem className="font-black text-[10px] tracking-widest uppercase text-red-500 gap-2 py-3" onClick={() => { setSelectedProvider(provider); setIsDeleteDialogOpen(true); }}><Trash2 className="h-4 w-4" /> TERMINATE</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  filteredProviders.map((provider) => (
-                    <TableRow key={provider.id} className="transition-colors hover:bg-muted/30">
-                      <TableCell>
-                        <div className="flex flex-col gap-1.5">
-                          <span className="text-base font-bold">
-                            {provider.name || "Unnamed Provider"}
-                          </span>
-
-                          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Mail className="h-3.5 w-3.5" />
-                            {provider.email}
-                          </span>
-
-                          {provider.registrationNumber && (
-                            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Briefcase className="h-3.5 w-3.5" />
-                              Reg: {provider.registrationNumber}
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-
-                      <TableCell>
-                        <div className="flex flex-col gap-1.5">
-                          {provider.contactNumber ? (
-                            <span className="flex items-center gap-1.5 text-xs">
-                              <Phone className="h-3.5 w-3.5" />
-                              {provider.contactNumber}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">No phone number</span>
-                          )}
-
-                          <span className="flex items-center gap-1.5 text-xs">
-                            <Star className="h-3.5 w-3.5 text-yellow-500" />
-                            {typeof provider.averageRating === "number"
-                              ? provider.averageRating.toFixed(1)
-                              : "0.0"}{" "}
-                            rating
-                          </span>
-
-                          <span className="text-xs text-muted-foreground">
-                            {provider.specialties?.length || 0} specialties
-                          </span>
-                        </div>
-                      </TableCell>
-
-                      <TableCell>
-                        <Badge className={statusColors[provider.user?.status || "ACTIVE"]}>
-                          {provider.user?.status || "ACTIVE"}
-                        </Badge>
-                      </TableCell>
-
-                      <TableCell className="px-6 text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="hover:text-primary"
-                            onClick={() => handleViewProvider(provider)}
-                            disabled={isProcessing}
-                            aria-label="View provider details"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          {provider.user?.status === "DELETED" ? (
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="hover:text-emerald-600"
-                              onClick={() => {
-                                setProviderToRestore(provider);
-                                setIsRestoreDialogOpen(true);
-                              }}
-                              disabled={isProcessing}
-                              aria-label="Restore provider"
-                            >
-                              <User className="h-4 w-4" />
-                            </Button>
-                          ) : (
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="hover:text-rose-600"
-                              onClick={() => {
-                                setSelectedProvider(provider);
-                                setIsDeleteDialogOpen(true);
-                              }}
-                              disabled={isProcessing}
-                              aria-label="Delete provider"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                ))}
               </TableBody>
             </Table>
           </div>
-
-          <div className="flex flex-col gap-3 border-t bg-muted/10 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
-              Showing page <span className="font-medium text-foreground">{meta.page}</span> of{" "}
-              <span className="font-medium text-foreground">{meta.totalPages}</span>
-            </p>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={meta.page <= 1 || loading}
-                onClick={() => fetchProviders(meta.page - 1)}
-              >
-                <ChevronLeft className="mr-1 h-4 w-4" />
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={meta.page >= meta.totalPages || loading}
-                onClick={() => fetchProviders(meta.page + 1)}
-              >
-                Next
-                <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
+          <div className="p-8 border-t border-zinc-100 dark:border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Page {meta.page} OF {meta.totalPages} • TOTAL {meta.total} ENTRIES</span>
+            <div className="flex gap-3">
+              <Button variant="outline" disabled={meta.page <= 1} onClick={() => fetchProviders(meta.page - 1)} className="rounded-xl h-10 px-6 font-black border-zinc-200 dark:border-zinc-800">PREV</Button>
+              <Button variant="outline" disabled={meta.page >= meta.totalPages} onClick={() => fetchProviders(meta.page + 1)} className="rounded-xl h-10 px-6 font-black border-zinc-200 dark:border-zinc-800">NEXT</Button>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Dialog open={isViewDialogOpen} onOpenChange={closeViewDialog}>
-        <DialogContent className="max-h-[90vh] w-[95vw] max-w-4xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">Provider Details</DialogTitle>
-            <DialogDescription>
-              Complete profile and financial information for the selected provider.
-            </DialogDescription>
-          </DialogHeader>
-
-          {detailedProvider ? (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Basic Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    <DetailItem label="Name" value={detailedProvider.name || "N/A"} />
-                    <DetailItem label="Email" value={detailedProvider.email || "N/A"} />
-                    <DetailItem
-                      label="Contact Number"
-                      value={detailedProvider.contactNumber || "N/A"}
-                    />
-                    <DetailItem
-                      label="Registration Number"
-                      value={detailedProvider.registrationNumber || "N/A"}
-                    />
-                    <DetailItem
-                      label="Experience"
-                      value={
-                        detailedProvider.experience
-                          ? `${detailedProvider.experience} years`
-                          : "N/A"
-                      }
-                    />
-                    <DetailItem
-                      label="Average Rating"
-                      value={
-                        typeof detailedProvider.averageRating === "number"
-                          ? `${detailedProvider.averageRating.toFixed(1)} ⭐`
-                          : "N/A"
-                      }
-                    />
-                  </div>
-
-                  <div className="mt-4 space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">Bio</p>
-                    <p className="rounded-md bg-muted/50 p-3 text-sm">
-                      {detailedProvider.bio || "No bio available"}
-                    </p>
-                  </div>
-
-                  <div className="mt-4">
-                    <p className="text-sm font-medium text-muted-foreground">Address</p>
-                    <p className="mt-2 rounded-md bg-muted/50 p-3 text-sm">
-                      {detailedProvider.address || "N/A"}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <DollarSign className="h-5 w-5 text-emerald-600" />
-                    Financial Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-500/10">
-                      <div className="mb-2 flex items-center gap-2">
-                        <DollarSign className="h-5 w-5 text-emerald-600" />
-                        <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                          Wallet Balance
-                        </p>
-                      </div>
-                      <p className="text-2xl font-black text-emerald-600">
-                        ${moneyFormat(detailedProvider.walletBalance)}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-500/10">
-                      <div className="mb-2 flex items-center gap-2">
-                        <Briefcase className="h-5 w-5 text-blue-600" />
-                        <p className="text-sm font-medium text-blue-700 dark:text-blue-400">
-                          Total Earned
-                        </p>
-                      </div>
-                      <p className="text-2xl font-black text-blue-600">
-                        ${moneyFormat(detailedProvider.totalEarned)}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {detailedProvider.specialties && detailedProvider.specialties.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Specialties</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {detailedProvider.specialties.map((specialty, index) => (
-                        <Badge key={index} variant="outline">
-                          {specialty.specialty?.title || "Unknown Specialty"}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          ) : (
-            <div className="py-10 text-center text-muted-foreground">
-              Loading details...
+      {/* Details Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="rounded-[2.5rem] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-10 max-w-4xl overflow-y-auto max-h-[90vh]">
+          <DialogHeader><DialogTitle className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white uppercase">Profile Extract</DialogTitle></DialogHeader>
+          {detailedProvider && (
+            <div className="space-y-8 py-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <DetailItem label="Legal Name" value={detailedProvider.name} />
+                <DetailItem label="Identity Email" value={detailedProvider.email} />
+                <DetailItem label="Contact Link" value={detailedProvider.contactNumber} />
+                <DetailItem label="Reg Matrix" value={detailedProvider.registrationNumber} />
+                <DetailItem label="Experience" value={`${detailedProvider.experience} Years`} />
+                <DetailItem label="Avg Score" value={`${detailedProvider.averageRating?.toFixed(1) || "0.0"} / 5.0`} />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-2xl border border-zinc-900 bg-black p-6 text-white dark:border-white dark:bg-white dark:text-black">
+                  <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-2">Wallet Liquidity</p>
+                  <p className="text-3xl font-black">${formatMoney(detailedProvider.walletBalance)}</p>
+                </div>
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 dark:bg-zinc-900/50 p-6 text-zinc-900 dark:text-white dark:border-zinc-800">
+                  <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-2">Gross Earnings</p>
+                  <p className="text-3xl font-black">${formatMoney(detailedProvider.totalEarned)}</p>
+                </div>
+              </div>
+              <DetailItem label="Address Coordinates" value={detailedProvider.address} />
             </div>
           )}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={closeViewDialog} disabled={isProcessing}>
-              Close
-            </Button>
-          </DialogFooter>
+          <DialogFooter><Button onClick={() => setIsViewDialogOpen(false)} className="w-full h-14 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-black text-lg">ESCAPE VIEW</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isDeleteDialogOpen} onOpenChange={closeDeleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Provider</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete{" "}
-              <span className="font-semibold text-foreground">
-                {selectedProvider?.name || "this provider"}
-              </span>
-              ? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter>
-            <Button variant="ghost" onClick={closeDeleteDialog} disabled={isProcessing}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteProvider}
-              disabled={isProcessing}
-            >
-              {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Delete Provider
-            </Button>
-          </DialogFooter>
+      {/* Delete Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="rounded-[2.5rem] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-10 max-w-xl text-center">
+           <div className="mx-auto w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center text-red-600 mb-6"><Trash2 size={32}/></div>
+           <DialogHeader><DialogTitle className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white uppercase mb-2">Terminate Access</DialogTitle></DialogHeader>
+           <p className="font-bold text-zinc-400">Are you prepared to strip access rights for <span className="text-zinc-900 dark:text-white">{selectedProvider?.name}</span>? This action is logged.</p>
+           <DialogFooter className="mt-8 flex gap-4">
+             <Button variant="ghost" onClick={() => setIsDeleteDialogOpen(false)} className="h-14 rounded-2xl font-black flex-1 uppercase">Abort</Button>
+             <Button variant="destructive" onClick={handleDeleteProvider} disabled={isProcessing} className="h-14 rounded-2xl font-black bg-red-600 flex-1 uppercase">Confirm Termination</Button>
+           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <Dialog open={isRestoreDialogOpen} onOpenChange={closeRestoreDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-emerald-600" />
-              Restore Provider
-            </DialogTitle>
-            <DialogDescription>
-              Are you sure you want to restore{" "}
-              <span className="font-semibold text-foreground">
-                {providerToRestore?.name || "this provider"}
-              </span>
-              ? The provider will be able to access their account again.
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter>
-            <Button variant="ghost" onClick={closeRestoreDialog} disabled={isProcessing}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleRestoreProvider}
-              disabled={isProcessing}
-              className="bg-emerald-600 hover:bg-emerald-700"
-            >
-              {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Restore Provider
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-function DetailItem({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div>
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <p className="mt-1 font-medium">{value}</p>
     </div>
   );
 }

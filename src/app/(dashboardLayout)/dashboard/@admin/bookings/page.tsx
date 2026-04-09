@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -69,24 +69,24 @@ import { toast } from "sonner";
 
 const bookingStatusColors: Record<BookingStatus, string> = {
   PENDING:
-    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300",
+    "bg-black text-white dark:bg-white dark:text-black",
   ACCEPTED:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300",
+    "bg-emerald-500 text-white",
   WORKING:
-    "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-300",
+    "border border-black text-black dark:border-white dark:text-white",
   COMPLETED:
-    "border-green-200 bg-green-50 text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-300",
+    "bg-emerald-500 text-white",
   CANCELLED:
-    "border-red-200 bg-red-50 text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300",
+    "bg-red-500 text-white",
 };
 
 const paymentStatusColors: Record<PaymentStatus, string> = {
   UNPAID:
-    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300",
+    "bg-black text-white dark:bg-white dark:text-black",
   PAID:
-    "border-green-200 bg-green-50 text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-300",
+    "bg-emerald-500 text-white",
   REFUNDED:
-    "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-300",
+    "bg-orange-500 text-white",
 };
 
 const statusOptions: { value: BookingStatus; label: string }[] = [
@@ -147,7 +147,7 @@ function StatCard({
               {value}
             </p>
           </div>
-          <div className="rounded-2xl border border-green-200 bg-green-50 p-3 dark:border-green-500/20 dark:bg-green-500/10">
+          <div className="rounded-[2.5rem] border border-green-200 bg-green-50 p-3 dark:border-green-500/20 dark:bg-green-500/10">
             <Icon className="h-6 w-6 text-green-700 dark:text-green-300" />
           </div>
         </div>
@@ -165,7 +165,7 @@ function DetailItem({
   value: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-black/10 bg-white p-4 dark:border-white/10 dark:bg-black/30">
+    <div className="rounded-[2.5rem] border border-black/10 bg-white p-4 dark:border-white/10 dark:bg-black/30">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
         {label}
       </p>
@@ -478,7 +478,7 @@ export default function AdminBookingsPage() {
                   <SelectTrigger className="w-full border-black/10 bg-black/5 transition-all hover:bg-white focus:ring-2 focus:ring-green-500 dark:border-white/10 dark:bg-white/5 dark:hover:bg-black sm:w-[160px]">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-black/10 dark:border-white/10">
+                  <SelectContent className="rounded-[2rem] border-black/10 dark:border-white/10">
                     <SelectItem value="All Status" className="text-muted-foreground italic">All Statuses</SelectItem>
                     {statusOptions.map((item) => (
                       <SelectItem key={item.value} value={item.value} className="focus:bg-green-50 focus:text-green-700 dark:focus:bg-green-500/10 dark:focus:text-green-400">
@@ -492,7 +492,7 @@ export default function AdminBookingsPage() {
                   <SelectTrigger className="w-full border-black/10 bg-black/5 transition-all hover:bg-white focus:ring-2 focus:ring-green-500 dark:border-white/10 dark:bg-white/5 dark:hover:bg-black sm:w-[160px]">
                     <SelectValue placeholder="Payment" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-black/10 dark:border-white/10">
+                  <SelectContent className="rounded-[2rem] border-black/10 dark:border-white/10">
                     <SelectItem value="All Payment" className="text-muted-foreground italic">All Payments</SelectItem>
                     {paymentOptions.map((item) => (
                       <SelectItem key={item.value} value={item.value} className="focus:bg-green-50 focus:text-green-700 dark:focus:bg-green-500/10 dark:focus:text-green-400">
@@ -649,11 +649,11 @@ export default function AdminBookingsPage() {
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 rounded-2xl border-black/10 shadow-xl dark:border-white/10 dark:bg-black/95 dark:backdrop-blur-md">
+                            <DropdownMenuContent align="end" className="w-48 rounded-[2.5rem] border-black/10 shadow-xl dark:border-white/10 dark:bg-black/95 dark:backdrop-blur-md">
                               <DropdownMenuItem
                                 onClick={() => toggleRowExpansion(booking.id)}
                                 disabled={isProcessing}
-                                className="rounded-xl px-3 py-2 text-sm font-medium focus:bg-green-50 focus:text-green-700 dark:focus:bg-green-500/10 dark:focus:text-green-400"
+                                className="rounded-[2rem] px-3 py-2 text-sm font-medium focus:bg-green-50 focus:text-green-700 dark:focus:bg-green-500/10 dark:focus:text-green-400"
                               >
                                 <Eye className="mr-2 h-4 w-4" />
                                 View Details
@@ -661,7 +661,7 @@ export default function AdminBookingsPage() {
                               <DropdownMenuItem
                                 onClick={() => openUpdateBooking(booking)}
                                 disabled={isProcessing}
-                                className="rounded-xl px-3 py-2 text-sm font-medium focus:bg-green-50 focus:text-green-700 dark:focus:bg-green-500/10 dark:focus:text-green-400"
+                                className="rounded-[2rem] px-3 py-2 text-sm font-medium focus:bg-green-50 focus:text-green-700 dark:focus:bg-green-500/10 dark:focus:text-green-400"
                               >
                                 <CheckCircle className="mr-2 h-4 w-4" />
                                 Update Status
@@ -670,7 +670,7 @@ export default function AdminBookingsPage() {
                                 <DropdownMenuItem
                                   onClick={() => openCancelBooking(booking)}
                                   disabled={isProcessing}
-                                  className="rounded-xl px-3 py-2 text-sm font-medium text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-400 dark:focus:bg-red-500/10 dark:focus:text-red-400"
+                                  className="rounded-[2rem] px-3 py-2 text-sm font-medium text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-400 dark:focus:bg-red-500/10 dark:focus:text-red-400"
                                 >
                                   <XCircle className="mr-2 h-4 w-4" />
                                   Cancel Booking
@@ -687,7 +687,7 @@ export default function AdminBookingsPage() {
                             <div className="grid gap-8">
                               {/* Top Status & Date Bar */}
                               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                                <div className="rounded-2xl border border-black/5 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-black/40">
+                                <div className="rounded-[2.5rem] border border-black/5 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-black/40">
                                   <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">
                                     <Calendar className="h-3 w-3" /> Date
                                   </p>
@@ -695,7 +695,7 @@ export default function AdminBookingsPage() {
                                     {formatDate(booking.bookingDate)}
                                   </p>
                                 </div>
-                                <div className="rounded-2xl border border-black/5 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-black/40">
+                                <div className="rounded-[2.5rem] border border-black/5 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-black/40">
                                   <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">
                                     <Clock className="h-3 w-3" /> Time
                                   </p>
@@ -703,7 +703,7 @@ export default function AdminBookingsPage() {
                                     {formatTime(booking.bookingTime)}
                                   </p>
                                 </div>
-                                <div className="rounded-2xl border border-black/5 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-black/40">
+                                <div className="rounded-[2.5rem] border border-black/5 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-black/40">
                                   <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">
                                     <DollarSign className="h-3 w-3" /> Amount
                                   </p>
@@ -711,7 +711,7 @@ export default function AdminBookingsPage() {
                                     ${formatMoney(booking.totalAmount)}
                                   </p>
                                 </div>
-                                <div className="rounded-2xl border border-black/5 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-black/40">
+                                <div className="rounded-[2.5rem] border border-black/5 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-black/40">
                                   <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">
                                     Status
                                   </p>
@@ -748,7 +748,7 @@ export default function AdminBookingsPage() {
                                     </h4>
                                     <div className="group relative flex items-center gap-4 rounded-3xl border border-black/5 bg-white p-5 shadow-sm transition-all hover:border-green-500/30 hover:shadow-md dark:border-white/5 dark:bg-white/5 dark:hover:border-green-500/30">
                                       {booking.provider?.profilePhoto && (
-                                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl ring-2 ring-black/5 dark:ring-white/10">
+                                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[2.5rem] ring-2 ring-black/5 dark:ring-white/10">
                                           <img
                                             src={booking.provider.profilePhoto}
                                             alt={booking.provider.name}
@@ -816,7 +816,7 @@ export default function AdminBookingsPage() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => toggleRowExpansion(booking.id)}
-                                className="rounded-xl border-black/10 hover:bg-green-50 hover:text-green-700 dark:border-white/10 dark:hover:bg-green-500/10 dark:hover:text-green-400"
+                                className="rounded-[2rem] border-black/10 hover:bg-green-50 hover:text-green-700 dark:border-white/10 dark:hover:bg-green-500/10 dark:hover:text-green-400"
                               >
                                 Hide Details
                               </Button>
@@ -880,19 +880,19 @@ export default function AdminBookingsPage() {
           <div className="space-y-4">
             {selectedBooking ? (
               <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="rounded-[2.5rem] border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Current Status
                   </p>
                   <p className="mt-2 font-medium text-black dark:text-white">{selectedBooking.status}</p>
                 </div>
-                <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="rounded-[2.5rem] border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Current Payment
                   </p>
                   <p className="mt-2 font-medium text-black dark:text-white">{selectedBooking.paymentStatus}</p>
                 </div>
-                <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="rounded-[2.5rem] border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Total Amount
                   </p>
@@ -991,7 +991,7 @@ export default function AdminBookingsPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
+          <div className="rounded-[2.5rem] border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
             Cancelling will set the booking status to <span className="font-semibold">CANCELLED</span>.
           </div>
 
@@ -1019,3 +1019,5 @@ export default function AdminBookingsPage() {
     </div>
   );
 }
+
+

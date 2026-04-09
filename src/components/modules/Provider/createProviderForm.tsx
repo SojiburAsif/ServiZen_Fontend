@@ -12,7 +12,9 @@ import { AuthValidation } from "@/zod/auth.validation";
 import { uploadToImgbb } from "@/lib/imageUpload.utils";
 import { toast } from "sonner";
 import {
+  AlertCircle,
   Check,
+  CheckCircle,
   Eye,
   EyeOff,
   Loader2,
@@ -128,179 +130,184 @@ export const CreateProviderForm = ({ specialties = [] }: { specialties: any[] })
   };
   // Reusable Classes
   const inputClass =
-    "w-full rounded-xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200 dark:placeholder-slate-500 dark:focus:border-emerald-500";
-  const labelClass = "block text-sm font-bold text-slate-700 dark:text-emerald-50/80 mb-1.5";
-  const errorClass = "mt-1.5 flex items-center gap-1 text-[11px] font-bold text-red-500 uppercase tracking-tight";
+    "w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-bold text-zinc-900 placeholder-zinc-400 transition-all focus:border-zinc-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder-zinc-600 dark:focus:border-zinc-100 dark:focus:bg-zinc-900 dark:focus:ring-zinc-100/5";
+  const labelClass = "block text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 ml-1";
+  const errorClass = "mt-2 flex items-center gap-1.5 text-[10px] font-black text-red-500 uppercase tracking-widest";
 
   return (
     <form
       onSubmit={handleSubmit(onFormSubmit)}
-      className="overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-2xl shadow-emerald-900/10 backdrop-blur-xl dark:border-emerald-500/10 dark:bg-slate-900/80 dark:shadow-black/50"
+      className="overflow-hidden rounded-[2.5rem] border border-zinc-200 bg-white shadow-2xl shadow-zinc-900/5 dark:border-zinc-800 dark:bg-black dark:shadow-none"
     >
-      <div className="p-6 md:p-8 space-y-10">
+      <div className="p-8 md:p-12 space-y-12">
         {/* Profile Photo Section */}
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-5">
           <div className="group relative">
-            <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow-xl transition-transform group-hover:scale-105 dark:border-slate-800 dark:bg-slate-800">
+            <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-zinc-100 bg-zinc-50 shadow-inner transition-transform group-hover:scale-[1.02] dark:border-zinc-900 dark:bg-zinc-900">
               {isUploading ? (
-                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+                <Loader2 className="h-8 w-8 animate-spin text-zinc-900 dark:text-white" />
               ) : profilePhotoUrl ? (
                 <img src={profilePhotoUrl} alt="Preview" className="h-full w-full object-cover" />
               ) : (
-                <User size={40} className="text-emerald-200 dark:text-emerald-900" />
+                <User size={48} className="text-zinc-200 dark:text-zinc-800" />
               )}
             </div>
-            <label className="absolute bottom-0 right-0 cursor-pointer rounded-full border-2 border-white bg-emerald-600 p-2.5 text-white shadow-lg transition-all hover:scale-110 hover:bg-emerald-500 active:scale-90 dark:border-slate-900">
-              <Upload size={16} />
+            <label className="absolute bottom-1 right-1 cursor-pointer rounded-full border-4 border-white bg-zinc-900 p-3 text-white shadow-xl transition-all hover:scale-110 active:scale-95 dark:border-black dark:bg-white dark:text-black">
+              <Upload size={18} />
               <input type="file" className="hidden" accept="image/*" onChange={handlePhotoChange} disabled={isUploading} />
             </label>
           </div>
           <div className="text-center">
-            <p className="text-xs font-black uppercase tracking-widest text-slate-800 dark:text-emerald-400">Profile Photo</p>
-            {errors.profilePhoto && <p className={errorClass}>{errors.profilePhoto.message}</p>}
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-100">Display Identity</p>
+            {errors.profilePhoto && <p className={errorClass}><AlertCircle size={12}/>{errors.profilePhoto.message}</p>}
           </div>
         </div>
 
-        {/* Account Information */}
-        <div className="space-y-5">
-          <div className="flex items-center gap-3">
-            <span className="h-px flex-1 bg-slate-200 dark:bg-emerald-900/30" />
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-500">Credentials</h3>
-            <span className="h-px flex-1 bg-slate-200 dark:bg-emerald-900/30" />
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2">
-            <div>
-              <label className={labelClass}>Full Name</label>
-              <div className="relative">
-                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("name")} className={`${inputClass} pl-11`} placeholder="Enter full name" />
-              </div>
-              {errors.name && <p className={errorClass}>{errors.name.message}</p>}
+        {/* Form Groups */}
+        <div className="space-y-10">
+          {/* Credentials */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-900 dark:text-zinc-100">01. Credentials</h3>
+              <div className="h-px flex-1 bg-zinc-100 dark:bg-zinc-900" />
             </div>
 
-            <div>
-              <label className={labelClass}>Email Address</label>
-              <div className="relative">
-                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("email")} type="email" className={`${inputClass} pl-11`} placeholder="Enter email address" />
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <label className={labelClass}>Legal Full Name</label>
+                <div className="relative">
+                  <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input {...register("name")} className={`${inputClass} pl-12`} placeholder="Ex: John Doe" />
+                </div>
+                {errors.name && <p className={errorClass}>{errors.name.message}</p>}
               </div>
-              {errors.email && <p className={errorClass}>{errors.email.message}</p>}
-            </div>
 
-            <div>
-              <label className={labelClass}>Password</label>
-              <div className="relative">
-                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("password")} type={showPassword ? "text" : "password"} className={`${inputClass} pl-11 pr-11`} placeholder="••••••••" />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
+              <div>
+                <label className={labelClass}>System Email</label>
+                <div className="relative">
+                  <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input {...register("email")} type="email" className={`${inputClass} pl-12`} placeholder="john@example.com" />
+                </div>
+                {errors.email && <p className={errorClass}>{errors.email.message}</p>}
               </div>
-              {errors.password && <p className={errorClass}>{errors.password.message}</p>}
-            </div>
 
-            <div>
-              <label className={labelClass}>Confirm Password</label>
-              <div className="relative">
-                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("confirmPassword")} type={showConfirmPassword ? "text" : "password"} className={`${inputClass} pl-11 pr-11`} placeholder="••••••••" />
-                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
+              <div>
+                <label className={labelClass}>Access Password</label>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input {...register("password")} type={showPassword ? "text" : "password"} className={`${inputClass} pl-12 pr-12`} placeholder="••••••••" />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.password && <p className={errorClass}>{errors.password.message}</p>}
               </div>
-              {errors.confirmPassword && <p className={errorClass}>{errors.confirmPassword.message}</p>}
-            </div>
-          </div>
-        </div>
 
-        {/* Professional Info */}
-        <div className="space-y-5">
-          <div className="flex items-center gap-3">
-            <span className="h-px flex-1 bg-slate-200 dark:bg-emerald-900/30" />
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-500">Work Details</h3>
-            <span className="h-px flex-1 bg-slate-200 dark:bg-emerald-900/30" />
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2">
-            <div>
-              <label className={labelClass}>Registration No.</label>
-              <div className="relative">
-                <Shield size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("registrationNumber")} className={`${inputClass} pl-11`} placeholder="REG-2026-XXXX" />
-              </div>
-              {errors.registrationNumber && <p className={errorClass}>{errors.registrationNumber.message}</p>}
-            </div>
-
-            <div>
-              <label className={labelClass}>Years Experience</label>
-              <div className="relative">
-                <Star size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("experience")} type="number" className={`${inputClass} pl-11`} placeholder="Enter years of experience" />
-              </div>
-            </div>
-
-            <div>
-              <label className={labelClass}>Phone Number</label>
-              <div className="relative">
-                <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("contactNumber")} className={`${inputClass} pl-11`} placeholder="Enter phone number" />
-              </div>
-            </div>
-
-            <div>
-              <label className={labelClass}>Location</label>
-              <div className="relative">
-                <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/60" />
-                <input {...register("address")} className={`${inputClass} pl-11`} placeholder="Enter location" />
+              <div>
+                <label className={labelClass}>Confirm Access</label>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input {...register("confirmPassword")} type={showConfirmPassword ? "text" : "password"} className={`${inputClass} pl-12 pr-12`} placeholder="••••••••" />
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.confirmPassword && <p className={errorClass}>{errors.confirmPassword.message}</p>}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Specialties */}
-        <div className="space-y-3 pt-2">
-          <label className="text-xs font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Select Specialties</label>
-          <div className="flex flex-wrap gap-2 rounded-2xl border border-white/50 bg-white/40 p-4 dark:border-slate-700/50 dark:bg-slate-800/30">
-            {specialties.length === 0 ? (
-               <p className="text-sm text-slate-500 w-full text-center py-2 font-medium">No specialties available.</p>
-            ) : (
-              specialties.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => toggleSpecialty(s.id)}
-                  className={`rounded-xl border px-4 py-2 text-xs font-bold transition-all ${
-                    selectedSpecialties.includes(s.id)
-                      ? "scale-105 border-emerald-600 bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-emerald-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                  }`}
-                >
-                  {selectedSpecialties.includes(s.id) && <Check size={12} className="mr-1.5 inline" />}
-                  {s.title}
-                </button>
-              ))
-            )}
+          {/* Work Details */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-900 dark:text-zinc-100">02. Work Details</h3>
+              <div className="h-px flex-1 bg-zinc-100 dark:bg-zinc-900" />
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <label className={labelClass}>Govt. Registration</label>
+                <div className="relative">
+                  <Shield size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input {...register("registrationNumber")} className={`${inputClass} pl-12`} placeholder="REG-2026-XXXX" />
+                </div>
+                {errors.registrationNumber && <p className={errorClass}>{errors.registrationNumber.message}</p>}
+              </div>
+
+              <div>
+                <label className={labelClass}>Experience (Years)</label>
+                <div className="relative">
+                  <Star size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input {...register("experience")} type="number" className={`${inputClass} pl-12`} placeholder="0" />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Direct Contact</label>
+                <div className="relative">
+                  <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input {...register("contactNumber")} className={`${inputClass} pl-12`} placeholder="+880" />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Base Location</label>
+                <div className="relative">
+                  <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input {...register("address")} className={`${inputClass} pl-12`} placeholder="City, Area" />
+                </div>
+              </div>
+            </div>
           </div>
-          {errors.specialties && <p className={errorClass}>{errors.specialties.message as string}</p>}
-          
-          {/* Hidden inputs for selected specialties */}
-          {selectedSpecialties.map((specialtyId) => (
-            <input key={specialtyId} type="hidden" name="specialties" value={specialtyId} />
-          ))}
+
+          {/* Specialties */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-900 dark:text-zinc-100">03. Domain expertise</h3>
+              <div className="h-px flex-1 bg-zinc-100 dark:bg-zinc-900" />
+            </div>
+
+            <div className="flex flex-wrap gap-2.5 rounded-3xl border border-zinc-100 bg-zinc-50/50 p-6 dark:border-zinc-900 dark:bg-zinc-900/20">
+              {specialties.length === 0 ? (
+                 <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 w-full text-center py-4">Status: No specialties found</p>
+              ) : (
+                specialties.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => toggleSpecialty(s.id)}
+                    className={`rounded-2xl border px-4 py-2.5 text-[11px] font-black uppercase tracking-wider transition-all ${
+                      selectedSpecialties.includes(s.id)
+                        ? "border-zinc-900 bg-zinc-900 text-white shadow-lg dark:border-zinc-100 dark:bg-white dark:text-black"
+                        : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-900 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 dark:hover:border-zinc-100 dark:hover:text-zinc-100"
+                    }`}
+                  >
+                    {selectedSpecialties.includes(s.id) && <Check size={12} className="mr-2 inline" />}
+                    {s.title}
+                  </button>
+                ))
+              )}
+            </div>
+            {errors.specialties && <p className={errorClass}><AlertCircle size={12}/>{errors.specialties.message as string}</p>}
+            
+            {/* Hidden inputs */}
+            {selectedSpecialties.map((specialtyId) => (
+              <input key={specialtyId} type="hidden" name="specialties" value={specialtyId} />
+            ))}
+          </div>
         </div>
 
         {/* Action Button */}
         <Button
           type="submit"
           disabled={loading || isUploading}
-          className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 py-7 text-base font-black uppercase tracking-widest text-white transition-all hover:scale-[1.01] hover:shadow-xl hover:shadow-emerald-500/30 active:scale-95 disabled:opacity-50"
+          className="group relative w-full overflow-hidden rounded-[2rem] bg-zinc-900 py-8 text-sm font-black uppercase tracking-[0.2em] text-white transition-all hover:scale-[1.01] hover:shadow-2xl hover:shadow-zinc-900/20 active:scale-95 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:shadow-white/10"
         >
-          <span className="relative z-10 flex items-center justify-center gap-3">
-            {loading ? <Loader2 className="animate-spin" /> : <Check size={20} />}
-            {loading ? "Processing..." : "Create Account"}
+          <span className="relative z-10 flex items-center justify-center gap-4">
+            {loading ? <Loader2 className="animate-spin" size={20} /> : <CheckCircle size={20} />}
+            {loading ? "Authorizing..." : "Register Provider Account"}
           </span>
-          <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+          <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full dark:via-black/5" />
         </Button>
       </div>
     </form>
