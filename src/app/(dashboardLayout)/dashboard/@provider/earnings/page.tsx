@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -44,7 +44,6 @@ export default function ProviderEarningsPage() {
     const fetchProviderStats = async () => {
       try {
         setLoading(true);
-
         // Fetch provider profile and stats in parallel
         const [profile, statsData] = await Promise.all([
           getProviderSelfProfile(),
@@ -120,27 +119,25 @@ export default function ProviderEarningsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto space-y-8 mt-4">
-        {/* Header Skeleton */}
-        <div className="bg-black dark:bg-zinc-900 rounded-[3rem] p-8 md:p-12 animate-pulse">
-          <div className="h-10 bg-zinc-800 rounded-full w-64 mb-4"></div>
-          <div className="h-4 bg-zinc-800 rounded-full w-96"></div>
-        </div>
-
-        {/* Stats Cards Skeleton */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white dark:bg-black rounded-[2rem] border border-zinc-200 dark:border-zinc-800 p-6 animate-pulse">
-              <div className="flex items-center justify-between mb-4">
-                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-900 rounded-2xl"></div>
-                <div className="h-4 bg-zinc-100 dark:bg-zinc-900 rounded-full w-12"></div>
-              </div>
-              <div className="space-y-2">
-                <div className="h-4 bg-zinc-100 dark:bg-zinc-900 rounded-full w-20"></div>
-                <div className="h-8 bg-zinc-100 dark:bg-zinc-900 rounded-full w-32"></div>
-              </div>
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="space-y-10">
+          <div className="h-44 animate-pulse rounded-[3rem] bg-zinc-100 dark:bg-zinc-900" />
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-32 animate-pulse rounded-[2rem] bg-zinc-100 dark:bg-zinc-900" />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <div className="h-64 animate-pulse rounded-[2.5rem] bg-zinc-50 dark:bg-zinc-900/50" />
+            <div className="lg:col-span-2">
+              <div className="h-64 animate-pulse rounded-[2.5rem] bg-zinc-50 dark:bg-zinc-900/50" />
             </div>
-          ))}
+          </div>
+          <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-48 animate-pulse rounded-[2.5rem] bg-zinc-50 dark:bg-zinc-900/50" />
+            ))}
+          </div>
         </div>
       </div>
     );
