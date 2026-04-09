@@ -35,9 +35,10 @@ import {
 import { env, publicEnv } from "@/lib/env";
 import { clearGoogleOAuthLock, startGoogleOAuth } from "@/lib/googleOAuth";
 import { clearPendingAuth, setPendingAuth } from "@/lib/pendingAuth";
-import { registerAction } from "@/services/auth.service";
+import { registerAction, loginAction } from "@/services/auth.service";
 import { IRegisterPayload } from "@/types/auth.typs";
 import { AuthValidation } from "@/zod/auth.validation";
+import { toast } from "sonner";
 
 const extractErrorMessage = (error: unknown, fallback = "Register failed") => {
   if (typeof error === "string") return error;
@@ -186,16 +187,22 @@ const RegisterForm = () => {
           window.sessionStorage.clear();
         }
 
-        setTimeout(() => {
-          if (needPasswordChange) {
-            clearPendingAuth();
-            router.push(`/reset-password?email=${encodeURIComponent(payload.email)}`);
-            return;
-          }
+        // Add auto-login call here
+        const loginRes = await loginAction({ email: payload.email, password: payload.password });
 
-          setPendingAuth(payload.email, payload.password);
-          router.push(`/verify-email?email=${encodeURIComponent(payload.email)}`);
-        }, 800);
+        if (needPasswordChange) {
+          clearPendingAuth();
+          router.push(`/reset-password?email=${encodeURIComponent(payload.email)}`);
+          return;
+        }
+
+        if (loginRes?.success) {
+          toast.success("Account created & logged in successfully!");
+          window.location.href = "/dashboard";
+        } else {
+          toast.success("Account created successfully! Please log in.");
+          router.push("/login");
+        }
       } catch (error: unknown) {
         setServerError(extractErrorMessage(error, "Register failed. Please try again."));
       }

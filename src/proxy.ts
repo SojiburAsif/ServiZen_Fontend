@@ -89,8 +89,7 @@ export async function proxy(request: NextRequest) {
 
         const isValidAccessToken = Boolean(verifiedAccessToken.success);
         const decodedAccessToken = verifiedAccessToken.success ? verifiedAccessToken.data : null;
-        const hasRoleClaim = Boolean(normalizeRole(decodedAccessToken?.role));
-        const authUserInfo = (accessToken || sessionToken) && hasRoleClaim
+        const authUserInfo = (accessToken || sessionToken)
             ? await getUserInfoFromApi(rawCookieHeader, accessToken, sessionToken)
             : null;
         const userRole =
@@ -104,7 +103,7 @@ export async function proxy(request: NextRequest) {
         const dashboardAliasOwner = resolveDashboardAliasOwner(pathname);
 
         // Logged-in users should not access login/register pages.
-        if (isAuth && isAuthenticated) {
+        if (isAuth && isAuthenticated && pathname !== "/verify-email") {
             return NextResponse.redirect(new URL(getFallbackDashboardRoute(userRole), request.url));
         }
 
@@ -128,11 +127,13 @@ export async function proxy(request: NextRequest) {
             }
             // Only allow if needPasswordChange is true
             const infoAny = authUserInfo as any;
-            const needPasswordChange = Boolean(
-                infoAny?.needPasswordChange ??
-                infoAny?.needPasswordchange ??
-                (typeof infoAny === "object" && Object.keys(infoAny).find(k => k.toLowerCase() === "needpasswordchange"))
-            );
+            
+            let needPasswordChange = Boolean(infoAny?.needPasswordChange ?? infoAny?.needPasswordchange);
+            if (infoAny?.needPasswordChange === undefined && infoAny?.needPasswordchange === undefined && typeof infoAny === "object") {
+                const key = Object.keys(infoAny || {}).find(k => k.toLowerCase() === "needpasswordchange");
+                if (key) needPasswordChange = Boolean(infoAny[key]);
+            }
+            
             if (needPasswordChange) {
                 return NextResponse.next();
             }
@@ -155,19 +156,19 @@ export async function proxy(request: NextRequest) {
         if (userInfo) {
             // Normalize needPasswordChange (support both spellings)
             const infoAny = userInfo as any;
-            const needPasswordChange = Boolean(
-                infoAny.needPasswordChange ??
-                infoAny.needPasswordchange ??
-                (typeof infoAny === "object" && Object.keys(infoAny).find(k => k.toLowerCase() === "needpasswordchange"))
-            );
+            
+            let needPasswordChange = Boolean(infoAny?.needPasswordChange ?? infoAny?.needPasswordchange);
+            if (infoAny?.needPasswordChange === undefined && infoAny?.needPasswordchange === undefined && typeof infoAny === "object") {
+                const key = Object.keys(infoAny || {}).find(k => k.toLowerCase() === "needpasswordchange");
+                if (key) needPasswordChange = Boolean(infoAny[key]);
+            }
 
             if (userInfo.emailVerified === false) {
-                if (pathname !== "/verify-email") {
-                    const verifyEmailUrl = new URL("/verify-email", request.url);
-                    verifyEmailUrl.searchParams.set("email", userInfo.email);
-                    return NextResponse.redirect(verifyEmailUrl);
+                // Allows unverified users to proceed without forcing /verify-email redirect
+                if (pathname === "/verify-email") {
+                    // They can still visit it manually
+                    return NextResponse.next();
                 }
-                return NextResponse.next();
             }
 
             if (userInfo.emailVerified && pathname === "/verify-email") {

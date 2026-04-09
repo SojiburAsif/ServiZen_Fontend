@@ -7,7 +7,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Loader2, CheckCircle2, RefreshCcw } from "lucide-react";
 import { clearPendingAuth, getPendingAuth } from "@/lib/pendingAuth";
-import { loginAction, verifyEmailAction } from "@/services/auth.service";
+import { loginAction, verifyEmailAction, sendVerifyEmailAction } from "@/services/auth.service";
 
 export const VerifyEmailForm = () => {
   const router = useRouter();
@@ -52,6 +52,17 @@ export const VerifyEmailForm = () => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email) return;
+    setError("");
+    setResendCooldown(60);
+    const res = await sendVerifyEmailAction(email);
+    if (!res.success) {
+      setError(res.message);
+      setResendCooldown(0);
     }
   };
 
@@ -169,7 +180,7 @@ export const VerifyEmailForm = () => {
               <button
                 type="button"
                 disabled={resendCooldown > 0}
-                onClick={() => setResendCooldown(60)}
+                onClick={handleResend}
                 className="inline-flex items-center gap-2 text-xs font-bold text-green-700 transition-colors hover:text-green-600 disabled:text-gray-400 dark:text-green-400"
               >
                 <RefreshCcw size={14} className={resendCooldown > 0 ? "animate-spin" : ""} />

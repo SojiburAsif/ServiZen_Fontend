@@ -112,7 +112,27 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
 
   const userInitial = user?.name?.trim()?.charAt(0)?.toUpperCase() || "U";
   const userRole = user?.role?.trim();
-    const isProviderOrAdmin = userRole === "PROVIDER" || userRole === "ADMIN";
+  const isProviderOrAdmin = userRole === "PROVIDER" || userRole === "ADMIN";
+
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const handleVerifyEmailClick = async () => {
+    if (!user?.email || isSendingOtp) return;
+    setIsSendingOtp(true);
+    try {
+      const { sendVerifyEmailAction } = await import("@/services/auth.service");
+      const result = await sendVerifyEmailAction(user.email);
+      if (result.success) {
+        toast.success("OTP Sent", { description: "Please check your email for the verification code." });
+        router.push(`/verify-email?email=${encodeURIComponent(user.email)}`);
+      } else {
+        toast.error("Failed to send OTP", { description: result.message || "Please try again later." });
+      }
+    } catch (e: any) {
+      toast.error("Error", { description: "An unexpected error occurred." });
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
   const handleLogout = async () => {
     if (isLoggingOut) {
       return;
@@ -379,6 +399,12 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                      </DropdownMenuItem>
                    )}
 
+                   {user?.emailVerified === false && (
+                     <DropdownMenuItem asChild className="p-0">
+                       <button onClick={handleVerifyEmailClick} disabled={isSendingOtp} className="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors w-full cursor-pointer relative overflow-hidden"><Shield className="size-4 mr-3 text-amber-500" />{isSendingOtp ? "Sending..." : "Verify Email"}<div className="absolute top-0 right-0 w-8 h-full bg-gradient-to-r from-transparent to-white/20 -skew-x-12 animate-shimmer" /></button>
+                     </DropdownMenuItem>
+                   )}
+
 <DropdownMenuItem asChild className="p-0">
                       <button onClick={() => setIsChangePasswordModalOpen(true)} className="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full cursor-pointer text-left">
                         <Lock className="size-4 mr-3 text-gray-500 group-hover:text-green-500" />
@@ -460,8 +486,9 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
                           <Link href="/dashboard/my-profile" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                             <User className="size-5" /> My Profile
                           </Link>
-                        )}
-                          <button onClick={() => setIsChangePasswordModalOpen(true)} className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-500 dark:hover:text-green-400 w-full text-left">
+                        )}                          {user?.emailVerified === false && (
+                            <button onClick={handleVerifyEmailClick} disabled={isSendingOtp} className="group w-full text-left flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30"><Shield className="size-5 text-amber-500" />{isSendingOtp ? "Sending..." : "Verify Email"}</button>
+                          )}                          <button onClick={() => setIsChangePasswordModalOpen(true)} className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-500 dark:hover:text-green-400 w-full text-left">
                             <Lock className="size-5" /> Change Password
                           </button>
                         <Link href="/notification" className="group flex items-center gap-3 text-sm font-medium p-3 rounded-xl transition-colors text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-100 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
@@ -539,3 +566,4 @@ const Navbar = ({ initialUser = null }: NavbarProps) => {
 };
 
 export default Navbar;
+

@@ -60,13 +60,6 @@ const LoginForm = () => {
         if (result?.success) {
           const userData = result?.data?.user || result?.data || {};
 
-          // Check if email is unverified in the success data
-          if (userData?.emailVerified === false) {
-            setPendingAuth(value.email, value.password);
-            window.location.href = `/verify-email?email=${encodeURIComponent(value.email)}&notice=otp-sent`;
-            return;
-          }
-
           if (userData?.needPasswordChange) {
             router.push(`/reset-password?email=${encodeURIComponent(value.email)}`);
             return;
@@ -79,26 +72,11 @@ const LoginForm = () => {
           return;
         }
 
-        // 2. Logic if API returns success: false but doesn't throw (rare)
-        if (isVerificationRequired(result?.message || "")) {
-          setPendingAuth(value.email, value.password);
-          window.location.href = `/verify-email?email=${encodeURIComponent(value.email)}&notice=otp-sent`;
-          return;
-        }
-
         setServerError(result?.message || "Invalid credentials");
 
       } catch (error: any) {
         // 3. Backend throws 4xx or 500 error (Most likely case)
         const errMsg = extractError(error);
-
-        // Force redirect if message indicates verification is needed
-        if (isVerificationRequired(errMsg)) {
-          setPendingAuth(value.email, value.password);
-          // Using window.location to bypass any router-level state locks during 500 errors
-          window.location.href = `/verify-email?email=${encodeURIComponent(value.email)}&notice=otp-sent`;
-          return;
-        }
 
         // Otherwise, show standard error UI
         setServerError(errMsg);

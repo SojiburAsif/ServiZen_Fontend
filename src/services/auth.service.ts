@@ -626,6 +626,29 @@ export const changePasswordAction = async (
   }
 };
 
+export const sendVerifyEmailAction = async (
+  email: string
+): Promise<ApiResponse<unknown> | ApiErrorResponse> => {
+  if (!email) {
+    return {
+      success: false,
+      message: "Email is required",
+    };
+  }
+
+  try {
+    const response = await httpClient.post<unknown>("/auth/send-verify-email-otp", {
+      email,
+    });
+    return response;
+  } catch (error: any) {
+    return {
+      success: false,
+      message: `Failed to send verification email: ${error.message}`,
+    };
+  }
+};
+
 export const verifyEmailAction = async (
   email: string,
   otp: string,
